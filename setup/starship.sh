@@ -71,23 +71,23 @@ else
     printf "   ↳ Starship will use default configuration\n"
 fi
 
-# --- 5. Check .bashrc configuration ---
-BASHRC="$HOME/.bashrc"
+# --- 5. Check .zshrc configuration ---
+ZSHRC="$HOME/.zshrc"
 MARKER_START="# Only sets up starship if it's installed."
-printf "\n${BLUE}🔧 Checking .bashrc integration...${NC}\n"
+printf "\n${BLUE}🔧 Checking .zshrc integration...${NC}\n"
 
-if [ -f "$BASHRC" ] && grep -Fxq "$MARKER_START" "$BASHRC"; then
-    printf "${GREEN}${CHECK} Starship already configured in .bashrc${NC}\n"
+if [ -f "$ZSHRC" ] && grep -Fxq "$MARKER_START" "$ZSHRC"; then
+    printf "${GREEN}${CHECK} Starship already configured in .zshrc${NC}\n"
 else
-    printf "${YELLOW}${WRENCH} Adding Starship initialization to .bashrc...${NC}\n"
-    cat >> "$BASHRC" << 'EOL'
+    printf "${YELLOW}${WRENCH} Adding Starship initialization to .zshrc...${NC}\n"
+    cat >> "$ZSHRC" << 'EOL'
 
 # Only sets up starship if it's installed.
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
 EOL
-    printf "${GREEN}${CHECK} Starship initialization added to .bashrc${NC}\n"
+    printf "${GREEN}${CHECK} Starship initialization added to .zshrc${NC}\n"
 fi
 
 # --- 6. Install FiraCode Nerd Font ---
@@ -119,7 +119,7 @@ printf "${GREEN}${CHECK} Starship setup complete!${NC}\n"
 printf "${CYAN}═══════════════════════════════════════${NC}\n\n"
 
 printf "${YELLOW}Next steps:${NC}\n"
-printf "   1. Reload your shell: ${CYAN}source ~/.bashrc${NC}\n"
+printf "   1. Reload your shell: ${CYAN}source ~/.zshrc${NC}\n"
 printf "   2. Ensure starship.toml is symlinked: ${CYAN}./install.sh${NC}\n"
 printf "   3. Configure your terminal to use 'FiraCode Nerd Font'\n"
 printf "      See: ${CYAN}docs/Terminal Font Setup.md${NC} for instructions\n\n"

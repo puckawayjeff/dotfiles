@@ -200,7 +200,7 @@ Always use variables for paths, never hardcode:
 DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use $HOME instead of hardcoded paths
-CONFIG_FILE="$HOME/.bashrc"
+CONFIG_FILE="$HOME/.zshrc"
 TARGET_DIR="$HOME/.config/app"
 ```
 
@@ -263,10 +263,10 @@ printf "\n${GREEN}${PARTY} Setup complete!${NC}\n"
 
 ## Configuration Management
 
-When adding configuration blocks to files like `.bashrc`:
+When adding configuration blocks to files like `.zshrc`:
 
 ```bash
-CONFIG_FILE="$HOME/.bashrc"
+CONFIG_FILE="$HOME/.zshrc"
 MARKER="# --- My Tool Configuration ---"
 
 # Check for existing configuration

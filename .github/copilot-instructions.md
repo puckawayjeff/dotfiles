@@ -99,7 +99,7 @@ else
 fi
 ```
 
-**Configuration markers** (for `.bashrc` additions):
+**Configuration markers** (for `.zshrc` additions):
 ```bash
 MARKER_START="# --- Tool Configuration ---"
 if grep -Fxq "$MARKER_START" "$CONFIG_FILE"; then

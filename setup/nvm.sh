@@ -34,7 +34,7 @@ PARTY="🎉"
 # --- Configuration ---
 NVM_VERSION="v0.40.1"  # Update this to latest stable version as needed
 NVM_DIR="${HOME}/.nvm"
-PROFILE_FILE="${HOME}/.bashrc"
+PROFILE_FILE="${HOME}/.zshrc"
 
 # --- Main Script ---
 printf "${CYAN}${ROCKET} Starting NVM Setup...${NC}\n\n"

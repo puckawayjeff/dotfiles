@@ -30,7 +30,7 @@ PARTY="🎉"
 PACKAGE="📦"
 
 # --- Configuration ---
-CONFIG_FILE="$HOME/.bashrc"
+CONFIG_FILE="$HOME/.zshrc"
 INSTALL_PREFIX="/usr/local"
 
 # --- Helper Functions ---
@@ -226,7 +226,7 @@ else
     echo "   ↳ Creating $FASTFETCH_CONFIG..."
     cat > "$FASTFETCH_CONFIG" << 'EOF'
 # ~/.bash_fastfetch: fastfetch configuration for bash
-# This file is sourced by .bashrc when fastfetch is installed
+# This file is sourced by .zshrc when fastfetch is installed
 
 # Compatibility aliases
 alias neofetch="fastfetch -c neofetch"
@@ -240,10 +240,10 @@ EOF
     printf "${GREEN}${CHECK} Created $FASTFETCH_CONFIG.${NC}\n"
 fi
 
-# Check if .bashrc has the conditional sourcing block
-BASHRC_MARKER="# Fastfetch configuration (only if installed)"
-if grep -Fq "$BASHRC_MARKER" "$CONFIG_FILE"; then
-    printf "${GREEN}${CHECK} .bashrc already configured to source fastfetch config.${NC}\n"
+# Check if .zshrc has the conditional sourcing block
+ZSHRC_MARKER="# Fastfetch configuration (only if installed)"
+if grep -Fq "$ZSHRC_MARKER" "$CONFIG_FILE"; then
+    printf "${GREEN}${CHECK} .zshrc already configured to source fastfetch config.${NC}\n"
 else
     echo "   ↳ Adding conditional sourcing to $CONFIG_FILE..."
     # Find the line with bash_aliases and add our block after it

@@ -185,7 +185,7 @@ glow
 2. Downloads NVM installation script from GitHub
 3. Installs NVM to `~/.nvm`
 4. Loads NVM into the current session
-5. Adds NVM configuration block to `~/.bashrc`:
+5. Adds NVM configuration block to `~/.zshrc`:
 
    ```bash
    export NVM_DIR="$HOME/.nvm"
@@ -198,7 +198,7 @@ glow
 
 **NVM Version Installed**: v0.40.1 (configurable in script)
 
-**Important Note on Duplicate Configuration**: The script checks for existing NVM configuration using `grep -Fxq` to search for the marker comment. If you run the script multiple times, it should detect the existing configuration and skip adding it. However, if the NVM installer itself (from nvm-sh) adds its own configuration block without using the same marker format, you may end up with duplicates. Always check `~/.bashrc` after running NVM setup and manually remove any duplicate blocks if present.
+**Important Note on Duplicate Configuration**: The script checks for existing NVM configuration using `grep -Fxq` to search for the marker comment. If you run the script multiple times, it should detect the existing configuration and skip adding it. However, if the NVM installer itself (from nvm-sh) adds its own configuration block without using the same marker format, you may end up with duplicates. Always check `~/.zshrc` after running NVM setup and manually remove any duplicate blocks if present.
 
 **Verification Commands**:
 
