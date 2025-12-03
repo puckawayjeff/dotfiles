@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# new-host.sh: Set up a new host with dotfiles
-# Usage: wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
+# join.sh: Set up a new host with dotfiles
+# Usage: wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 # 
 # Prerequisites: SSH keys must be configured manually before running this script to enable git operations.
 # This script is idempotent and safe to re-run.
