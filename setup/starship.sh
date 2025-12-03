@@ -43,7 +43,7 @@ fi
 
 # --- 2. Download and install Starship ---
 printf "\n${BLUE}📦 Installing Starship via official installer...${NC}\n"
-if curl -sS https://starship.rs/install.sh | sh -s -- --yes; then
+if curl -sS https://starship.rs/install.sh | sh -s -- --yes > /dev/null 2>&1; then
     printf "${GREEN}${CHECK} Starship installed successfully.${NC}\n"
 else
     printf "${RED}${CROSS} Error: Starship installation failed.${NC}\n"
