@@ -169,24 +169,70 @@ dotpull() {
 }
 
 # Add a new dotfile to the repo
+# Usage: add-dotfile <source_path> [destination_path]
+# Examples:
+#   add-dotfile ~/.gitconfig
+#   add-dotfile ~/.config/tmux/tmux.conf
+#   add-dotfile ~/.bashrc config/.bashrc.backup
 add-dotfile() {
     local file="$1"
+    local custom_dest="$2"
     
     if [[ -z "$file" ]]; then
         print -P "%F{red}❌ Error: No file path provided.%f"
-        print "Usage: add-dotfile <path_to_dotfile>"
+        print "Usage: add-dotfile <path_to_dotfile> [destination_path]"
+        print ""
+        print "Examples:"
+        print "  add-dotfile ~/.gitconfig"
+        print "  add-dotfile ~/.config/tmux/tmux.conf"
+        print "  add-dotfile ~/.bashrc config/.bashrc.backup"
+        return 1
+    fi
+    
+    # Check if file is already a symlink
+    if [[ -L "$file" ]]; then
+        local link_target=$(readlink "$file")
+        print -P "%F{red}❌ Error: Source '$file' is already a symlink.%f"
+        print -P "   Target: $link_target"
         return 1
     fi
     
     local source_path=$(realpath "$file")
     local basename=$(basename "$source_path")
     local dotfiles_dir="$HOME/dotfiles"
-    local dest_path="$dotfiles_dir/config/$basename"
     local install_script="$dotfiles_dir/install.sh"
+    
+    # Determine destination path
+    local dest_path
+    if [[ -n "$custom_dest" ]]; then
+        # Custom destination provided
+        if [[ "$custom_dest" = /* ]]; then
+            # Absolute path
+            dest_path="$custom_dest"
+        else
+            # Relative path (relative to dotfiles dir)
+            dest_path="$dotfiles_dir/$custom_dest"
+        fi
+    else
+        # Default: config/<basename>
+        dest_path="$dotfiles_dir/config/$basename"
+    fi
+    
+    # Get the directory part and filename part
+    local dest_dir=$(dirname "$dest_path")
+    local dest_filename=$(basename "$dest_path")
     
     # Validation
     if [[ ! -e "$source_path" ]]; then
         print -P "%F{red}❌ Error: Source '$source_path' does not exist.%f"
+        return 1
+    fi
+    
+    # Check if source is a directory
+    if [[ -d "$source_path" ]]; then
+        print -P "%F{red}❌ Error: Source '$source_path' is a directory.%f"
+        print "This function currently only supports files."
+        print "To add a directory, manually move it and create the symlink."
         return 1
     fi
     
@@ -200,8 +246,14 @@ add-dotfile() {
         return 1
     fi
     
+    # Create destination directory if needed
+    if [[ ! -d "$dest_dir" ]]; then
+        print -P "%F{blue}📁 Creating destination directory...%f"
+        mkdir -p "$dest_dir"
+    fi
+    
     # Move file
-    print -P "%F{blue}🔧 Moving file to repo (config/)...%f"
+    print -P "%F{blue}🔧 Moving file to repo...%f"
     mv "$source_path" "$dest_path"
     print -P "%F{green}✅ Moved to $dest_path%f"
     
@@ -215,7 +267,9 @@ add-dotfile() {
     
     # Replace literal home path with $HOME variable
     local install_target_path="${source_path/#$HOME/\$HOME}"
-    local new_entry="    [\"\$DOTFILES_DIR/config/$basename\"]=\"$install_target_path\""
+    # Convert dest_path to use $DOTFILES_DIR
+    local install_source_path="${dest_path/#$dotfiles_dir/\$DOTFILES_DIR}"
+    local new_entry="    [\"$install_source_path\"]=\"$install_target_path\""
     
     if grep -q "\"$install_target_path\"" "$install_script"; then
         print -P "%F{yellow}⚠️  Entry already exists in install.sh%f"
@@ -231,10 +285,12 @@ $new_entry
     
     # Stage changes
     print -P "%F{blue}📦 Staging changes...%f"
-    git -C "$dotfiles_dir" add "config/$basename" "install.sh"
+    # Get relative path from dotfiles_dir for git add
+    local git_add_path="${dest_path/#$dotfiles_dir\//}"
+    git -C "$dotfiles_dir" add "$git_add_path" "install.sh"
     
-    print -P "\n%F{green}🎉 Successfully added '$basename'!%f"
-    print "Next: dotpush 'Add $basename'"
+    print -P "\n%F{green}🎉 Successfully added '$dest_filename'!%f"
+    print "Next: dotpush 'Add $dest_filename'"
 }
 
 # Run dotfiles setup scripts

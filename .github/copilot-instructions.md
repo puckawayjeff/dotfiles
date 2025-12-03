@@ -200,6 +200,34 @@ Example SSH setup:
 
 ## Project Roadmap (December 2025)
 
+### Completed (December 2025)
+- ✅ **Test Suite**: Created `test.sh` validation script
+- ✅ **Examples Documentation**: Added comprehensive `docs/Examples.md`
+- ✅ **Enhanced add-dotfile**: Support for custom paths, symlink detection, better error handling
+- ✅ **Changelog**: Created `CHANGELOG.md` for tracking changes
+- ✅ **Quick Start Guide**: Created `QUICKSTART.md` reference card
+
 ### Future Enhancements
-- **Documentation Polish**: Continue improving documentation clarity
-- **Examples**: Add example configurations for common use cases
+
+**High Priority:**
+- **Tmux Configuration**: Create `setup/tmux.sh` with sensible default config
+  - Mouse support enabled
+  - Better keybindings
+  - Status bar customization
+  - Integration with existing `updatep` function
+
+**Medium Priority:**
+- **Host-Specific Overrides**: Support per-host customization
+  - `config/hosts/<hostname>/` directory structure
+  - Load optional `~/.zshrc.local` for host-specific settings
+  - Document patterns in best practices
+  - Allow host-specific aliases and environment variables
+
+**Low Priority:**
+- **Backup/Restore Functions**: Add safety net for major changes
+  - `dotbackup` function for timestamped backups
+  - `dotrestore` function to rollback to previous state
+- **Extended Validation**: Enhance `test.sh` with additional checks
+  - Verify plugin installations
+  - Check for common configuration errors
+  - Performance benchmarks for shell startup time
