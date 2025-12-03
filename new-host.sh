@@ -76,9 +76,13 @@ log_substep() {
 log_section "Starting dotfiles setup (public version)" "$ROCKET"
 
 log_section "Installing Base Utilities" "$PACKAGE"
-log_warning "Updating package lists..."
-sudo apt update
-
+if ! command -v apt &> /dev/null; then
+    log_error "Cannot update packages without apt package manager."
+else
+    log_warning "Updating package lists..."
+    sudo apt update &> /dev/null
+    log_success "Package lists updated"
+fi
 # Check if Git is installed
 if ! command -v git &> /dev/null; then
     # Git not installed - check if apt is available
