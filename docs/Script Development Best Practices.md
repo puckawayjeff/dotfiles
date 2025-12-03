@@ -5,6 +5,7 @@ This guide establishes conventions for creating and maintaining bash scripts in 
 ## Environment & Assumptions
 
 All scripts should be written with these assumptions:
+
 - **Target OS**: Debian-based Linux (Debian, Ubuntu, Mint, Pi OS, Proxmox)
 - **Shell**: Zsh or Bash
 - **Display**: May or may not have GUI (scripts should work in headless environments)
@@ -27,31 +28,27 @@ Add `set -e` for scripts where any failure should stop execution:
 set -e  # Exit immediately if a command exits with a non-zero status
 ```
 
-## Color Definitions
+## Shared Library Usage
 
-Use `tput` for maximum compatibility. Define colors at the top of scripts that need them:
+**Always source `lib/utils.sh`** to access standardized colors, icons, and helper functions:
 
 ```bash
-# Define colors using tput (portable across terminals)
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)   # Success messages
-    YELLOW=$(tput setaf 3)  # Warnings, prompts, user attention
-    BLUE=$(tput setaf 4)    # Section headers, informational
-    CYAN=$(tput setaf 6)    # Command output, sub-steps
-    RED=$(tput setaf 1)     # Errors, failures
-    NC=$(tput sgr0)         # Reset/No Color
-else
-    # Fallback to ANSI escape codes if tput unavailable
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    RED='\033[0;31m'
-    NC='\033[0m'
-fi
+# Source the shared library (adjust path as needed)
+DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DOTFILES_DIR/lib/utils.sh"
 ```
 
-### Color Usage Guidelines
+This provides:
+
+- **Colors**: `$GREEN`, `$YELLOW`, `$BLUE`, `$CYAN`, `$RED`, `$NC` (portable via tput)
+- **Icons**: `$ROCKET`, `$WRENCH`, `$CHECK`, `$CROSS`, `$COMPUTER`, `$PARTY`, `$PACKAGE`
+- **Helpers**: `log_section()`, `log_success()`, `log_error()`, `log_warning()`, `log_info()`, `log_substep()`
+
+### When to Define Colors Manually
+
+Only define colors inline for **standalone scripts** that must work outside the dotfiles repository. For all scripts within the dotfiles structure, use `lib/utils.sh`.
+
+## Color Usage Guidelines (from lib/utils.sh)
 
 - **GREEN** - Success confirmations, completion messages
 - **YELLOW** - Warnings, prompts for user input, items requiring attention
@@ -59,56 +56,78 @@ fi
 - **CYAN** - Command output, sub-operations, detailed progress
 - **RED** - Errors, failures, critical issues
 
-## Emoji Standards
+## Using Helper Functions
 
-Use emojis consistently to provide visual cues:
-
-```bash
-# Define emoji constants for consistency
-ROCKET="🚀"      # Starting a new process or major operation
-WRENCH="🔧"      # Installation, configuration, setup tasks
-CHECK="✅"       # Success, completion, verification passed
-CROSS="❌"       # Error, failure, verification failed
-COMPUTER="💻"    # System-level operations
-PARTY="🎉"       # Final completion, celebration
-```
-
-### Emoji Usage Examples
+Prefer helper functions from `lib/utils.sh` over manual printf/echo commands:
 
 ```bash
+# Use helper functions for standard messages
+log_section "Installing Dependencies"             # Section header with icon
+log_substep "Downloading configuration file..."   # Indented sub-step
+log_success "Installation complete"               # Success message
+log_error "Configuration failed"                  # Error message
+log_warning "Please review the settings"          # Warning message
+log_info "Processing 3 files"                     # Info message
+
+# For custom formatted output, icons are available:
 printf "${CYAN}${ROCKET} Starting installation process...${NC}\n"
-printf "${YELLOW}${WRENCH} Configuring system settings...${NC}\n"
-printf "${GREEN}${CHECK} Installation complete.${NC}\n"
-printf "${RED}${CROSS} Error: Configuration failed.${NC}\n"
-printf "${BLUE}${COMPUTER} Updating system packages...${NC}\n"
 printf "${GREEN}${PARTY} Setup finished successfully!${NC}\n"
 ```
 
 ## Output Formatting Patterns
 
 ### Section Headers
-Major sections should be visually distinct:
+
+Use the `log_section` helper function:
+
 ```bash
-printf "\n${BLUE}📦 Section Name${NC}\n\n"
+log_section "Section Name"          # Uses default rocket icon
+log_section "Installing" "$WRENCH"  # Custom icon
 ```
 
 ### Sub-Operations
-Indent sub-tasks with 3 spaces and use an arrow:
+
+Use the `log_substep` helper function:
+
 ```bash
-echo "   ↳ Downloading configuration file..."
+log_substep "Downloading configuration file..."
+log_substep "Extracting archive..."
 ```
 
 ### Success Messages
+
+Use the `log_success` helper function:
+
 ```bash
-printf "${GREEN}✅ Operation completed successfully.${NC}\n"
+log_success "Operation completed successfully"
 ```
 
 ### Error Messages
+
+Use the `log_error` helper function:
+
 ```bash
-printf "${RED}❌ Error: Specific description of what failed.${NC}\n"
+log_error "Specific description of what failed"
+```
+
+### Warning Messages
+
+Use the `log_warning` helper function:
+
+```bash
+log_warning "Configuration needs review"
+```
+
+### Info Messages
+
+Use the `log_info` helper function:
+
+```bash
+log_info "Processing batch 2 of 5"
 ```
 
 ### Progress Updates
+
 ```bash
 echo "[1/4] First step description..."
 echo "[2/4] Second step description..."
@@ -117,84 +136,41 @@ echo "[2/4] Second step description..."
 ## Error Handling
 
 ### Basic Error Checking
+
 ```bash
 if ! command -v required_tool &> /dev/null; then
-    printf "${RED}${CROSS} Error: required_tool is not installed.${NC}\n"
+    log_error "required_tool is not installed"
     exit 1
 fi
 ```
 
 ### Command Success Verification
+
 ```bash
 if ! sudo apt install package-name -y; then
-    printf "${RED}${CROSS} Error: Package installation failed.${NC}\n"
+    log_error "Package installation failed"
     exit 1
 fi
-printf "${GREEN}${CHECK} Package installed successfully.${NC}\n"
+log_success "Package installed successfully"
 ```
 
 ### Idempotent Checks
+
 Scripts should be safely re-runnable:
+
 ```bash
 if [ -f "$CONFIG_FILE" ]; then
-    echo "✅ Configuration already exists. Skipping."
+    log_success "Configuration already exists. Skipping"
 else
-    echo "⏳ Creating configuration..."
+    log_substep "Creating configuration..."
     # Create config
-fi
-```
-
-## Helper Functions
-
-### Print Functions
-Standardize common output patterns:
-```bash
-# Print a formatted section header
-print_header() {
-    printf "\n${BLUE}📦 $1${NC}\n\n"
-}
-
-# Print a success message
-print_success() {
-    printf "${GREEN}✅ $1${NC}\n"
-}
-
-# Print an error message
-print_error() {
-    printf "${RED}❌ Error: $1${NC}\n" >&2
-}
-
-# Download with status feedback
-download_file() {
-    local url=$1
-    local dest=$2
-    local filename=$(basename "$dest")
-    
-    echo -n "   ↳ Downloading $filename..."
-    if wget -q "$url" -O "$dest"; then
-        echo -e " ${GREEN}✔${NC}"
-    else
-        echo -e " ${RED}✖ FAILED${NC}"
-        exit 1
-    fi
-}
-```
-
-### Usage Example
-```bash
-print_header "Installing Dependencies"
-echo "   ↳ Updating package lists..."
-if sudo apt update; then
-    print_success "Package lists updated"
-else
-    print_error "Failed to update package lists"
-    exit 1
 fi
 ```
 
 ## Path Variables
 
 Always use variables for paths, never hardcode:
+
 ```bash
 # Get script's directory
 DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -216,46 +192,30 @@ For `setup/*.sh` scripts, follow this template:
 # Exit on error
 set -e
 
-# --- Color Definitions ---
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    BLUE=$(tput setaf 4)
-    CYAN=$(tput setaf 6)
-    RED=$(tput setaf 1)
-    NC=$(tput sgr0)
-else
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    RED='\033[0;31m'
-    NC='\033[0m'
-fi
-
-# --- Emoji Constants ---
-ROCKET="🚀"
-WRENCH="🔧"
-CHECK="✅"
-CROSS="❌"
-COMPUTER="💻"
-PARTY="🎉"
+# Source shared library
+DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+source "$DOTFILES_DIR/lib/utils.sh"
 
 # --- Main Script ---
 printf "${CYAN}${ROCKET} Starting [Package Name] setup...${NC}\n\n"
 
 # 1. Check if already installed
-printf "${BLUE}Checking for existing installation...${NC}\n"
+log_section "Checking Installation"
 if command -v package_name &> /dev/null; then
-    printf "${GREEN}${CHECK} Already installed.${NC}\n"
+    log_success "Already installed"
 else
-    printf "${YELLOW}${WRENCH} Not found. Installing...${NC}\n"
+    log_warning "Not found. Installing..."
+    log_substep "Downloading package..."
     # Installation steps
+    log_success "Installation complete"
 fi
 
 # 2. Configuration
-printf "\n${BLUE}📦 Configuring [Package Name]...${NC}\n"
+log_section "Configuring [Package Name]" "$WRENCH"
+log_substep "Creating config directory..."
+log_substep "Writing configuration file..."
 # Configuration steps
+log_success "Configuration complete"
 
 # 3. Final verification
 printf "\n${GREEN}${PARTY} Setup complete!${NC}\n"
@@ -271,24 +231,58 @@ MARKER="# --- My Tool Configuration ---"
 
 # Check for existing configuration
 if grep -Fxq "$MARKER" "$CONFIG_FILE"; then
-    echo "✅ Configuration already present."
+    log_success "Configuration already present"
 else
-    echo "⏳ Adding configuration block..."
+    log_substep "Adding configuration block..."
     cat >> "$CONFIG_FILE" << 'EOL'
 # --- My Tool Configuration ---
 export TOOL_PATH="$HOME/.tool"
 export PATH="$TOOL_PATH/bin:$PATH"
 # --- End My Tool Configuration ---
 EOL
-    echo "✅ Configuration added."
+    log_success "Configuration added"
 fi
 ```
+
+## Standalone Scripts (Outside Dotfiles)
+
+If creating a script that must work independently of the dotfiles repository, define colors inline:
+
+```bash
+# Define colors using tput (portable across terminals)
+if command -v tput &> /dev/null; then
+    GREEN=$(tput setaf 2)
+    YELLOW=$(tput setaf 3)
+    BLUE=$(tput setaf 4)
+    CYAN=$(tput setaf 6)
+    RED=$(tput setaf 1)
+    NC=$(tput sgr0)
+else
+    # Fallback to ANSI escape codes
+    GREEN='\033[0;32m'
+    YELLOW='\033[0;33m'
+    BLUE='\033[0;34m'
+    CYAN='\033[0;36m'
+    RED='\033[0;31m'
+    NC='\033[0m'
+fi
+
+# Define icons
+ROCKET="🚀"
+CHECK="✅"
+CROSS="❌"
+WRENCH="🔧"
+```
+
+For all other scripts within the dotfiles repository, use `lib/utils.sh`.
 
 ## Testing & Validation
 
 Before committing new scripts:
+
 1. Test on a clean system if possible
 2. Verify idempotency (safe to run multiple times)
 3. Test with and without required tools installed
 4. Ensure error messages are clear and actionable
 5. Verify color output in different terminals
+6. Confirm `lib/utils.sh` is sourced correctly (for dotfiles scripts)

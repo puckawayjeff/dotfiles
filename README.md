@@ -21,6 +21,83 @@ Files are stored in this Git repository and symlinked to their expected system l
 - **Version controlled** - Full history and rollback capability
 - **Host-aware configs** - Gracefully handles missing software
 
+## Terminal Environment
+
+The automated setup configures a modern, powerful shell environment with intelligent completions, fuzzy finding, and visual enhancements:
+
+### Zsh - Modern Shell with Plugins
+
+**Why Zsh?** Modern shell with intelligent completions, command history, and syntax validation. Autosuggestions save hundreds of keystrokes per day. FZF and zoxide revolutionize navigation. Fully compatible with existing bash scripts.
+
+**Automatic Installation:**
+
+- Zsh 5.9+ as default shell
+- [Zinit](https://github.com/zdharma-continuum/zinit) plugin manager
+- 8 power-user plugins:
+  - **zsh-autosuggestions** - Fish-like inline suggestions from history
+  - **fast-syntax-highlighting** - Real-time command syntax validation
+  - **zsh-completions** - Additional completion definitions
+  - **zsh-history-substring-search** - Arrow key history filtering
+  - **FZF** - Fuzzy finder for files, history, processes
+  - **zoxide** - Smarter cd with frecency algorithm
+  - **fd** - Modern, faster find replacement
+  - **direnv** - Automatic environment loading per directory
+- FiraCode Nerd Font for icon display
+
+**First Use:** Log out and back in after installation. On first zsh session, Zinit auto-installs all plugins (~30 seconds, one-time only).
+
+**Key Features:**
+
+- **Autosuggestions** - Type partial command, press → to accept grey suggestion
+- **Syntax Highlighting** - Green = valid, Red = invalid, instantly as you type
+- **FZF** - Ctrl+R (history), Ctrl+T (files), Alt+C (directories)
+- **Zoxide** - `z dotfiles` jumps intelligently based on frecency
+- **History Substring** - Up/Down arrows filter history by typed prefix
+- **Fast Startup** - Plugins lazy-load in background (~0.1s prompt)
+
+### Eza - Modern ls Replacement
+
+**Why Eza?** Better defaults, git integration, and icon support. Shows more information at a glance while remaining familiar.
+
+**Automatic Installation:**
+
+- Replaces `ls` with enhanced version via aliases
+- Git status integration (modified/staged indicators)
+- File type icons with Nerd Fonts
+- Directories listed before files
+- Tree view for hierarchies
+- Written in Rust for performance
+
+**Conditional Aliases:** Automatically used when available, gracefully falls back to standard `ls` on systems without eza.
+
+### Starship - Cross-Shell Prompt
+
+**Why Starship?** Fast, informative prompt with git status, language versions, and context-aware modules.
+
+**Automatic Installation:**
+
+- Cross-shell prompt with Nerd Font support
+- Git branch and status indicators
+- Language version detection (Node, Python, Rust, etc.)
+- Command duration for long-running tasks
+- Exit status indicators
+- Customizable via `config/starship.toml`
+
+### Fastfetch - System Information
+
+**Why Fastfetch?** Fast neofetch alternative written in C, shows system info with distro logo on shell startup.
+
+**Automatic Installation:**
+
+- Displays on interactive shell startup
+- System info, distro logo, hardware details
+- Compatibility aliases for `neofetch` and `screenfetch`
+- Customizable via `config/fastfetch.jsonc`
+
+### Terminal Font Setup
+
+For proper icon display in prompts and eza output, configure your terminal to use **FiraCode Nerd Font** (auto-installed by setup). See [Terminal Font Setup](docs/Terminal%20Font%20Setup.md) for terminal-specific configuration instructions.
+
 ## Quick Start
 
 ### Deploy to a New Host
@@ -81,7 +158,7 @@ The symlinks ensure changes take effect immediately (or after sourcing shell con
 
 ## Repository Structure
 
-```
+```text
 dotfiles/
 ├── join.sh                 # Initial setup script (auto-installs core tools)
 ├── install.sh              # Creates all symlinks
@@ -94,18 +171,12 @@ dotfiles/
 ├── lib/                    # Shared libraries
 │   └── utils.sh            # Common functions for scripts
 ├── setup/                  # Software setup scripts
-│   ├── zsh.sh              # ⚙️ Zsh with Zinit (auto-installed)
-│   ├── eza.sh              # ⚙️ Modern ls replacement (auto-installed)
-│   ├── fastfetch.sh        # ⚙️ System info tool (auto-installed)
-│   ├── starship.sh         # ⚙️ Cross-shell prompt (auto-installed)
-│   ├── foot.sh             # 📦 Wayland terminal emulator (optional)
-│   ├── glow.sh             # 📦 Markdown viewer (optional)
-│   ├── nvm.sh              # 📦 Node Version Manager (optional)
-│   └── syncthing.sh        # 📦 File synchronization (optional)
+│   ├── foot.sh             # 📦 Wayland terminal emulator
+│   ├── glow.sh             # 📦 Markdown viewer
+│   ├── nvm.sh              # 📦 Node Version Manager
+│   └── syncthing.sh        # 📦 File synchronization
 └── docs/                   # Extended documentation
     ├── Functions Reference.md
-    ├── Git Workflow for Dotfiles.md
-    ├── Handling Git Merge Conflicts.md
     ├── New Host Deployment.md
     ├── Script Development Best Practices.md
     ├── Setup Scripts Reference.md
@@ -125,6 +196,7 @@ Contains custom functions and host-aware setup:
 - `paths()` - Diagnostic tool to verify PATH entries
 - `packk()` - Create compressed archives (tar.gz, zip, 7z) from directories
 - `unpackk()` - Extract archives with nested directory handling
+- `maintain()` - Quick `dotpull` and `updatep` combo
 
 Conditional blocks prevent errors when optional software isn't installed:
 
@@ -168,14 +240,7 @@ Standardized installation scripts for system tools. All follow consistent patter
 - Error handling with clear messages
 - Progress indicators
 
-**Core Tools (Automatically Installed by `join.sh`)**:
-
-- `zsh.sh` - Zsh shell with Zinit plugin manager and power-user plugins
-- `eza.sh` - Modern ls replacement with git integration
-- `fastfetch.sh` - Fast system information tool
-- `starship.sh` - Cross-shell prompt with Nerd Font support
-
-**Optional Tools (Manual Installation)**:
+**Available Scripts**:
 
 - `foot.sh` - Foot terminal with Cage compositor (Wayland only)
 - `glow.sh` - Terminal-based Markdown viewer
@@ -203,15 +268,15 @@ bash ~/dotfiles/setup/glow.sh
 Detailed guides are available in the `docs/` directory:
 
 ### Getting Started
+
 - **[New Host Deployment](docs/New%20Host%20Deployment.md)** - Complete guide to `join.sh`, stash behavior, and recovery workflows
+- **[Terminal Font Setup](docs/Terminal%20Font%20Setup.md)** - Nerd Font setup instructions
 
 ### Configuration & Tools
+
 - **[Functions Reference](docs/Functions%20Reference.md)** - Complete documentation of `dotpush`, `dotpull`, `updatep`, `mkd`, `paths`, and all aliases
 - **[Setup Scripts Reference](docs/Setup%20Scripts%20Reference.md)** - Installation scripts for foot, glow, NVM, and Syncthing
 
-### Git & Version Control
-- **[Git Workflow for Dotfiles](docs/Git%20Workflow%20for%20Dotfiles.md)** - Using `dotpush`, `dotpull`, and manual Git operations for syncing
-- **[Handling Git Merge Conflicts](docs/Handling%20Git%20Merge%20Conflicts.md)** - Resolving conflicts between hosts
-
 ### Development
+
 - **[Script Development Best Practices](docs/Script%20Development%20Best%20Practices.md)** - Standards for writing consistent shell scripts

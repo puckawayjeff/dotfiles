@@ -126,7 +126,7 @@ if command -v starship >/dev/null 2>&1; then
 fi
 ```
 
-Apply to all optional tools: Deno, dotnet, starship, fastfetch, NVM.
+Apply to all optional tools: Deno, dotnet, NVM, etc.
 
 ## Key Shell Functions (`.zshrc`)
 
@@ -189,41 +189,17 @@ Example SSH setup:
 2. Changes take effect immediately (or `source ~/.zshrc`)
 3. Run `dotpush "Update <function> description"`
 
-**Update SSH config**:
-SSH config is not managed by this repository. Edit `~/.ssh/config` directly on each host.
-
 ## Documentation Structure
 
-`docs/` contains detailed guides (8 markdown files):
+`docs/` contains detailed guides (markdown files):
+- **Functions Reference.md** - All functions and aliases documented
 - **New Host Deployment.md** - `join.sh` guide, stash behavior, recovery
-- **Automating Dotfile Management.md** - Symlink system, `add-dotfile.sh` internals
-- **Git Workflow for Dotfiles.md** - `dotpush` and manual workflows
-- **Handling Git Merge Conflicts.md** - Conflict resolution strategies
-- **Bash Functions Reference.md** - All functions and aliases documented
-- **SSH Key Management and Configuration.md** - Multi-key setup
-- **Setup Scripts Reference.md** - Installation scripts for tools
 - **Script Development Best Practices.md** - Conventions documented here
-
-## Migration Notes
-
-**VS Code Settings** (November 2025) - Removed from dotfiles, now using GitHub account sync:
-- No longer add VS Code files via `add-dotfile.sh`
-- VS Code settings managed through GitHub account sync feature
+- **Setup Scripts Reference.md** - Installation scripts for tools
+- **Terminal Font Setup.md** - Nerd Fonts installation guide
 
 ## Project Roadmap (December 2025)
 
-### Phase 1: Housekeeping & Structure ✅ COMPLETE
-- ✅ **Folder Reorganization**: Moved all dotfiles into a `config/` subdirectory
-- ✅ **Shared Library**: Created `lib/utils.sh` with centralized colors, icons, and helper functions
-- ✅ **Script Modernization**: Updated scripts to use shared library and improved patterns
-
-### Phase 2: Public Release Preparation ✅ COMPLETE (December 2, 2025)
-- ✅ **Repository Cleanup**: Removed all sensitive data and references
-- ✅ **Documentation Overhaul**: Rewrote all docs for public consumption
-- ✅ **SSH Independence**: Made repository fully standalone without SSH automation
-- ✅ **Public `join.sh`**: Generic deployment script requiring manual SSH setup
-
-### Phase 3: Future Enhancements
+### Future Enhancements
 - **Documentation Polish**: Continue improving documentation clarity
-- **License**: Add a LICENSE file
 - **Examples**: Add example configurations for common use cases

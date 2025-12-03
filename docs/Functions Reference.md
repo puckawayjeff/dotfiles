@@ -368,10 +368,10 @@ The repository uses conditional aliases that provide enhanced directory listings
 
 ```bash
 alias ls='eza --color=auto --group-directories-first'
-alias ll='eza -lag --group-directories-first --git'
-alias la='eza -a --group-directories-first'
-alias l='eza -1 --group-directories-first'
-alias lt='eza --tree --level=2 --group-directories-first'
+alias ll='eza --icons -lag --group-directories-first --git'
+alias la='eza --icons -a --group-directories-first'
+alias l='eza --icons -1 --group-directories-first'
+alias lt='eza --icons --tree --level=2 --group-directories-first'
 ```
 
 **When `eza` is NOT installed** (fallback):
@@ -412,25 +412,6 @@ alias bat='batcat --color=auto'
 ```
 
 **Purpose**: Maps `bat` command to `batcat` (the package name on Debian/Ubuntu) with automatic color detection.
-
-**Prerequisites**:
-
-```bash
-sudo apt install bat
-```
-
-**Usage**:
-
-```bash
-# View file with syntax highlighting
-bat .zshrc
-
-# View file without line numbers
-bat --style=plain script.sh
-
-# Compare files
-bat file1.txt file2.txt
-```
 
 **Why This Alias**:
 On Debian-based systems, the `bat` package (a different tool) conflicts with the name, so the Rust-based `bat` (cat clone with syntax highlighting) is installed as `batcat`. This alias restores the expected `bat` command.
