@@ -2,12 +2,32 @@
 
 ## Overview
 
-The `setup/` directory contains standardized installation scripts for optional tools and services. Each script is:
+The `setup/` directory contains standardized installation scripts for tools and services. Each script is:
 
 - **Idempotent** - Safe to run multiple times without errors
 - **Self-contained** - No arguments required, interactive where needed
 - **Consistent** - All follow the same formatting and error handling patterns
 - **Well-documented** - Clear output with colored progress indicators
+
+### Core vs Optional Tools
+
+**Core Tools (Automatically Installed)**:
+
+These tools are automatically installed by `new-host.sh`:
+
+- **zsh** - Installed first to provide the shell environment
+- **eza** - Modern ls replacement
+- **fastfetch** - System information display
+- **starship** - Cross-shell prompt
+
+**Optional Tools (Manual Installation)**:
+
+These tools require manual installation via `dotsetup`:
+
+- **foot** - Wayland terminal emulator
+- **glow** - Markdown renderer
+- **nvm** - Node.js version manager
+- **syncthing** - File synchronization
 
 ## General Usage
 
@@ -21,9 +41,11 @@ dotsetup <script-name>
 
 ### Eza - Modern ls Replacement
 
-**Script**: `setup/eza.sh`
+**Script**: `setup/eza.sh` ⚙️ **Automatically Installed**
 
 **Project**: [eza](https://github.com/eza-community/eza) - Modern replacement for `ls` with better defaults, git integration, and icon support. Provides more information at a glance while remaining familiar. The repository's conditional aliases mean you get enhanced features when available but still work on systems without eza.
+
+**Note**: This tool is automatically installed by `new-host.sh` during initial setup.
 
 **What It Does**:
 
@@ -46,9 +68,11 @@ dotsetup <script-name>
 
 ### Fastfetch - System Information Tool
 
-**Script**: `setup/fastfetch.sh`
+**Script**: `setup/fastfetch.sh` ⚙️ **Automatically Installed**
 
 **Project**: [fastfetch](https://github.com/fastfetch-cli/fastfetch) - Fast neofetch-like system information tool written in C
+
+**Note**: This tool is automatically installed by `new-host.sh` during initial setup.
 
 **What It Does**:
 
@@ -65,9 +89,11 @@ dotsetup <script-name>
 
 ### Glow - Terminal Markdown Renderer
 
-**Script**: `setup/glow.sh`
+**Script**: `setup/glow.sh` 📦 **Optional**
 
 **Project**: [Glow](https://github.com/charmbracelet/glow) - Beautifully renders markdown files directly in the terminal with syntax highlighting, styled headers, and proper formatting. Perfect for reading documentation, READMEs, and notes without leaving the command line. Includes a built-in pager and file browser.
+
+**Installation**: Run `dotsetup glow` to install this optional tool.
 
 **What It Does**:
 
@@ -110,9 +136,11 @@ glow
 
 ### Foot Terminal - Wayland Terminal Emulator
 
-**Script**: `setup/foot.sh`
+**Script**: `setup/foot.sh` 📦 **Optional**
 
 **Project**: [foot](https://codeberg.org/dnkl/foot) - Extremely fast and lightweight terminal designed for Wayland. Ideal for minimalist setups, older hardware, or dedicated terminal servers. Cage allows running a single application in fullscreen kiosk mode. Good for local monitor output on servers.
+
+**Installation**: Run `dotsetup foot` to install this optional tool.
 
 **Note**: Requires Wayland compositor. Not suitable for X11-only systems.
 
@@ -137,9 +165,11 @@ glow
 
 ### NVM - Node Version Manager
 
-**Script**: `setup/nvm.sh`
+**Script**: `setup/nvm.sh` 📦 **Optional**
 
 **Project**: [nvm](https://github.com/nvm-sh/nvm) - Allows managing multiple Node.js versions without conflicts. Essential for projects requiring different Node.js versions. Prevents permission issues with global package installations.
+
+**Installation**: Run `dotsetup nvm` to install this optional tool.
 
 **What It Does**:
 
@@ -190,9 +220,11 @@ command -v nvm
 
 ### Zsh - Modern Shell with Plugins
 
-**Script**: `setup/zsh.sh`
+**Script**: `setup/zsh.sh` ⚙️ **Automatically Installed**
 
 **Project**: [Zsh](https://www.zsh.org/) with [Zinit](https://github.com/zdharma-continuum/zinit) plugin manager. Modern shell with intelligent completions, command history, and syntax validation. Autosuggestions alone save hundreds of keystrokes per day. FZF and zoxide revolutionize navigation. Fully compatible with existing bash scripts and dotfiles structure.
+
+**Note**: This is the first script run by `new-host.sh` to establish the shell environment. Zsh will be set as your default shell automatically.
 
 **What It Does**:
 
@@ -324,9 +356,11 @@ chsh -s /bin/bash
 
 ### Syncthing - Continuous File Synchronization
 
-**Script**: `setup/syncthing.sh`
+**Script**: `setup/syncthing.sh` 📦 **Optional**
 
 **Project**: [Syncthing](https://syncthing.net/) - Provides Dropbox-like functionality without trusting a third party. Perfect for homelab environments where you control all endpoints. Faster than cloud sync for LAN transfers.
+
+**Installation**: Run `dotsetup syncthing` to install this optional tool.
 
 **What It Does**:
 

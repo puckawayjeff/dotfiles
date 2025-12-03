@@ -14,10 +14,17 @@ wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host
 
 This command will:
 
-1. Check for and install Git (if needed)
-2. Check for and install Zsh (if needed)
-3. Clone the dotfiles repository from GitHub
-4. Run `install.sh` to create all symlinks
+1. Update package lists
+2. Install Git (if needed)
+3. Install core utilities: `bat`, `p7zip-full`, `tree`
+4. Clone the dotfiles repository from GitHub
+5. Run core setup scripts automatically:
+   - **zsh** - Modern shell with plugins (Zinit, autosuggestions, syntax highlighting, FZF, zoxide)
+   - **eza** - Modern ls replacement with git integration and icons
+   - **fastfetch** - Fast system information tool
+   - **starship** - Cross-shell prompt with Nerd Font support
+6. Run `install.sh` to create all symlinks
+7. Apply configuration changes
 
 ## Script Behavior
 
@@ -72,17 +79,53 @@ When running on a host that already has the dotfiles repository:
 
 4. **Re-run Installation** - Runs `install.sh` to update any new symlinks.
 
+## Core vs Optional Tools
+
+### Automatically Installed (Core)
+
+These tools are installed automatically by `new-host.sh`:
+
+- **bat** - Cat clone with syntax highlighting (Debian package: `bat`, command: `batcat`)
+- **p7zip-full** - 7-Zip compression tool (required by `packk`/`unpackk` functions)
+- **tree** - Directory tree visualization
+- **zsh** - Modern shell with Zinit plugin manager and 8 power-user plugins
+- **eza** - Modern ls replacement with git integration
+- **fastfetch** - Fast system information display
+- **starship** - Cross-shell prompt with Nerd Font support
+
+### Optional (Manual Installation)
+
+These tools can be installed manually using `dotsetup`:
+
+- **foot** - Lightweight Wayland terminal emulator (requires Wayland)
+- **glow** - Beautiful terminal markdown renderer
+- **nvm** - Node.js version manager
+- **syncthing** - Continuous file synchronization
+
+To install optional tools:
+
+```bash
+# List available setup scripts
+dotsetup
+
+# Install a specific tool
+dotsetup glow
+dotsetup nvm
+```
+
 ## Idempotency
 
 The `new-host.sh` script is fully idempotent - safe to run multiple times:
 
 - **Git Installation**: Skips if already installed
-- **Zsh Installation**: Skips if already installed  
+- **Core Utilities**: Only installs missing packages
 - **Repository**: Stashes changes and pulls if exists, clones if not
+- **Setup Scripts**: Each script is idempotent and checks existing installations
 - **Symlinks**: `install.sh` uses `ln -sf` (creates or updates symlinks)
 
 You can safely re-run the script to:
 
 - Update to latest dotfiles
+- Re-run setup scripts to update tools
 - Fix broken symlinks
-- Update Git configuration
+- Ensure all core utilities are installed

@@ -2,7 +2,7 @@
 # new-host.sh: Set up a new host with dotfiles
 # Usage: wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
 # 
-# Prerequisites: SSH keys must be configured manually before running this script.
+# Prerequisites: SSH keys must be configured manually before running this script to enable git operations.
 # This script is idempotent and safe to re-run.
 
 # Exit immediately if a command exits with a non-zero status
@@ -57,53 +57,46 @@ print_error() {
 
 printf "${CYAN}${ROCKET} Starting dotfiles setup (public version)...${NC}\n"
 
-# Check if SSH is configured
-if [ ! -f "$HOME/.ssh/id_ed25519_github" ]; then
-    printf "${YELLOW}${WARNING} SSH keys not found.${NC}\n"
-    printf "${YELLOW}   This script requires SSH to be configured manually first.${NC}\n"
-    printf "${YELLOW}   Generate keys: ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_github${NC}\n"
-    printf "${YELLOW}   Add public key to GitHub: https://github.com/settings/keys${NC}\n\n"
-fi
+print_header "Installing Base Utilities"
+# Update package lists first
+printf "${YELLOW}${WRENCH} Updating package lists...${NC}\n"
+sudo apt update
 
-print_header "Checking for Git and Zsh"
 # Check if Git is installed
 if ! command -v git &> /dev/null; then
     printf "${YELLOW}${WRENCH} Git is not installed. Installing...${NC}\n"
-    echo "   ↳ Updating package lists..."
-    sudo apt update
-    echo "   ↳ Installing Git..."
     sudo apt install -y git
     print_success "Git installed successfully."
 else
     print_success "Git is already installed."
 fi
 
-# Check if Zsh is installed
-if ! command -v zsh &> /dev/null; then
-    printf "${YELLOW}${WRENCH} Zsh is not installed. Installing...${NC}\n"
-    sudo apt install -y zsh
-    print_success "Zsh installed successfully."
-else
-    print_success "Zsh is already installed."
-fi
-
-# Set Zsh as default shell
-if [ "$SHELL" != "$(which zsh)" ]; then
-    printf "${YELLOW}${WRENCH} Setting Zsh as default shell...${NC}\n"
-    sudo chsh -s "$(which zsh)" "$USER"
-    print_success "Default shell changed to Zsh (requires logout)."
-fi
-
 # Verify Git installation
 echo "   ↳ Git version: $(git --version | cut -d' ' -f3)"
 
-# Configure Git (users should customize these values)
-echo "   ↳ Configuring Git settings..."
-git config --global pull.rebase false
-print_success "Git pull strategy configured."
-printf "${YELLOW}   Note: Set your Git identity with:${NC}\\n"
-printf "${YELLOW}   git config --global user.name \"Your Name\"${NC}\\n"
-printf "${YELLOW}   git config --global user.email \"you@example.com\"${NC}\\n"
+# Install core utilities (bat, p7zip-full, tree)
+printf "${YELLOW}${WRENCH} Installing core utilities (bat, p7zip-full, tree)...${NC}\n"
+UTILS_TO_INSTALL=()
+
+if ! command -v batcat &> /dev/null; then
+    UTILS_TO_INSTALL+=(bat)
+fi
+
+if ! command -v 7z &> /dev/null; then
+    UTILS_TO_INSTALL+=(p7zip-full)
+fi
+
+if ! command -v tree &> /dev/null; then
+    UTILS_TO_INSTALL+=(tree)
+fi
+
+if [ ${#UTILS_TO_INSTALL[@]} -gt 0 ]; then
+    echo "   ↳ Installing: ${UTILS_TO_INSTALL[*]}"
+    sudo apt install -y "${UTILS_TO_INSTALL[@]}"
+    print_success "Core utilities installed successfully."
+else
+    print_success "All core utilities already installed."
+fi
 
 print_header "Cloning dotfiles repository"
 if [ -d "$HOME/dotfiles/.git" ]; then
@@ -121,11 +114,28 @@ if [ -d "$HOME/dotfiles/.git" ]; then
     git pull
     print_success "Dotfiles repository updated."
 else
-    printf "${YELLOW}${WRENCH} You may be prompted to accept the host and decrypt your SSH key...${NC}\\n"
     # Clone this repository - modify the URL if you've forked it
     git clone git@github.com:puckawayjeff/dotfiles.git "$HOME/dotfiles"
     print_success "Dotfiles repository cloned."
 fi
+
+print_header "Running core setup scripts"
+# Run setup scripts in order: zsh must be first, others can follow
+SETUP_SCRIPTS=("zsh" "eza" "fastfetch" "starship")
+
+for script in "${SETUP_SCRIPTS[@]}"; do
+    if [ -f "$HOME/dotfiles/setup/${script}.sh" ]; then
+        printf "${CYAN}${WRENCH} Running ${script} setup...${NC}\n"
+        if bash "$HOME/dotfiles/setup/${script}.sh"; then
+            print_success "${script} setup completed."
+        else
+            printf "${RED}${CROSS} Warning: ${script} setup failed but continuing...${NC}\n"
+        fi
+        echo ""
+    else
+        printf "${YELLOW}${WARNING} Warning: ${script}.sh not found, skipping...${NC}\n"
+    fi
+done
 
 print_header "Running dotfiles install script"
 bash "$HOME/dotfiles/install.sh"

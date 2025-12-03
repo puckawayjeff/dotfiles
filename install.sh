@@ -22,8 +22,6 @@ log_section "Starting dotfiles installation"
 
 # 1. Ensure required directories exist
 log_section "Ensuring directories exist" "$WRENCH"
-mkdir -p "$HOME/.ssh"
-mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/fastfetch"
 log_success "Directories ready."
 
@@ -65,7 +63,7 @@ if [ $SKIPPED -gt 0 ]; then
     log_info "Skipped $SKIPPED existing symlink(s)."
 fi
 
-# 4. Apply changes to current session
+# 3. Apply changes to current session
 log_info "Applying changes to current session..."
 if [ -f "$HOME/.zshrc" ]; then
     log_info "Note: Run 'source ~/.zshrc' or restart your shell to apply changes."

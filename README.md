@@ -6,7 +6,7 @@
 > wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
 > ```
 >
-> This installs Git/Zsh, clones the repo, and creates symlinks.
+> This installs Git, core utilities (bat, p7zip-full, tree), runs automated setup (zsh, eza, fastfetch, starship), clones the repo, and creates symlinks.
 
 ## Overview
 
@@ -25,15 +25,24 @@ Files are stored in this Git repository and symlinked to their expected system l
 
 ### Deploy to a New Host
 
-The `new-host.sh` script automates the setup process:
+The `new-host.sh` script automates the complete setup process:
 
-1. Checks for required dependencies (Git, Zsh)
-2. Clones this repository
-3. Creates all symlinks via `install.sh`
+1. Updates package lists
+2. Installs Git (if needed)
+3. Installs core utilities: `bat`, `p7zip-full`, `tree`
+4. Clones this repository
+5. Runs core setup scripts automatically:
+   - **zsh** - Modern shell with Zinit, autosuggestions, syntax highlighting, FZF, zoxide
+   - **eza** - Modern ls replacement with git integration
+   - **fastfetch** - Fast system information display
+   - **starship** - Cross-shell prompt with Nerd Font support
+6. Creates all symlinks via `install.sh`
 
 ```bash
 wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
 ```
+
+**Note**: You'll need to log out and log back in for Zsh to become your default shell.
 
 ### Add a New Dotfile
 
@@ -74,7 +83,7 @@ The symlinks ensure changes take effect immediately (or after sourcing shell con
 
 ```
 dotfiles/
-├── new-host.sh             # Initial setup script
+├── new-host.sh             # Initial setup script (auto-installs core tools)
 ├── install.sh              # Creates all symlinks
 ├── config/                 # Configuration files
 │   ├── .zshrc              # Zsh configuration
@@ -84,13 +93,16 @@ dotfiles/
 │   └── fastfetch.jsonc     # Fastfetch configuration
 ├── lib/                    # Shared libraries
 │   └── utils.sh            # Common functions for scripts
-├── setup/                  # Optional software setup scripts
-│   ├── foot.sh             # Wayland terminal emulator
-│   ├── glow.sh             # Markdown viewer for terminals
-│   ├── nvm.sh              # Node Version Manager
-│   └── syncthing.sh        # File synchronization (requires web config)
+├── setup/                  # Software setup scripts
+│   ├── zsh.sh              # ⚙️ Zsh with Zinit (auto-installed)
+│   ├── eza.sh              # ⚙️ Modern ls replacement (auto-installed)
+│   ├── fastfetch.sh        # ⚙️ System info tool (auto-installed)
+│   ├── starship.sh         # ⚙️ Cross-shell prompt (auto-installed)
+│   ├── foot.sh             # 📦 Wayland terminal emulator (optional)
+│   ├── glow.sh             # 📦 Markdown viewer (optional)
+│   ├── nvm.sh              # 📦 Node Version Manager (optional)
+│   └── syncthing.sh        # 📦 File synchronization (optional)
 └── docs/                   # Extended documentation
-    ├── Automating Dotfile Management.md
     ├── Functions Reference.md
     ├── Git Workflow for Dotfiles.md
     ├── Handling Git Merge Conflicts.md
@@ -149,23 +161,31 @@ SSH configuration is not managed by this repository. You'll need to configure it
 
 ### Setup Scripts (`setup/`)
 
-Standardized installation scripts for optional tools. All follow consistent patterns:
+Standardized installation scripts for system tools. All follow consistent patterns:
 
 - Color output with emojis for visual feedback
 - Idempotent (safe to run multiple times)
 - Error handling with clear messages
 - Progress indicators
 
-Available setup scripts:
+**Core Tools (Automatically Installed by `new-host.sh`)**:
 
-- `foot.sh` - Foot terminal with Cage compositor
+- `zsh.sh` - Zsh shell with Zinit plugin manager and power-user plugins
+- `eza.sh` - Modern ls replacement with git integration
+- `fastfetch.sh` - Fast system information tool
+- `starship.sh` - Cross-shell prompt with Nerd Font support
+
+**Optional Tools (Manual Installation)**:
+
+- `foot.sh` - Foot terminal with Cage compositor (Wayland only)
 - `glow.sh` - Terminal-based Markdown viewer
 - `nvm.sh` - Node Version Manager with Node.js LTS
 - `syncthing.sh` - File synchronization service
 
-Run any setup script using the `dotsetup` helper:
+Run optional setup scripts using the `dotsetup` helper:
+
 ```bash
-dotsetup eza
+dotsetup glow
 dotsetup nvm
 
 # Or list all available scripts
@@ -173,8 +193,9 @@ dotsetup
 ```
 
 Alternatively, run directly:
+
 ```bash
-bash ~/dotfiles/setup/eza.sh
+bash ~/dotfiles/setup/glow.sh
 ```
 
 ## Documentation
