@@ -143,7 +143,7 @@ dotpull() {
     fi
     
     printf "⬇️  Pulling latest changes...\n"
-    if git pull; then
+    if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
         printf "✅ Git pull successful.\n"
         
         # Run install.sh to update symlinks/config
