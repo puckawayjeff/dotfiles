@@ -13,7 +13,7 @@ The `setup/` directory contains standardized installation scripts for tools and 
 
 **Core Tools (Automatically Installed)**:
 
-These tools are automatically installed by `new-host.sh`:
+These tools are automatically installed by `join.sh`:
 
 - **zsh** - Installed first to provide the shell environment
 - **eza** - Modern ls replacement
@@ -45,7 +45,7 @@ dotsetup <script-name>
 
 **Project**: [eza](https://github.com/eza-community/eza) - Modern replacement for `ls` with better defaults, git integration, and icon support. Provides more information at a glance while remaining familiar. The repository's conditional aliases mean you get enhanced features when available but still work on systems without eza.
 
-**Note**: This tool is automatically installed by `new-host.sh` during initial setup.
+**Note**: This tool is automatically installed by `join.sh` during initial setup.
 
 **What It Does**:
 
@@ -72,7 +72,7 @@ dotsetup <script-name>
 
 **Project**: [fastfetch](https://github.com/fastfetch-cli/fastfetch) - Fast neofetch-like system information tool written in C
 
-**Note**: This tool is automatically installed by `new-host.sh` during initial setup.
+**Note**: This tool is automatically installed by `join.sh` during initial setup.
 
 **What It Does**:
 
@@ -224,7 +224,7 @@ command -v nvm
 
 **Project**: [Zsh](https://www.zsh.org/) with [Zinit](https://github.com/zdharma-continuum/zinit) plugin manager. Modern shell with intelligent completions, command history, and syntax validation. Autosuggestions alone save hundreds of keystrokes per day. FZF and zoxide revolutionize navigation. Fully compatible with existing bash scripts and dotfiles structure.
 
-**Note**: This is the first script run by `new-host.sh` to establish the shell environment. Zsh will be set as your default shell automatically.
+**Note**: This is the first script run by `join.sh` to establish the shell environment. Zsh will be set as your default shell automatically.
 
 **What It Does**:
 

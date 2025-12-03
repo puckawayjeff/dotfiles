@@ -3,7 +3,7 @@
 > **Quick Start:** Deploy to a new host with one command:
 >
 > ```bash
-> wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
+> wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 > ```
 >
 > This installs Git, core utilities (bat, p7zip-full, tree), runs automated setup (zsh, eza, fastfetch, starship), clones the repo, and creates symlinks.
@@ -25,7 +25,7 @@ Files are stored in this Git repository and symlinked to their expected system l
 
 ### Deploy to a New Host
 
-The `new-host.sh` script automates the complete setup process:
+The `join.sh` script automates the complete setup process:
 
 1. Updates package lists
 2. Installs Git (if needed)
@@ -39,7 +39,7 @@ The `new-host.sh` script automates the complete setup process:
 6. Creates all symlinks via `install.sh`
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
+wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 ```
 
 **Note**: You'll need to log out and log back in for Zsh to become your default shell.
@@ -83,7 +83,7 @@ The symlinks ensure changes take effect immediately (or after sourcing shell con
 
 ```
 dotfiles/
-├── new-host.sh             # Initial setup script (auto-installs core tools)
+├── join.sh                 # Initial setup script (auto-installs core tools)
 ├── install.sh              # Creates all symlinks
 ├── config/                 # Configuration files
 │   ├── .zshrc              # Zsh configuration
@@ -168,7 +168,7 @@ Standardized installation scripts for system tools. All follow consistent patter
 - Error handling with clear messages
 - Progress indicators
 
-**Core Tools (Automatically Installed by `new-host.sh`)**:
+**Core Tools (Automatically Installed by `join.sh`)**:
 
 - `zsh.sh` - Zsh shell with Zinit plugin manager and power-user plugins
 - `eza.sh` - Modern ls replacement with git integration
@@ -203,7 +203,7 @@ bash ~/dotfiles/setup/glow.sh
 Detailed guides are available in the `docs/` directory:
 
 ### Getting Started
-- **[New Host Deployment](docs/New%20Host%20Deployment.md)** - Complete guide to `new-host.sh`, stash behavior, and recovery workflows
+- **[New Host Deployment](docs/New%20Host%20Deployment.md)** - Complete guide to `join.sh`, stash behavior, and recovery workflows
 
 ### Configuration & Tools
 - **[Functions Reference](docs/Functions%20Reference.md)** - Complete documentation of `dotpush`, `dotpull`, `updatep`, `mkd`, `paths`, and all aliases

@@ -9,7 +9,7 @@ Symlink-based dotfiles management for Linux hosts. Files live in Git and are sym
 - `config/functions.zsh` - Common Zsh functions and aliases
 - `config/.zshrc` - Main Zsh configuration file
 - `lib/utils.sh` - Shared library for colors, icons, and helper functions
-- `new-host.sh` - One-click deployment (installs git/zsh, clones repo, runs `install.sh`)
+- `join.sh` - One-click deployment (installs git/zsh, clones repo, runs `install.sh`)
 - `setup/*.sh` - Optional tool installers (fastfetch, foot, nvm, syncthing)
 
 ## Critical Workflows
@@ -35,7 +35,7 @@ The script:
 ### New Host Deployment
 Canonical one-liner:
 ```bash
-wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
+wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 ```
 
 **Prerequisites:** SSH keys must be manually configured before running if wanting to interact with GitHub beyond initial clone.
@@ -195,7 +195,7 @@ SSH config is not managed by this repository. Edit `~/.ssh/config` directly on e
 ## Documentation Structure
 
 `docs/` contains detailed guides (8 markdown files):
-- **New Host Deployment.md** - `new-host.sh` guide, stash behavior, recovery
+- **New Host Deployment.md** - `join.sh` guide, stash behavior, recovery
 - **Automating Dotfile Management.md** - Symlink system, `add-dotfile.sh` internals
 - **Git Workflow for Dotfiles.md** - `dotpush` and manual workflows
 - **Handling Git Merge Conflicts.md** - Conflict resolution strategies
@@ -221,7 +221,7 @@ SSH config is not managed by this repository. Edit `~/.ssh/config` directly on e
 - ✅ **Repository Cleanup**: Removed all sensitive data and references
 - ✅ **Documentation Overhaul**: Rewrote all docs for public consumption
 - ✅ **SSH Independence**: Made repository fully standalone without SSH automation
-- ✅ **Public `new-host.sh`**: Generic deployment script requiring manual SSH setup
+- ✅ **Public `join.sh`**: Generic deployment script requiring manual SSH setup
 
 ### Phase 3: Future Enhancements
 - **Documentation Polish**: Continue improving documentation clarity

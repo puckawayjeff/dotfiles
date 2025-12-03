@@ -2,14 +2,14 @@
 
 ## Overview
 
-The `new-host.sh` script automates the deployment process for setting up a new Linux host with your dotfiles configuration. It handles dependency installation, repository cloning, and symlink creation.
+The `join.sh` script automates the deployment process for setting up a new Linux host with your dotfiles configuration. It handles dependency installation, repository cloning, and symlink creation.
 
 ## Deployment
 
 One-line deployment command:
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/new-host.sh | bash
+wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 ```
 
 This command will:
@@ -30,7 +30,7 @@ This command will:
 
 ### First-Time Setup
 
-When running `new-host.sh` on a host without the dotfiles repository:
+When running `join.sh` on a host without the dotfiles repository:
 
 1. **Git Installation** - If Git is not installed, the script will:
    - Run `sudo apt update`
@@ -83,7 +83,7 @@ When running on a host that already has the dotfiles repository:
 
 ### Automatically Installed (Core)
 
-These tools are installed automatically by `new-host.sh`:
+These tools are installed automatically by `join.sh`:
 
 - **bat** - Cat clone with syntax highlighting (Debian package: `bat`, command: `batcat`)
 - **p7zip-full** - 7-Zip compression tool (required by `packk`/`unpackk` functions)
@@ -115,7 +115,7 @@ dotsetup nvm
 
 ## Idempotency
 
-The `new-host.sh` script is fully idempotent - safe to run multiple times:
+The `join.sh` script is fully idempotent - safe to run multiple times:
 
 - **Git Installation**: Skips if already installed
 - **Core Utilities**: Only installs missing packages
