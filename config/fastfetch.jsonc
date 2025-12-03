@@ -285,7 +285,15 @@
     },
     {
       "type": "version",
-      "keyIcon": ""
+      "keyIcon": ""
+    },
+    {
+      "type": "command",
+      "key": "Dotfiles",
+      "keyIcon": "",
+      "text": "cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown'",
+      "shell": "/bin/bash",
+      "param": "-c"
     }
   ]
 }

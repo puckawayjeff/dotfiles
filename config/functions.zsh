@@ -490,3 +490,27 @@ maintain() {
     print "\n🔄 Reloading zsh configuration..."
     exec zsh
 }
+
+# Display dotfiles version
+dotversion() {
+    local DOTFILES_DIR="$HOME/dotfiles"
+    local VERSION_FILE="$DOTFILES_DIR/VERSION"
+    
+    if [[ ! -f "$VERSION_FILE" ]]; then
+        print -P "%F{red}❌ Error: VERSION file not found.%f"
+        return 1
+    fi
+    
+    local VERSION=$(cat "$VERSION_FILE")
+    print -P "%F{cyan}📦 Dotfiles Version:%f %F{green}v${VERSION}%f"
+    
+    # Optional: Show git info if available
+    if [[ -d "$DOTFILES_DIR/.git" ]]; then
+        local COMMIT=$(git -C "$DOTFILES_DIR" rev-parse --short HEAD 2>/dev/null)
+        local BRANCH=$(git -C "$DOTFILES_DIR" branch --show-current 2>/dev/null)
+        if [[ -n "$COMMIT" ]]; then
+            print -P "%F{blue}   Branch:%f $BRANCH"
+            print -P "%F{blue}   Commit:%f $COMMIT"
+        fi
+    fi
+}
