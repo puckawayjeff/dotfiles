@@ -514,3 +514,68 @@ dotversion() {
         fi
     fi
 }
+
+# ===== SSH Sync Functions (Optional - only loaded if sshsync repo exists) =====
+if [[ -d "$HOME/sshsync/.git" ]]; then
+    
+    # SSH config git push
+    sshpush() {
+        local ORIGINAL_DIR="$PWD"
+        local COMMIT_MSG="$1"
+        
+        if [[ -z "$COMMIT_MSG" ]]; then
+            printf "Enter commit message: "
+            read -r COMMIT_MSG
+            if [[ -z "$COMMIT_MSG" ]]; then
+                printf "No commit message provided. Aborting.\n"
+                return 1
+            fi
+        fi
+        
+        cd "$HOME/sshsync" || {
+            printf "Error: Could not change to ~/sshsync directory\n"
+            return 1
+        }
+        
+        # Discard local changes to ssh.conf (will be overwritten by symlink anyway)
+        git checkout -- ssh.conf 2>/dev/null || true
+        
+        git add . && \
+        git commit -m "$COMMIT_MSG" && \
+        git push
+        
+        local EXIT_CODE=$?
+        
+        cd "$ORIGINAL_DIR" || {
+            printf "Warning: Could not return to original directory: $ORIGINAL_DIR\n"
+        }
+        
+        return $EXIT_CODE
+    }
+    
+    # SSH config git pull
+    sshpull() {
+        local ORIGINAL_DIR="$PWD"
+        local SSHSYNC_DIR="$HOME/sshsync"
+        
+        cd "$SSHSYNC_DIR" || {
+            printf "Error: Could not change to ~/sshsync directory\n"
+            return 1
+        }
+        
+        # Discard local changes to ssh.conf (will be overwritten by symlink anyway)
+        git checkout -- ssh.conf 2>/dev/null || true
+        
+        printf "⬇️  Pulling latest SSH config changes...\n"
+        if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
+            printf "✅ SSH config updated successfully.\n"
+        else
+            printf "❌ Error: Git pull failed.\n"
+            cd "$ORIGINAL_DIR"
+            return 1
+        fi
+        
+        cd "$ORIGINAL_DIR"
+    }
+    
+fi
