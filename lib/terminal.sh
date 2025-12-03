@@ -27,7 +27,9 @@ track_skip() { INSTALLS_SKIPPED=$((INSTALLS_SKIPPED + 1)); }
 # ZSH INSTALLATION
 # ============================================================================
 install_zsh() {
-    log_section "Zsh Installation" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Zsh Installation" "$COMPUTER"
+    fi
     
     if command -v zsh &> /dev/null; then
         ZSH_VERSION=$(zsh --version | head -n1)
@@ -66,7 +68,9 @@ install_zsh() {
 # FZF (Fuzzy Finder)
 # ============================================================================
 install_fzf() {
-    log_section "FZF (Fuzzy Finder)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "FZF (Fuzzy Finder)" "$COMPUTER"
+    fi
     
     if command -v fzf &> /dev/null; then
         log_success "FZF already installed"
@@ -87,7 +91,9 @@ install_fzf() {
 # ZOXIDE (Smart cd)
 # ============================================================================
 install_zoxide() {
-    log_section "Zoxide (Smart cd)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Zoxide (Smart cd)" "$COMPUTER"
+    fi
     
     if command -v zoxide &> /dev/null; then
         log_success "Zoxide already installed"
@@ -113,7 +119,9 @@ install_zoxide() {
 # FD (Fast find alternative)
 # ============================================================================
 install_fd() {
-    log_section "fd (Fast find)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "fd (Fast find)" "$COMPUTER"
+    fi
     
     if command -v fd &> /dev/null || command -v fdfind &> /dev/null; then
         log_success "fd already installed"
@@ -139,7 +147,9 @@ install_fd() {
 # DIRENV (Directory environment loader)
 # ============================================================================
 install_direnv() {
-    log_section "direnv (Directory environments)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "direnv (Directory environments)" "$COMPUTER"
+    fi
     
     if command -v direnv &> /dev/null; then
         log_success "direnv already installed"
@@ -160,7 +170,9 @@ install_direnv() {
 # EZA (Modern ls replacement)
 # ============================================================================
 install_eza() {
-    log_section "eza (Modern ls)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "eza (Modern ls)" "$COMPUTER"
+    fi
     
     # Check if already installed from official repo
     if command -v eza &> /dev/null && [ -f /etc/apt/sources.list.d/gierens.list ]; then
@@ -220,7 +232,9 @@ install_eza() {
 # FASTFETCH (System info)
 # ============================================================================
 install_fastfetch() {
-    log_section "fastfetch (System info)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "fastfetch (System info)" "$COMPUTER"
+    fi
     
     # Remove package-based installations first
     local removed_any=false
@@ -303,7 +317,9 @@ install_fastfetch() {
 # STARSHIP (Cross-shell prompt)
 # ============================================================================
 install_starship() {
-    log_section "starship (Shell prompt)" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "starship (Shell prompt)" "$COMPUTER"
+    fi
     
     if command -v starship &> /dev/null; then
         local current_version=$(starship --version 2>/dev/null | head -n1)
@@ -325,7 +341,9 @@ install_starship() {
 # NERD FONT
 # ============================================================================
 install_nerd_font() {
-    log_section "FiraCode Nerd Font" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "FiraCode Nerd Font" "$COMPUTER"
+    fi
     
     local FONT_DIR="$HOME/.local/share/fonts"
     local FONT_NAME="FiraCodeNerdFont-Regular.ttf"
@@ -372,7 +390,9 @@ install_nerd_font() {
 # EMOJI FONT SUPPORT
 # ============================================================================
 install_emoji_fonts() {
-    log_section "Emoji Font Support" "$COMPUTER"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Emoji Font Support" "$COMPUTER"
+    fi
     
     if dpkg -l 2>/dev/null | grep -q "^ii.*fonts-noto-color-emoji"; then
         log_success "Emoji fonts already installed"

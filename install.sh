@@ -180,7 +180,7 @@ if [[ "$QUIET_MODE" != "true" ]]; then
     printf "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}\n\n"
 else
     # In quiet mode, show compact summary
-    local summary=""
+    summary=""
     if [ $CREATED -gt 0 ]; then
         summary="${CREATED} updated"
     fi
