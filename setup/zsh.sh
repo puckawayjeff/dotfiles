@@ -123,7 +123,7 @@ else
 fi
 
 # --- 6. Verify .zshrc exists in dotfiles ---
-DOTFILES_ZSHRC="$HOME/dotfiles/.zshrc"
+DOTFILES_ZSHRC="$HOME/dotfiles/config/.zshrc"
 printf "\n${BLUE}📝 Checking for .zshrc configuration...${NC}\n"
 if [[ -f "$DOTFILES_ZSHRC" ]]; then
     printf "${GREEN}${CHECK} Found .zshrc in dotfiles: $DOTFILES_ZSHRC${NC}\n"

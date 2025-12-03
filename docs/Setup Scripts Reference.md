@@ -306,7 +306,7 @@ mkd test   # Create and cd into directory
 
 **Configuration Files**:
 
-- `~/.zshrc` - Main configuration (symlinked to `~/dotfiles/.zshrc`)
+- `~/.zshrc` - Main configuration (symlinked to `~/dotfiles/config/.zshrc`)
 - `~/.zinit/` - Zinit and plugin installation directory (auto-created)
 - `~/.local/share/fonts/NerdFonts/` - FiraCode Nerd Font installation
 
