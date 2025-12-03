@@ -100,10 +100,10 @@ alias bat='batcat --color=auto'
 # ls/eza aliases (conditional on eza installation)
 if command -v eza >/dev/null 2>&1; then
     alias ls='eza --color=auto --group-directories-first'
-    alias ll='eza -lag --group-directories-first --git'
-    alias la='eza -a --group-directories-first'
-    alias l='eza -1 --group-directories-first'
-    alias lt='eza --tree --level=2 --group-directories-first'
+    alias ll='eza --icons -lag --group-directories-first --git'
+    alias la='eza --icons -a --group-directories-first'
+    alias l='eza --icons -1 --group-directories-first'
+    alias lt='eza --icons --tree --level=2 --group-directories-first'
 else
     alias ll='ls -alh'
     alias la='ls -A'
