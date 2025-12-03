@@ -216,48 +216,6 @@ fi
 # 2. Configure shell integration via .bash_fastfetch
 printf "\n${BLUE}📦 Configuring shell integration...${NC}\n"
 
-FASTFETCH_CONFIG="$HOME/.bash_fastfetch"
-MARKER_COMMENT="# ~/.bash_fastfetch: fastfetch configuration for bash"
-
-# Check if .bash_fastfetch already exists with the correct content
-if [ -f "$FASTFETCH_CONFIG" ] && grep -Fq "$MARKER_COMMENT" "$FASTFETCH_CONFIG"; then
-    printf "${GREEN}${CHECK} $FASTFETCH_CONFIG already exists.${NC}\n"
-else
-    echo "   ↳ Creating $FASTFETCH_CONFIG..."
-    cat > "$FASTFETCH_CONFIG" << 'EOF'
-# ~/.bash_fastfetch: fastfetch configuration for bash
-# This file is sourced by .zshrc when fastfetch is installed
-
-# Compatibility aliases
-alias neofetch="fastfetch -c neofetch"
-alias screenfetch="fastfetch -c screenfetch"
-
-# Run fastfetch on interactive shells
-if [[ $- == *i* ]]; then
-    fastfetch
-fi
-EOF
-    printf "${GREEN}${CHECK} Created $FASTFETCH_CONFIG.${NC}\n"
-fi
-
-# Check if .zshrc has the conditional sourcing block
-ZSHRC_MARKER="# Fastfetch configuration (only if installed)"
-if grep -Fq "$ZSHRC_MARKER" "$CONFIG_FILE"; then
-    printf "${GREEN}${CHECK} .zshrc already configured to source fastfetch config.${NC}\n"
-else
-    echo "   ↳ Adding conditional sourcing to $CONFIG_FILE..."
-    # Find the line with bash_aliases and add our block after it
-    sed -i '/^# Alias definitions$/,/^fi$/ {
-        /^fi$/a\
-\
-# Fastfetch configuration (only if installed)\
-if command -v fastfetch >/dev/null 2>&1 && [ -f ~/.bash_fastfetch ]; then\
-    . ~/.bash_fastfetch\
-fi
-    }' "$CONFIG_FILE"
-    printf "${GREEN}${CHECK} Updated $CONFIG_FILE with conditional sourcing.${NC}\n"
-fi
-
 printf "${CYAN}Configuration will activate on next shell or 'source $CONFIG_FILE'.${NC}\n"
 
 printf "\n${GREEN}${PARTY} Fastfetch setup complete!${NC}\n"
