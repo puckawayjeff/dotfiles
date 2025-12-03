@@ -28,10 +28,12 @@ PARTY="🎉"
 PACKAGE="📦"
 
 # --- Logging Helpers ---
+# Supports QUIET_MODE environment variable to suppress verbose output
 
 # Print a section header
 # Usage: log_section "Section Name" "Optional Icon"
 log_section() {
+    # Always show section headers, even in quiet mode
     local title="$1"
     local icon="${2:-$ROCKET}"
     printf "\n${CYAN}${icon} ${title}...${NC}\n"
@@ -40,29 +42,37 @@ log_section() {
 # Print a success message
 # Usage: log_success "Message"
 log_success() {
-    printf "${GREEN}${CHECK} $1${NC}\n"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        printf "${GREEN}${CHECK} $1${NC}\n"
+    fi
 }
 
 # Print an error message
 # Usage: log_error "Message"
 log_error() {
+    # Always show errors, even in quiet mode
     printf "${RED}${CROSS} Error: $1${NC}\n" >&2
 }
 
 # Print an info message (blue)
 # Usage: log_info "Message"
 log_info() {
-    printf "${BLUE}$1${NC}\n"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        printf "${BLUE}$1${NC}\n"
+    fi
 }
 
 # Print a warning message (yellow)
 # Usage: log_warning "Message"
 log_warning() {
+    # Always show warnings, even in quiet mode
     printf "${YELLOW}$1${NC}\n"
 }
 
 # Print a sub-step description
 # Usage: log_substep "Message"
 log_substep() {
-    echo "   ↳ $1"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        echo "   ↳ $1"
+    fi
 }

@@ -417,21 +417,23 @@ main() {
     install_nerd_font
     install_emoji_fonts
     
-    # Print summary
-    echo ""
-    log_section "Installation Summary" "$PARTY"
-    printf "${GREEN}  ✓ Success: ${INSTALLS_SUCCESS}${NC}\n"
-    printf "${YELLOW}  ⊘ Skipped: ${INSTALLS_SKIPPED}${NC}\n"
-    if [ $INSTALLS_FAILED -gt 0 ]; then
-        printf "${RED}  ✗ Failed:  ${INSTALLS_FAILED}${NC}\n"
-    fi
-    echo ""
-    
-    if [ $INSTALLS_FAILED -gt 0 ]; then
-        log_warning "Some installations failed but the system is functional"
-        log_info "Re-run install.sh to retry failed installations"
-    else
-        log_success "All terminal utilities installed successfully!"
+    # Print summary (skip in quiet mode unless there were failures)
+    if [[ "$QUIET_MODE" != "true" ]] || [ $INSTALLS_FAILED -gt 0 ]; then
+        echo ""
+        log_section "Installation Summary" "$PARTY"
+        printf "${GREEN}  ✓ Success: ${INSTALLS_SUCCESS}${NC}\n"
+        printf "${YELLOW}  ⊘ Skipped: ${INSTALLS_SKIPPED}${NC}\n"
+        if [ $INSTALLS_FAILED -gt 0 ]; then
+            printf "${RED}  ✗ Failed:  ${INSTALLS_FAILED}${NC}\n"
+        fi
+        echo ""
+        
+        if [ $INSTALLS_FAILED -gt 0 ]; then
+            log_warning "Some installations failed but the system is functional"
+            log_info "Re-run install.sh to retry failed installations"
+        else
+            log_success "All terminal utilities installed successfully!"
+        fi
     fi
 }
 

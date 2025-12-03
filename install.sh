@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 # install.sh - Creates symlinks for dotfiles configuration
 # Safe to run multiple times (idempotent)
+# Usage: install.sh [--quiet]  # Suppress verbose output for already-configured hosts
 
 # Don't exit on error for graceful degradation
 set +e
+
+# Parse arguments
+QUIET_MODE=false
+if [[ "$1" == "--quiet" || "$1" == "-q" ]]; then
+    QUIET_MODE=true
+fi
+export QUIET_MODE
 
 # --- Configuration ---
 # Get the directory of the script itself
@@ -141,21 +149,26 @@ if [ $SKIPPED -gt 0 ]; then
 fi
 
 # --- 5. Final instructions ---
-log_section "Installation Complete" "$PARTY"
-if [ -f "$HOME/.zshrc" ]; then
-    log_info "Run 'source ~/.zshrc' or restart your shell to apply changes"
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Installation Complete" "$PARTY"
+    if [ -f "$HOME/.zshrc" ]; then
+        log_info "Run 'source ~/.zshrc' or restart your shell to apply changes"
+    else
+        log_warning ".zshrc not found - changes will apply on next login"
+    fi
+
+    # Check if shell needs to be changed
+    if [ "$(basename "$SHELL")" != "zsh" ] && command -v zsh &> /dev/null; then
+        log_warning "Default shell is not zsh - logout/login required for change to take effect"
+    fi
+
+    printf "\n${GREEN}${CHECK} Dotfiles installation complete!${NC}\n"
+    log_section "Next Steps" "$ROCKET"
+    printf "${YELLOW}${INFO}${NC} To apply all changes, run:\n"
+    printf "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}\n"
+    printf "   ${DIM}OR${NC}\n"
+    printf "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}\n\n"
 else
-    log_warning ".zshrc not found - changes will apply on next login"
+    # In quiet mode, just show a simple completion message
+    printf "${GREEN}${CHECK} Dotfiles updated${NC}\n"
 fi
-
-# Check if shell needs to be changed
-if [ "$(basename "$SHELL")" != "zsh" ] && command -v zsh &> /dev/null; then
-    log_warning "Default shell is not zsh - logout/login required for change to take effect"
-fi
-
-printf "\n${GREEN}${CHECK} Dotfiles installation complete!${NC}\n"
-log_section "Next Steps" "$ROCKET"
-printf "${YELLOW}${INFO}${NC} To apply all changes, run:\n"
-printf "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}\n"
-printf "   ${DIM}OR${NC}\n"
-printf "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}\n\n"

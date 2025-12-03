@@ -149,7 +149,7 @@ dotpull() {
         # Run install.sh to update symlinks/config
         if [[ -f "./install.sh" ]]; then
             printf "\n🔧 Running install.sh...\n"
-            ./install.sh
+            ./install.sh --quiet
         fi
         
         if [[ "$NO_EXEC" == "true" ]]; then
@@ -470,13 +470,14 @@ maintain() {
     print "\n🚀 Starting Maintenance Sequence..."
     
     # Run dotpull without reloading shell immediately
+    # (dotpull already uses --quiet for install.sh)
     dotpull --no-exec
     if [[ $? -ne 0 ]]; then
         print "\n❌ dotpull failed. Stopping."
         return 1
     fi
     
-    # Note: install.sh is already run by dotpull
+    # Note: install.sh is already run by dotpull (in quiet mode)
     
     print "\n⏱️  Configuration updated."
     print -n "    Launching system updates in 5 seconds... "
