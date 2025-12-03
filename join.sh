@@ -115,7 +115,7 @@ if [ -d "$HOME/dotfiles/.git" ]; then
     fi
     
     log_substep "Pulling latest changes..."
-    git pull
+    GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull
     log_success "Dotfiles repository updated"
 else
     # Check for SSH key to determine clone method
