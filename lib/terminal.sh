@@ -397,7 +397,9 @@ install_emoji_fonts() {
 # MAIN EXECUTION
 # ============================================================================
 main() {
-    log_section "Terminal Utilities Installation" "$ROCKET"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Terminal Utilities Installation" "$ROCKET"
+    fi
     
     # Check if apt is available
     if ! command -v apt &> /dev/null; then
@@ -417,8 +419,8 @@ main() {
     install_nerd_font
     install_emoji_fonts
     
-    # Print summary (skip in quiet mode unless there were failures)
-    if [[ "$QUIET_MODE" != "true" ]] || [ $INSTALLS_FAILED -gt 0 ]; then
+    # Print summary only in verbose mode
+    if [[ "$QUIET_MODE" != "true" ]]; then
         echo ""
         log_section "Installation Summary" "$PARTY"
         printf "${GREEN}  ✓ Success: ${INSTALLS_SUCCESS}${NC}\n"
@@ -434,6 +436,9 @@ main() {
         else
             log_success "All terminal utilities installed successfully!"
         fi
+    elif [ $INSTALLS_FAILED -gt 0 ]; then
+        # In quiet mode, only show failures
+        log_warning "${INSTALLS_FAILED} terminal utilities failed to install"
     fi
 }
 

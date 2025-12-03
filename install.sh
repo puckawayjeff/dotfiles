@@ -26,10 +26,14 @@ else
 fi
 
 # --- Main Script ---
-log_section "Starting dotfiles installation" "$ROCKET"
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Starting dotfiles installation" "$ROCKET"
+fi
 
 # --- 1. Configure git if needed ---
-log_section "Git Configuration" "$WRENCH"
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Git Configuration" "$WRENCH"
+fi
 if ! git config --global user.name > /dev/null 2>&1; then
     log_info "Setting default git user.name..."
     git config --global user.name "dotfiles-user"
@@ -51,7 +55,9 @@ else
 fi
 
 # --- 2. Install core utilities ---
-log_section "Core Utilities Installation" "$PACKAGE"
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Core Utilities Installation" "$PACKAGE"
+fi
 
 if command -v apt &> /dev/null; then
     # Define core utilities: command:package format
@@ -98,9 +104,13 @@ else
 fi
 
 # --- 3. Install terminal utilities ---
-log_section "Terminal Utilities" "$COMPUTER"
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Terminal Utilities" "$COMPUTER"
+fi
 if [ -f "$DOTFILES_DIR/lib/terminal.sh" ]; then
-    log_info "Running terminal utilities installer..."
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_info "Running terminal utilities installer..."
+    fi
     if source "$DOTFILES_DIR/lib/terminal.sh"; then
         : # Success message handled by terminal.sh
     else
@@ -169,6 +179,21 @@ if [[ "$QUIET_MODE" != "true" ]]; then
     printf "   ${DIM}OR${NC}\n"
     printf "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}\n\n"
 else
-    # In quiet mode, just show a simple completion message
-    printf "${GREEN}${CHECK} Dotfiles updated${NC}\n"
+    # In quiet mode, show compact summary
+    local summary=""
+    if [ $CREATED -gt 0 ]; then
+        summary="${CREATED} updated"
+    fi
+    if [ $SKIPPED -gt 0 ]; then
+        if [ -n "$summary" ]; then
+            summary="$summary, ${SKIPPED} unchanged"
+        else
+            summary="${SKIPPED} unchanged"
+        fi
+    fi
+    if [ -n "$summary" ]; then
+        printf "${GREEN}${CHECK} Dotfiles: ${summary}${NC}\n"
+    else
+        printf "${GREEN}${CHECK} Dotfiles updated${NC}\n"
+    fi
 fi
