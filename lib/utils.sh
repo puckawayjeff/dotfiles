@@ -25,6 +25,7 @@ CHECK="✅"
 CROSS="❌"
 COMPUTER="💻"
 PARTY="🎉"
+PACKAGE="📦"
 
 # --- Logging Helpers ---
 

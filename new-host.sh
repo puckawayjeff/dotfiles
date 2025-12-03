@@ -35,117 +35,114 @@ CROSS="❌"
 COMPUTER="💻"
 PARTY="🎉"
 WARNING="⚠️"
+PACKAGE="📦"
 
-# --- Helper Functions ---
+# --- Helper Functions (matching utils.sh) ---
 
-# Print a formatted section header
-print_header() {
-    printf "\n${BLUE}📦 $1${NC}\n\n"
+# Print a section header
+log_section() {
+    local title="$1"
+    local icon="${2:-$PACKAGE}"
+    printf "\n${CYAN}${icon} ${title}...${NC}\n"
 }
 
 # Print a success message
-print_success() {
+log_success() {
     printf "${GREEN}${CHECK} $1${NC}\n"
 }
 
 # Print an error message
-print_error() {
+log_error() {
     printf "${RED}${CROSS} Error: $1${NC}\n" >&2
+}
+
+# Print an info message
+log_info() {
+    printf "${BLUE}$1${NC}\n"
+}
+
+# Print a warning message
+log_warning() {
+    printf "${YELLOW}$1${NC}\n"
+}
+
+# Print a sub-step
+log_substep() {
+    echo "   ↳ $1"
 }
 
 # --- Main Script ---
 
-printf "${CYAN}${ROCKET} Starting dotfiles setup (public version)...${NC}\n"
+log_section "Starting dotfiles setup (public version)" "$ROCKET"
 
-print_header "Installing Base Utilities"
-# Update package lists first
-printf "${YELLOW}${WRENCH} Updating package lists...${NC}\n"
+log_section "Installing Base Utilities" "$PACKAGE"
+log_warning "Updating package lists..."
 sudo apt update
 
 # Check if Git is installed
 if ! command -v git &> /dev/null; then
-    printf "${YELLOW}${WRENCH} Git is not installed. Installing...${NC}\n"
+    # Git not installed - check if apt is available
+    if ! command -v apt &> /dev/null; then
+        log_error "Git is not installed and apt package manager is not available"
+        log_error "This script requires Debian-based systems (Debian, Ubuntu, Mint, etc.)"
+        exit 1
+    fi
+    
+    log_warning "Git is not installed. Installing..."
     sudo apt install -y git
-    print_success "Git installed successfully."
+    log_success "Git installed successfully"
 else
-    print_success "Git is already installed."
+    log_success "Git is already installed"
 fi
 
 # Verify Git installation
-echo "   ↳ Git version: $(git --version | cut -d' ' -f3)"
+log_substep "Git version: $(git --version | cut -d' ' -f3)"
 
-# Install core utilities (bat, p7zip-full, tree)
-printf "${YELLOW}${WRENCH} Installing core utilities (bat, p7zip-full, tree)...${NC}\n"
-UTILS_TO_INSTALL=()
-
-if ! command -v batcat &> /dev/null; then
-    UTILS_TO_INSTALL+=(bat)
-fi
-
-if ! command -v 7z &> /dev/null; then
-    UTILS_TO_INSTALL+=(p7zip-full)
-fi
-
-if ! command -v tree &> /dev/null; then
-    UTILS_TO_INSTALL+=(tree)
-fi
-
-if [ ${#UTILS_TO_INSTALL[@]} -gt 0 ]; then
-    echo "   ↳ Installing: ${UTILS_TO_INSTALL[*]}"
-    sudo apt install -y "${UTILS_TO_INSTALL[@]}"
-    print_success "Core utilities installed successfully."
-else
-    print_success "All core utilities already installed."
-fi
-
-print_header "Cloning dotfiles repository"
+log_section "Cloning dotfiles repository" "$ROCKET"
 if [ -d "$HOME/dotfiles/.git" ]; then
-    printf "${YELLOW}⚠️  Dotfiles repository already exists.${NC}\n"
+    log_warning "Dotfiles repository already exists"
     cd "$HOME/dotfiles"
     
     # Check if there are uncommitted changes
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        echo "   ↳ Stashing local changes..."
+        log_substep "Stashing local changes..."
         git stash push -m "Auto-stash before pull on $(date '+%Y-%m-%d %H:%M:%S')"
-        printf "${CYAN}   ↳ Local changes stashed. Use 'git stash pop' to restore them.${NC}\n"
+        log_info "   ↳ Local changes stashed. Use 'git stash pop' to restore them."
     fi
     
-    echo "   ↳ Pulling latest changes..."
+    log_substep "Pulling latest changes..."
     git pull
-    print_success "Dotfiles repository updated."
+    log_success "Dotfiles repository updated"
 else
-    # Clone this repository - modify the URL if you've forked it
-    git clone git@github.com:puckawayjeff/dotfiles.git "$HOME/dotfiles"
-    print_success "Dotfiles repository cloned."
-fi
-
-print_header "Running core setup scripts"
-# Run setup scripts in order: zsh must be first, others can follow
-SETUP_SCRIPTS=("zsh" "eza" "fastfetch" "starship")
-
-for script in "${SETUP_SCRIPTS[@]}"; do
-    if [ -f "$HOME/dotfiles/setup/${script}.sh" ]; then
-        printf "${CYAN}${WRENCH} Running ${script} setup...${NC}\n"
-        if bash "$HOME/dotfiles/setup/${script}.sh"; then
-            print_success "${script} setup completed."
-        else
-            printf "${RED}${CROSS} Warning: ${script} setup failed but continuing...${NC}\n"
-        fi
-        echo ""
+    # Check for SSH key to determine clone method
+    if [ -f "$HOME/.ssh/id_ed25519_github" ]; then
+        log_substep "SSH key found - cloning via SSH..."
+        git clone git@github.com:puckawayjeff/dotfiles.git "$HOME/dotfiles"
     else
-        printf "${YELLOW}${WARNING} Warning: ${script}.sh not found, skipping...${NC}\n"
+        log_substep "No SSH key - cloning via HTTPS..."
+        git clone https://github.com/puckawayjeff/dotfiles.git "$HOME/dotfiles"
     fi
-done
-
-print_header "Running dotfiles install script"
-bash "$HOME/dotfiles/install.sh"
-print_success "Install script finished."
-
-print_header "Finalizing setup"
-# Source the .zshrc to apply changes immediately
-echo "   ↳ Sourcing .zshrc to apply changes..."
-if [ -f "$HOME/.zshrc" ]; then
-    # We can't source zshrc in bash, so we just inform the user
-    printf "${CYAN}   Note: Please restart your shell or run 'zsh' to enter your new environment.${NC}\n"
+    log_success "Dotfiles repository cloned"
 fi
-printf "\n${GREEN}${PARTY} Setup complete!${NC}\n"
+
+log_section "Running dotfiles install script" "$WRENCH"
+bash "$HOME/dotfiles/install.sh"
+log_success "Install script finished"
+
+log_section "Finalizing setup" "$PARTY"
+# Check if default shell was changed 
+if [ "$(basename "$SHELL")" != "zsh" ] && command -v zsh &> /dev/null; then
+    log_substep "Default shell changed to zsh"
+    log_substep "Logout and login to activate zsh"
+fi
+
+# Check if git config is using defaults
+CURRENT_EMAIL=$(git config --global user.email 2>/dev/null || echo "")
+if [ "$CURRENT_EMAIL" = "dotfiles@change.me" ]; then
+    log_warning "Git is using default credentials"
+    log_substep "Update with: git config --global user.name 'Your Name'"
+    log_substep "Update with: git config --global user.email 'your@email.com'"
+fi
+
+printf "\n${GREEN}${PARTY} New host setup complete!${NC}\n"
+log_info "Start a new shell with: zsh"
