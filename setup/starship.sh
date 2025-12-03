@@ -61,7 +61,7 @@ else
 fi
 
 # --- 4. Check for starship.toml in dotfiles ---
-DOTFILES_TOML="$HOME/dotfiles/starship.toml"
+DOTFILES_TOML="$HOME/dotfiles/config/starship.toml"
 printf "\n${BLUE}📝 Checking for configuration file...${NC}\n"
 if [ -f "$DOTFILES_TOML" ]; then
     printf "${GREEN}${CHECK} Found configuration: $DOTFILES_TOML${NC}\n"
