@@ -6,30 +6,14 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# --- Color Definitions ---
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    BLUE=$(tput setaf 4)
-    CYAN=$(tput setaf 6)
-    RED=$(tput setaf 1)
-    NC=$(tput sgr0)
+# Load shared utilities
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/../lib/utils.sh" ]; then
+    source "$SCRIPT_DIR/../lib/utils.sh"
 else
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    RED='\033[0;31m'
-    NC='\033[0m'
+    echo "Error: lib/utils.sh not found"
+    exit 1
 fi
-
-# --- Emoji Constants ---
-ROCKET="🚀"
-WRENCH="🔧"
-CHECK="✅"
-CROSS="❌"
-COMPUTER="💻"
-PARTY="🎉"
 
 # --- Configuration ---
 NVM_VERSION="v0.40.1"  # Update this to latest stable version as needed
@@ -37,43 +21,43 @@ NVM_DIR="${HOME}/.nvm"
 PROFILE_FILE="${HOME}/.zshrc"
 
 # --- Main Script ---
-printf "${CYAN}${ROCKET} Starting NVM Setup...${NC}\n\n"
+log_section "Starting NVM Setup" "$ROCKET"
 
 # 1. Clean up any system-installed Node.js (optional but recommended)
-printf "${BLUE}${WRENCH} Checking for system Node.js installations...${NC}\n"
+log_step "Checking for system Node.js installations..." "$WRENCH"
 if command -v node &> /dev/null && [[ "$(which node)" != *".nvm"* ]]; then
-    printf "${YELLOW}System Node.js detected. Removing to avoid conflicts...${NC}\n"
-    echo "   ↳ This requires sudo and will keep your system clean."
+    log_warning "System Node.js detected. Removing to avoid conflicts..."
+    log_substep "This requires sudo and will keep your system clean."
     if sudo apt remove -y nodejs npm 2>/dev/null; then
         sudo apt autoremove -y
-        printf "${GREEN}${CHECK} System Node.js removed.${NC}\n"
+        log_success "System Node.js removed."
     else
-        printf "${YELLOW}Could not remove system Node.js (may not be installed via apt).${NC}\n"
+        log_warning "Could not remove system Node.js (may not be installed via apt)."
     fi
 else
-    printf "${GREEN}${CHECK} No conflicting system Node.js found.${NC}\n"
+    log_success "No conflicting system Node.js found."
 fi
 
 # 2. Check if NVM is already installed
 printf "\n${BLUE}Checking for existing NVM installation...${NC}\n"
 if [ -d "$NVM_DIR" ]; then
-    printf "${GREEN}${CHECK} NVM directory already exists at $NVM_DIR.${NC}\n"
+    log_success "NVM directory already exists at $NVM_DIR."
     # Load NVM to check version
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     
     if command -v nvm &> /dev/null; then
         CURRENT_VERSION=$(nvm --version)
-        printf "${CYAN}Current NVM version: ${CURRENT_VERSION}${NC}\n"
+        log_info "${CYAN}Current NVM version: ${CURRENT_VERSION}${NC}"
     fi
 else
     # 3. Install NVM
     printf "${YELLOW}${WRENCH} NVM not found. Installing...${NC}\n\n"
-    printf "${BLUE}${COMPUTER} Downloading NVM ${NVM_VERSION}...${NC}\n"
+    log_action "Downloading NVM ${NVM_VERSION}..."
     
     if curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash; then
-        printf "${GREEN}${CHECK} NVM installed successfully.${NC}\n"
+        log_success "NVM installed successfully."
     else
-        printf "${RED}${CROSS} Error: NVM installation failed.${NC}\n"
+        log_error "NVM installation failed."
         exit 1
     fi
 fi
@@ -85,19 +69,19 @@ export NVM_DIR="$NVM_DIR"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 if ! command -v nvm &> /dev/null; then
-    printf "${RED}${CROSS} Error: NVM failed to load.${NC}\n"
+    log_error "NVM failed to load."
     exit 1
 fi
-printf "${GREEN}${CHECK} NVM loaded.${NC}\n"
+log_success "NVM loaded."
 
 # 5. Verify shell configuration is present
 printf "\n${BLUE}Checking shell configuration...${NC}\n"
 NVM_CONFIG_MARKER='# --- NVM Configuration ---'
 
 if grep -Fxq "$NVM_CONFIG_MARKER" "$PROFILE_FILE"; then
-    printf "${GREEN}${CHECK} NVM configuration already present in $PROFILE_FILE.${NC}\n"
+    log_success "NVM configuration already present in $PROFILE_FILE."
 else
-    printf "${YELLOW}${WRENCH} Adding NVM configuration to $PROFILE_FILE...${NC}\n"
+    log_warning "Adding NVM configuration to $PROFILE_FILE..."
     
     # Add NVM configuration block
     cat >> "$PROFILE_FILE" << 'EOL'
@@ -108,7 +92,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 # --- End NVM Configuration ---
 EOL
-    printf "${GREEN}${CHECK} Configuration added to $PROFILE_FILE.${NC}\n"
+    log_success "Configuration added to $PROFILE_FILE."
 fi
 
 # 6. Install Node.js LTS if not already installed
@@ -116,21 +100,21 @@ printf "\n${BLUE}${COMPUTER} Checking for Node.js installation...${NC}\n"
 
 if command -v node &> /dev/null; then
     NODE_VERSION=$(node --version)
-    printf "${GREEN}${CHECK} Node.js ${NODE_VERSION} is already installed.${NC}\n"
-    echo "   ↳ Location: $(which node)"
+    log_success "Node.js ${NODE_VERSION} is already installed."
+    log_substep "Location: $(which node)"
 else
-    printf "${YELLOW}${WRENCH} Installing Node.js LTS version...${NC}\n"
-    echo "   ↳ This may take a few minutes..."
+    log_warning "Installing Node.js LTS version..."
+    log_substep "This may take a few minutes..."
     
     if nvm install --lts; then
-        printf "${GREEN}${CHECK} Node.js LTS installed successfully.${NC}\n"
+        log_success "Node.js LTS installed successfully."
         
         # Set LTS as default
         echo "   ↳ Setting LTS as default version..."
         nvm alias default 'lts/*'
-        printf "${GREEN}${CHECK} Default version set to LTS.${NC}\n"
+        log_success "Default version set to LTS."
     else
-        printf "${RED}${CROSS} Error: Node.js installation failed.${NC}\n"
+        log_error "Node.js installation failed."
         exit 1
     fi
 fi
@@ -141,22 +125,23 @@ NODE_PATH=$(which node)
 NPM_PATH=$(which npm)
 
 if [[ "$NODE_PATH" == *".nvm"* ]]; then
-    printf "${GREEN}${CHECK} Node.js location: ${NODE_PATH}${NC}\n"
-    printf "${GREEN}${CHECK} Node.js version: $(node --version)${NC}\n"
-    printf "${GREEN}${CHECK} NPM location: ${NPM_PATH}${NC}\n"
-    printf "${GREEN}${CHECK} NPM version: $(npm --version)${NC}\n"
+    log_success "Node.js location: ${NODE_PATH}"
+    log_success "Node.js version: $(node --version)"
+    log_success "NPM location: ${NPM_PATH}"
+    log_success "NPM version: $(npm --version)"
 else
-    printf "${YELLOW}Warning: Node.js not running from NVM directory.${NC}\n"
+    log_warning "Warning: Node.js not running from NVM directory."
     printf "Expected path to contain '.nvm', got: ${NODE_PATH}\n"
 fi
 
 # 8. Display helpful information
-printf "\n${GREEN}${PARTY} NVM setup complete!${NC}\n\n"
-printf "${CYAN}Quick Start Commands:${NC}\n"
-printf "  ${YELLOW}nvm ls${NC}              - List installed Node versions\n"
-printf "  ${YELLOW}nvm ls-remote${NC}       - List available versions online\n"
-printf "  ${YELLOW}nvm install node${NC}    - Install latest Node.js\n"
-printf "  ${YELLOW}nvm install 18${NC}      - Install specific version (e.g., 18)\n"
-printf "  ${YELLOW}nvm use 18${NC}          - Switch to version 18\n"
-printf "  ${YELLOW}nvm alias default 18${NC} - Set version 18 as default\n"
+log_complete "NVM setup complete!"
+log_plain ""
+log_info "${CYAN}Quick Start Commands:${NC}"
+log_plain "  ${YELLOW}nvm ls${NC}"              - List installed Node versions\n"
+log_plain "  ${YELLOW}nvm ls-remote${NC}"       - List available versions online\n"
+log_plain "  ${YELLOW}nvm install node${NC}"    - Install latest Node.js\n"
+log_plain "  ${YELLOW}nvm install 18${NC}"      - Install specific version (e.g., 18)\n"
+log_plain "  ${YELLOW}nvm use 18${NC}"          - Switch to version 18\n"
+log_plain "  ${YELLOW}nvm alias default 18${NC}" - Set version 18 as default\n"
 printf "\n${CYAN}Current session is ready. New terminals will load NVM automatically.${NC}\n"

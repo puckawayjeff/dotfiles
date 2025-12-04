@@ -33,11 +33,20 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 # Install zinit if not present
 if [[ ! -d "$ZINIT_HOME" ]]; then
-    print -P "%F{33}▓▒░ Installing Zinit plugin manager...%f"
+    # Source utils for consistent logging
+    if [[ -f "$HOME/dotfiles/lib/utils.sh" ]]; then
+        source "$HOME/dotfiles/lib/utils.sh"
+        log_action "Installing Zinit plugin manager..." "$PACKAGE"
+    else
+        print -P "%F{33}Installing Zinit plugin manager...%f"
+    fi
+    
     command mkdir -p "$(dirname $ZINIT_HOME)"
-    command git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" && \
-        print -P "%F{34}▓▒░ Installation successful.%f" || \
-        print -P "%F{160}▓▒░ Installation failed.%f"
+    if command git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" 2>/dev/null; then
+        [[ -n "$log_success" ]] && log_success "Zinit installed successfully" || print -P "%F{34}Installation successful.%f"
+    else
+        [[ -n "$log_error" ]] && log_error "Zinit installation failed" || print -P "%F{160}Installation failed.%f"
+    fi
 fi
 
 # Load zinit

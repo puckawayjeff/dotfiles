@@ -200,16 +200,16 @@ else
 fi
 
 # --- Summary ---
-printf "\n"
+log_plain ""
 log_section "Test Results" "$PARTY"
-printf "Total Tests: ${BLUE}$TESTS_RUN${NC}\n"
-printf "Passed:      ${GREEN}$TESTS_PASSED${NC}\n"
-printf "Failed:      ${RED}$TESTS_FAILED${NC}\n"
+log_plain "Total Tests: ${BLUE}$TESTS_RUN${NC}"
+log_plain "Passed:      ${GREEN}$TESTS_PASSED${NC}"
+log_plain "Failed:      ${RED}$TESTS_FAILED${NC}"
 
 if [ $TESTS_FAILED -eq 0 ]; then
-    printf "\n${GREEN}${CHECK} All tests passed!${NC}\n"
+    log_complete "All tests passed!"
     exit 0
 else
-    printf "\n${RED}${CROSS} Some tests failed. Please review the errors above.${NC}\n"
+    log_error "Some tests failed. Please review the errors above."
     exit 1
 fi

@@ -5,30 +5,14 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# --- Color Definitions ---
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    BLUE=$(tput setaf 4)
-    CYAN=$(tput setaf 6)
-    RED=$(tput setaf 1)
-    NC=$(tput sgr0)
+# Load shared utilities
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/../lib/utils.sh" ]; then
+    source "$SCRIPT_DIR/../lib/utils.sh"
 else
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    RED='\033[0;31m'
-    NC='\033[0m'
+    echo "Error: lib/utils.sh not found"
+    exit 1
 fi
-
-# --- Emoji Constants ---
-ROCKET="🚀"
-WRENCH="🔧"
-CHECK="✅"
-CROSS="❌"
-COMPUTER="💻"
-PARTY="🎉"
 
 # --- Configuration ---
 TMUX_CONF="${HOME}/.tmux.conf"
@@ -36,38 +20,38 @@ DOTFILES_DIR="${HOME}/dotfiles"
 TMUX_CONF_SOURCE="${DOTFILES_DIR}/config/tmux.conf"
 
 # --- Main Script ---
-printf "${CYAN}${ROCKET} Starting tmux Setup...${NC}\n\n"
+log_section "Starting tmux Setup" "$ROCKET"
 
 # 1. Check if tmux is already installed
-printf "${BLUE}${WRENCH} Checking for tmux installation...${NC}\n"
+log_step "Checking for tmux installation..." "$WRENCH"
 if command -v tmux &> /dev/null; then
     TMUX_VERSION=$(tmux -V)
-    printf "${GREEN}${CHECK} tmux is already installed: ${TMUX_VERSION}${NC}\n"
+    log_success "tmux is already installed: ${TMUX_VERSION}"
 else
-    printf "${YELLOW}${WRENCH} tmux not found. Installing...${NC}\n"
+    log_warning "tmux not found. Installing..."
     
     # Update package list
-    printf "${BLUE}${COMPUTER} Updating package list...${NC}\n"
+    log_action "Updating package list..."
     if sudo apt update; then
-        printf "${GREEN}${CHECK} Package list updated.${NC}\n"
+        log_success "Package list updated."
     else
-        printf "${RED}${CROSS} Error: Failed to update package list.${NC}\n"
+        log_error "Failed to update package list."
         exit 1
     fi
     
     # Install tmux
-    printf "${BLUE}${COMPUTER} Installing tmux...${NC}\n"
+    log_action "Installing tmux..."
     if sudo apt install -y tmux; then
         TMUX_VERSION=$(tmux -V)
-        printf "${GREEN}${CHECK} tmux installed successfully: ${TMUX_VERSION}${NC}\n"
+        log_success "tmux installed successfully: ${TMUX_VERSION}"
     else
-        printf "${RED}${CROSS} Error: tmux installation failed.${NC}\n"
+        log_error "tmux installation failed."
         exit 1
     fi
 fi
 
 # 2. Check if config file exists (symlink expected)
-printf "\n${BLUE}Checking tmux configuration...${NC}\n"
+log_info "\nChecking tmux configuration..."
 
 if [[ -L "$TMUX_CONF" ]]; then
     # It's a symlink - check if it points to the right place
@@ -75,42 +59,42 @@ if [[ -L "$TMUX_CONF" ]]; then
     EXPECTED_TARGET=$(readlink -f "$TMUX_CONF_SOURCE")
     
     if [[ "$LINK_TARGET" == "$EXPECTED_TARGET" ]]; then
-        printf "${GREEN}${CHECK} Configuration already linked correctly.${NC}\n"
-        printf "   ↳ ${TMUX_CONF} -> ${TMUX_CONF_SOURCE}\n"
+        log_success "Configuration already linked correctly."
+        log_substep "${TMUX_CONF} -> ${TMUX_CONF_SOURCE}"
     else
-        printf "${YELLOW}⚠️  Symlink exists but points to wrong location.${NC}\n"
-        printf "   ↳ Current: ${LINK_TARGET}\n"
-        printf "   ↳ Expected: ${EXPECTED_TARGET}\n"
-        printf "${YELLOW}${WRENCH} Fixing symlink...${NC}\n"
+        log_warning "${WARNING}  Symlink exists but points to wrong location."
+        log_substep "Current: ${LINK_TARGET}"
+        log_substep "Expected: ${EXPECTED_TARGET}"
+        log_step "Fixing symlink..." "$WRENCH"
         rm "$TMUX_CONF"
         ln -s "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-        printf "${GREEN}${CHECK} Symlink corrected.${NC}\n"
+        log_success "Symlink corrected."
     fi
 elif [[ -f "$TMUX_CONF" ]]; then
     # Regular file exists
-    printf "${YELLOW}⚠️  Regular file exists at ${TMUX_CONF}${NC}\n"
-    printf "${YELLOW}This will be replaced by a symlink to the dotfiles version.${NC}\n"
+    log_warning "${WARNING}  Regular file exists at ${TMUX_CONF}"
+    log_warning "This will be replaced by a symlink to the dotfiles version."
     printf "Backup existing file? [Y/n]: "
     read -r RESPONSE
     
     if [[ ! "$RESPONSE" =~ ^[Nn]$ ]]; then
         BACKUP_FILE="${TMUX_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
         cp "$TMUX_CONF" "$BACKUP_FILE"
-        printf "${GREEN}${CHECK} Backup created: ${BACKUP_FILE}${NC}\n"
+        log_success "Backup created: ${BACKUP_FILE}"
     fi
     
     rm "$TMUX_CONF"
     ln -s "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-    printf "${GREEN}${CHECK} Symlink created.${NC}\n"
+    log_success "Symlink created."
 else
     # No config exists
     if [[ -f "$TMUX_CONF_SOURCE" ]]; then
-        printf "${BLUE}${WRENCH} Creating symlink to dotfiles config...${NC}\n"
+        log_step "Creating symlink to dotfiles config..." "$WRENCH"
         ln -s "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-        printf "${GREEN}${CHECK} Symlink created.${NC}\n"
+        log_success "Symlink created."
     else
-        printf "${YELLOW}⚠️  Source config not found: ${TMUX_CONF_SOURCE}${NC}\n"
-        printf "${YELLOW}Run 'install.sh' from your dotfiles directory to set up all configs.${NC}\n"
+        log_warning "${WARNING}  Source config not found: ${TMUX_CONF_SOURCE}"
+        log_warning "Run 'install.sh' from your dotfiles directory to set up all configs."
     fi
 fi
 
@@ -128,35 +112,38 @@ if [[ -L "$TMUX_CONF" ]]; then
 elif [[ -f "$TMUX_CONF" ]]; then
     printf "${GREEN}${CHECK} Config file: ${TMUX_CONF} (regular file)${NC}\n"
 else
-    printf "${YELLOW}⚠️  No config file found at ${TMUX_CONF}${NC}\n"
+    log_warning "${WARNING}  No config file found at ${TMUX_CONF}"
 fi
 
 # 4. Test configuration syntax (if tmux is running, this won't work perfectly, but we try)
-printf "\n${BLUE}Testing configuration syntax...${NC}\n"
+log_info "\nTesting configuration syntax..."
 if [[ -f "$TMUX_CONF" ]]; then
     # Start tmux in the background with the config and immediately exit to test parsing
     if tmux -f "$TMUX_CONF" new-session -d -s tmux-config-test 'exit' 2>/dev/null; then
         tmux kill-session -t tmux-config-test 2>/dev/null || true
-        printf "${GREEN}${CHECK} Configuration syntax is valid.${NC}\n"
+        log_success "Configuration syntax is valid."
     else
-        printf "${YELLOW}⚠️  Could not verify config (tmux may already be running).${NC}\n"
+        log_warning "${WARNING}  Could not verify config (tmux may already be running)."
     fi
 fi
 
 # 5. Display helpful information
-printf "\n${GREEN}${PARTY} tmux setup complete!${NC}\n\n"
-printf "${CYAN}Quick Start Commands:${NC}\n"
-printf "  ${YELLOW}tmux${NC}                    - Start a new tmux session\n"
-printf "  ${YELLOW}tmux new -s <name>${NC}      - Start a new named session\n"
-printf "  ${YELLOW}tmux ls${NC}                 - List all sessions\n"
-printf "  ${YELLOW}tmux attach -t <name>${NC}   - Attach to a session\n"
-printf "  ${YELLOW}tmux kill-session -t <name>${NC} - Kill a session\n"
-printf "\n${CYAN}Key Bindings (with our config):${NC}\n"
-printf "  ${YELLOW}Ctrl+b${NC} is the prefix key\n"
-printf "  ${YELLOW}Prefix + |${NC}              - Split pane vertically\n"
-printf "  ${YELLOW}Prefix + -${NC}              - Split pane horizontally\n"
-printf "  ${YELLOW}Prefix + h/j/k/l${NC}        - Navigate panes (vim-style)\n"
-printf "  ${YELLOW}Prefix + r${NC}              - Reload configuration\n"
-printf "  ${YELLOW}Prefix + [${NC}              - Enter copy mode (scroll with arrows/vim keys)\n"
-printf "  ${YELLOW}Mouse${NC}                   - Click to select panes, drag to resize, scroll to navigate history\n"
-printf "\n${CYAN}Note: This config integrates with the 'updatep' function in your .zshrc${NC}\n"
+log_complete "tmux setup complete!"
+log_plain ""
+log_info "${CYAN}Quick Start Commands:${NC}"
+log_plain "  ${YELLOW}tmux${NC}                    - Start a new tmux session"
+log_plain "  ${YELLOW}tmux new -s <name>${NC}      - Start a new named session"
+log_plain "  ${YELLOW}tmux ls${NC}                 - List all sessions"
+log_plain "  ${YELLOW}tmux attach -t <name>${NC}   - Attach to a session"
+log_plain "  ${YELLOW}tmux kill-session -t <name>${NC} - Kill a session"
+log_plain ""
+log_info "${CYAN}Key Bindings (with our config):${NC}"
+log_plain "  ${YELLOW}Ctrl+b${NC} is the prefix key"
+log_plain "  ${YELLOW}Prefix + |${NC}              - Split pane vertically"
+log_plain "  ${YELLOW}Prefix + -${NC}              - Split pane horizontally"
+log_plain "  ${YELLOW}Prefix + h/j/k/l${NC}        - Navigate panes (vim-style)"
+log_plain "  ${YELLOW}Prefix + r${NC}              - Reload configuration"
+log_plain "  ${YELLOW}Prefix + [${NC}              - Enter copy mode (scroll with arrows/vim keys)"
+log_plain "  ${YELLOW}Mouse${NC}                   - Click to select panes, drag to resize, scroll to navigate history"
+log_plain ""
+log_info "${CYAN}Note: This config integrates with the 'updatep' function in your .zshrc${NC}"

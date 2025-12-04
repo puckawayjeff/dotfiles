@@ -467,14 +467,14 @@ main() {
     
     # Print summary only in verbose mode
     if [[ "$QUIET_MODE" != "true" ]]; then
-        echo ""
+        log_plain ""
         log_section "Installation Summary" "$PARTY"
-        printf "${GREEN}  ✓ Success: ${INSTALLS_SUCCESS}${NC}\n"
-        printf "${YELLOW}  ⊘ Skipped: ${INSTALLS_SKIPPED}${NC}\n"
+        log_success "Success: ${INSTALLS_SUCCESS}"
+        log_warning "Skipped: ${INSTALLS_SKIPPED}"
         if [ $INSTALLS_FAILED -gt 0 ]; then
-            printf "${RED}  ✗ Failed:  ${INSTALLS_FAILED}${NC}\n"
+            log_error "Failed:  ${INSTALLS_FAILED}"
         fi
-        echo ""
+        log_plain ""
         
         if [ $INSTALLS_FAILED -gt 0 ]; then
             log_warning "Some installations failed but the system is functional"

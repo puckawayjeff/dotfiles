@@ -26,6 +26,13 @@ CROSS="❌"
 COMPUTER="💻"
 PARTY="🎉"
 PACKAGE="📦"
+FOLDER="📁"
+LINK="🔗"
+PENCIL="📝"
+ARROW_DOWN="⬇️"
+ARROW_UP="⬆️"
+RELOAD="🔄"
+WARNING="⚠️"
 
 # --- Logging Helpers ---
 # Supports QUIET_MODE environment variable to suppress verbose output
@@ -74,5 +81,41 @@ log_warning() {
 log_substep() {
     if [[ "$QUIET_MODE" != "true" ]]; then
         echo "   ↳ $1"
+    fi
+}
+
+# Print a step with custom icon (blue text)
+# Usage: log_step "Message" "Icon"
+log_step() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        local message="$1"
+        local icon="${2:-$WRENCH}"
+        printf "${BLUE}${icon} ${message}${NC}\n"
+    fi
+}
+
+# Print a plain message without icon or color
+# Usage: log_plain "Message"
+log_plain() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        echo "$1"
+    fi
+}
+
+# Print a completion/celebration message (green with party icon)
+# Usage: log_complete "Message"
+log_complete() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        printf "\n${GREEN}${PARTY} $1${NC}\n"
+    fi
+}
+
+# Print an action in progress with custom icon (cyan text)
+# Usage: log_action "Message" "Optional Icon"
+log_action() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        local message="$1"
+        local icon="${2:-$COMPUTER}"
+        printf "${CYAN}${icon} ${message}${NC}\n"
     fi
 }

@@ -1,61 +1,41 @@
 # config/functions.zsh - Custom Zsh functions
 # Sourced by .zshrc
 
-# --- Helper for Colors ---
-# We can reuse the logic from utils.sh if we want, or just define simple vars here for zsh
-# Zsh has built-in color support via %F{color} in print -P, or standard ANSI codes.
-# Let's stick to standard ANSI for consistency with bash scripts where possible, 
-# or use tput if we want to be robust.
+# Source shared utilities (colors, emojis, logging functions)
+DOTFILES_DIR="${HOME}/dotfiles"
+source "${DOTFILES_DIR}/lib/utils.sh"
+
 autoload -U colors && colors
 
 # --- Functions ---
 
 # Update system packages
 updatep() {
-    # Define colors and emojis
-    local GREEN YELLOW BLUE CYAN RED NC
-    if command -v tput &> /dev/null; then
-        GREEN=$(tput setaf 2)
-        YELLOW=$(tput setaf 3)
-        BLUE=$(tput setaf 4)
-        CYAN=$(tput setaf 6)
-        RED=$(tput setaf 1)
-        NC=$(tput sgr0)
-    else
-        GREEN='\033[0;32m'
-        YELLOW='\033[0;33m'
-        BLUE='\033[0;34m'
-        CYAN='\033[0;36m'
-        RED='\033[0;31m'
-        NC='\033[0m'
-    fi
-    
-    local ROCKET="🚀" WRENCH="🔧" CHECK="✅" CROSS="❌" COMPUTER="💻" PARTY="🎉"
-    
-    printf "${CYAN}${ROCKET} Starting system update process...${NC}\n"
+    log_section "Starting system update process" "$ROCKET"
     
     # Check for tmux
     if ! command -v tmux &> /dev/null; then
-        printf "${YELLOW}${WRENCH} tmux not found. Attempting to install...${NC}\n"
-        printf "Running 'sudo apt update' first...\n"
+        log_warning "${WRENCH} tmux not found. Attempting to install..."
+        log_info "Running 'sudo apt update' first..."
         if ! sudo apt update; then
-            printf "${RED}${CROSS} Error: 'sudo apt update' failed.${NC}\n"
+            log_error "'sudo apt update' failed."
             return 1
         fi
         if ! sudo apt install tmux -y; then
-            printf "${RED}${CROSS} Error: tmux installation failed.${NC}\n"
+            log_error "tmux installation failed."
             return 1
         fi
-        printf "${GREEN}${CHECK} tmux installed successfully.${NC}\n"
+        log_success "tmux installed successfully."
     else
-        printf "${GREEN}${CHECK} tmux is already installed.${NC}\n"
+        log_success "tmux is already installed."
     fi
     
     local LOG_FILE="${HOME}/.cache/updatep.log"
     mkdir -p "${HOME}/.cache"
     
-    printf "${BLUE}${COMPUTER} Running system update in background...${NC}\n"
-    printf "Output will be logged to: ${LOG_FILE}\n\n"
+    log_info "${COMPUTER} Running system update..."
+    log_info "Output will be logged to: ${LOG_FILE}"
+    log_info "${CYAN}Press Ctrl+B then D to detach if needed${NC}\n"
     
     local SESSION_NAME="system-update-$$"
     
@@ -64,9 +44,11 @@ updatep() {
     cat > "$SCRIPT_FILE" << 'SCRIPT_EOF'
 #!/bin/bash
 LOG_FILE="$1"
-{
+
+# Use script command to log everything while displaying to terminal
+script -q -c '
     echo "--- Starting System Updates ---"
-    echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
     echo ""
     echo "Running: sudo apt update"
     sudo apt update
@@ -77,30 +59,33 @@ LOG_FILE="$1"
     echo "Running: sudo apt autoremove -y"
     sudo apt autoremove -y
     echo ""
+    
+    # Update flatpak if available
+    if command -v flatpak &> /dev/null; then
+        echo "Running: flatpak update -y"
+        flatpak update -y
+        echo ""
+    fi
+    
     echo "--- Update Process Finished ---"
-    echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
-} > "$LOG_FILE" 2>&1
+    echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
+' "$LOG_FILE"
 SCRIPT_EOF
     chmod +x "$SCRIPT_FILE"
     
-    if ! tmux new-session -d -s "$SESSION_NAME" "$SCRIPT_FILE '$LOG_FILE'"; then
-         printf "${RED}${CROSS} Error: Failed to create tmux session.${NC}\n"
+    if ! tmux new-session -s "$SESSION_NAME" "$SCRIPT_FILE '$LOG_FILE'"; then
+         log_error "Failed to create tmux session."
          rm -f "$SCRIPT_FILE"
          return 1
     fi
     
-    # Wait for session to complete
-    while tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
-        sleep 1
-    done
-    
-    # Cleanup script file
+    # Cleanup script file after session ends
     rm -f "$SCRIPT_FILE"
     
-    printf "\n${BLUE}========== Process Summary ==========${NC}\n"
-    printf "${GREEN}${CHECK} System update completed successfully.${NC}\n"
-    printf "${CYAN}${PARTY} Log saved to: ${LOG_FILE}${NC}\n"
-    printf "${YELLOW}View log: cat ${LOG_FILE}${NC}\n\n"
+    log_section "Process Summary" "$CHECK"
+    log_success "System update completed successfully."
+    log_info "${CYAN}${PARTY} Log saved to: ${LOG_FILE}${NC}"
+    log_warning "View log: cat ${LOG_FILE}\n"
     
     return 0
 }
@@ -119,13 +104,13 @@ dotpush() {
         printf "Enter commit message: "
         read -r COMMIT_MSG
         if [[ -z "$COMMIT_MSG" ]]; then
-            printf "No commit message provided. Aborting.\n"
+            log_error "No commit message provided. Aborting."
             return 1
         fi
     fi
     
     cd "$HOME/dotfiles" || {
-        printf "Error: Could not change to ~/dotfiles directory\n"
+        log_error "Could not change to ~/dotfiles directory"
         return 1
     }
     
@@ -136,7 +121,7 @@ dotpush() {
     local EXIT_CODE=$?
     
     cd "$ORIGINAL_DIR" || {
-        printf "Warning: Could not return to original directory: $ORIGINAL_DIR\n"
+        log_warning "Could not return to original directory: $ORIGINAL_DIR"
     }
     
     return $EXIT_CODE
@@ -154,36 +139,36 @@ dotpull() {
     fi
     
     cd "$DOTFILES_DIR" || {
-        printf "Error: Could not change to ~/dotfiles directory\n"
+        log_error "Could not change to ~/dotfiles directory"
         return 1
     }
     
     # Auto-stash if needed
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        printf "⚠️  Local changes detected. Stashing...\n"
+        log_warning "⚠️  Local changes detected. Stashing..."
         git stash push -m "Auto-stash before pull on $(date '+%Y-%m-%d %H:%M:%S')"
-        printf "   ↳ Local changes stashed. Use 'git stash pop' to restore them.\n"
+        log_substep "Local changes stashed. Use 'git stash pop' to restore them."
     fi
     
-    printf "⬇️  Pulling latest changes...\n"
+    log_info "⬇️  Pulling latest changes..."
     if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
-        printf "✅ Git pull successful.\n"
+        log_success "Git pull successful."
         
         # Run install.sh to update symlinks/config
         if [[ -f "./install.sh" ]]; then
-            printf "\n🔧 Running install.sh...\n"
+            log_info "\n${WRENCH} Running install.sh..."
             ./install.sh --quiet
         fi
         
         if [[ "$NO_EXEC" == "true" ]]; then
-            printf "\n✅ Dotfiles updated. Reload skipped (--no-exec).\n"
+            log_success "\nDotfiles updated. Reload skipped (--no-exec)."
         else
             # Reload shell configuration by replacing the process
-            printf "\n🔄 Reloading zsh configuration...\n"
+            log_info "\n🔄 Reloading zsh configuration..."
             exec zsh
         fi
     else
-        printf "❌ Error: Git pull failed.\n"
+        log_error "Git pull failed."
         cd "$ORIGINAL_DIR"
         return 1
     fi
@@ -202,21 +187,21 @@ add-dotfile() {
     local custom_dest="$2"
     
     if [[ -z "$file" ]]; then
-        print -P "%F{red}❌ Error: No file path provided.%f"
-        print "Usage: add-dotfile <path_to_dotfile> [destination_path]"
-        print ""
-        print "Examples:"
-        print "  add-dotfile ~/.gitconfig"
-        print "  add-dotfile ~/.config/tmux/tmux.conf"
-        print "  add-dotfile ~/.bashrc config/.bashrc.backup"
+        log_error "No file path provided."
+        log_plain "Usage: add-dotfile <path_to_dotfile> [destination_path]"
+        log_plain ""
+        log_plain "Examples:"
+        log_substep "add-dotfile ~/.gitconfig"
+        log_substep "add-dotfile ~/.config/tmux/tmux.conf"
+        log_substep "add-dotfile ~/.bashrc config/.bashrc.backup"
         return 1
     fi
     
     # Check if file is already a symlink
     if [[ -L "$file" ]]; then
         local link_target=$(readlink "$file")
-        print -P "%F{red}❌ Error: Source '$file' is already a symlink.%f"
-        print -P "   Target: $link_target"
+        log_error "Source '$file' is already a symlink."
+        log_substep "Target: $link_target"
         return 1
     fi
     
@@ -247,46 +232,46 @@ add-dotfile() {
     
     # Validation
     if [[ ! -e "$source_path" ]]; then
-        print -P "%F{red}❌ Error: Source '$source_path' does not exist.%f"
+        log_error "Source '$source_path' does not exist."
         return 1
     fi
     
     # Check if source is a directory
     if [[ -d "$source_path" ]]; then
-        print -P "%F{red}❌ Error: Source '$source_path' is a directory.%f"
-        print "This function currently only supports files."
-        print "To add a directory, manually move it and create the symlink."
+        log_error "Source '$source_path' is a directory."
+        log_plain "This function currently only supports files."
+        log_plain "To add a directory, manually move it and create the symlink."
         return 1
     fi
     
     if [[ -e "$dest_path" ]]; then
-        print -P "%F{red}❌ Error: Destination '$dest_path' already exists.%f"
+        log_error "Destination '$dest_path' already exists."
         return 1
     fi
     
     if [[ ! -f "$install_script" ]]; then
-        print -P "%F{red}❌ Error: install.sh not found.%f"
+        log_error "install.sh not found."
         return 1
     fi
     
     # Create destination directory if needed
     if [[ ! -d "$dest_dir" ]]; then
-        print -P "%F{blue}📁 Creating destination directory...%f"
+        log_step "Creating destination directory..." "$FOLDER"
         mkdir -p "$dest_dir"
     fi
     
     # Move file
-    print -P "%F{blue}🔧 Moving file to repo...%f"
+    log_step "Moving file to repo..." "$WRENCH"
     mv "$source_path" "$dest_path"
-    print -P "%F{green}✅ Moved to $dest_path%f"
+    log_success "Moved to $dest_path"
     
     # Symlink back
-    print -P "%F{blue}🔗 Creating symlink...%f"
+    log_step "Creating symlink..." "$LINK"
     ln -s "$dest_path" "$source_path"
-    print -P "%F{green}✅ Symlink created%f"
+    log_success "Symlink created"
     
     # Update install.sh
-    print -P "%F{blue}📝 Updating install.sh...%f"
+    log_step "Updating install.sh..." "$PENCIL"
     
     # Replace literal home path with $HOME variable
     local install_target_path="${source_path/#$HOME/\$HOME}"
@@ -295,7 +280,7 @@ add-dotfile() {
     local new_entry="    [\"$install_source_path\"]=\"$install_target_path\""
     
     if grep -q "\"$install_target_path\"" "$install_script"; then
-        print -P "%F{yellow}⚠️  Entry already exists in install.sh%f"
+        log_warning "${WARNING}  Entry already exists in install.sh"
     else
         # Insert into SYMLINKS array
         # We assume the array definition ends with a closing parenthesis
@@ -303,17 +288,17 @@ add-dotfile() {
             /^)/ i\\
 $new_entry
         }" "$install_script"
-        print -P "%F{green}✅ Added to install.sh%f"
+        log_success "Added to install.sh"
     fi
     
     # Stage changes
-    print -P "%F{blue}📦 Staging changes...%f"
+    log_step "Staging changes..." "$PACKAGE"
     # Get relative path from dotfiles_dir for git add
-    local git_add_path="${dest_path/#$dotfiles_dir\//}"
+    local git_add_path="${dest_path/#$dotfiles_dir\/}"
     git -C "$dotfiles_dir" add "$git_add_path" "install.sh"
     
-    print -P "\n%F{green}🎉 Successfully added '$dest_filename'!%f"
-    print "Next: dotpush 'Add $dest_filename'"
+    log_complete "Successfully added '$dest_filename'!"
+    log_plain "Next: dotpush 'Add $dest_filename'"
 }
 
 # Run dotfiles setup scripts
@@ -321,18 +306,18 @@ dotsetup() {
     local SETUP_DIR="$HOME/dotfiles/setup"
     
     if [[ -z "$1" ]]; then
-        printf "📦 Available setup scripts:\n"
+        log_info "${PACKAGE} Available setup scripts:"
         if [[ -d "$SETUP_DIR" ]]; then
             for script in "$SETUP_DIR"/*.sh; do
                 if [[ -f "$script" ]]; then
                     local script_name=$(basename "$script" .sh)
                     if [[ ! "$script_name" =~ ^_ ]]; then
-                        printf "   ↳ ${script_name}\n"
+                        log_substep "${script_name}"
                     fi
                 fi
             done
         else
-            printf "❌ Error: Setup directory not found: $SETUP_DIR\n"
+            log_error "Setup directory not found: $SETUP_DIR"
             return 1
         fi
         return 0
@@ -342,7 +327,7 @@ dotsetup() {
     local SCRIPT_PATH="$SETUP_DIR/${SCRIPT_NAME}.sh"
     
     if [[ ! -f "$SCRIPT_PATH" ]]; then
-        printf "❌ Error: Setup script '${SCRIPT_NAME}' not found.\n"
+        log_error "Setup script '${SCRIPT_NAME}' not found."
         return 1
     fi
     
@@ -350,54 +335,30 @@ dotsetup() {
         chmod +x "$SCRIPT_PATH"
     fi
     
-    printf "🚀 Running setup script: ${SCRIPT_NAME}\n"
+    log_section "Running setup script: ${SCRIPT_NAME}" "$ROCKET"
     bash "$SCRIPT_PATH"
 }
 
 # Check PATH validity
 paths() {
-    local GREEN_CHECK='\e[32m✔\e[0m'
-    local RED_X='\e[31m✘\e[0m'
-    local BOLD='\e[1m'
-    local NORMAL='\e[0m'
-    
-    print -P "${BOLD}Checking PATH entries...${NORMAL}"
+    log_section "Checking PATH entries" "$COMPUTER"
     
     echo $PATH | tr ':' '\n' | while read -r path; do
         if [[ -d "$path" ]]; then
-            print -P "$GREEN_CHECK $path"
+            printf "${GREEN}${CHECK}${NC} $path\n"
         else
-            print -P "$RED_X $path"
-            print -u2 "Warning: PATH entry does not exist: $path"
+            printf "${RED}${CROSS}${NC} $path\n"
+            log_warning "PATH entry does not exist: $path" >&2
         fi
     done
 }
 
 # Pack directory into archive
 packk() {
-    local GREEN YELLOW BLUE CYAN RED NC
-    if command -v tput &> /dev/null; then
-        GREEN=$(tput setaf 2)
-        YELLOW=$(tput setaf 3)
-        BLUE=$(tput setaf 4)
-        CYAN=$(tput setaf 6)
-        RED=$(tput setaf 1)
-        NC=$(tput sgr0)
-    else
-        GREEN='\033[0;32m'
-        YELLOW='\033[0;33m'
-        BLUE='\033[0;34m'
-        CYAN='\033[0;36m'
-        RED='\033[0;31m'
-        NC='\033[0m'
-    fi
-    
-    local ROCKET="🚀" CHECK="✅" CROSS="❌"
-    
     if [[ -z "$1" ]]; then
-        printf "${RED}${CROSS} Error: No directory specified.${NC}\n"
-        printf "Usage: packk <directory> [format]\n"
-        printf "Formats: tar.gz (default), zip, 7z\n"
+        log_error "No directory specified."
+        log_plain "Usage: packk <directory> [format]"
+        log_plain "Formats: tar.gz (default), zip, 7z"
         return 1
     fi
     
@@ -405,12 +366,12 @@ packk() {
     local FORMAT="${2:-tar.gz}"
     
     if [[ ! -d "$SOURCE_DIR" ]]; then
-        printf "${RED}${CROSS} Error: Directory '$SOURCE_DIR' does not exist.${NC}\n"
+        log_error "Directory '$SOURCE_DIR' does not exist."
         return 1
     fi
     
     if [[ -z "$(ls -A "$SOURCE_DIR")" ]]; then
-        printf "${RED}${CROSS} Error: Directory '$SOURCE_DIR' is empty.${NC}\n"
+        log_error "Directory '$SOURCE_DIR' is empty."
         return 1
     fi
     
@@ -421,65 +382,65 @@ packk() {
         tar.gz)
             ARCHIVE_NAME="${DIR_NAME}.tar.gz"
             if ! command -v tar &> /dev/null; then
-                printf "${RED}${CROSS} Error: 'tar' is not installed.${NC}\n"
+                log_error "'tar' is not installed."
                 return 1
             fi
             ;;
         zip)
             ARCHIVE_NAME="${DIR_NAME}.zip"
             if ! command -v zip &> /dev/null; then
-                printf "${RED}${CROSS} Error: 'zip' is not installed.${NC}\n"
+                log_error "'zip' is not installed."
                 return 1
             fi
             ;;
         7z)
             ARCHIVE_NAME="${DIR_NAME}.7z"
             if ! command -v 7z &> /dev/null; then
-                printf "${RED}${CROSS} Error: '7z' is not installed.${NC}\n"
+                log_error "'7z' is not installed."
                 return 1
             fi
             ;;
         *)
-            printf "${RED}${CROSS} Error: Unsupported format '$FORMAT'.${NC}\n"
-            printf "Supported formats: tar.gz, zip, 7z\n"
+            log_error "Unsupported format '$FORMAT'."
+            log_plain "Supported formats: tar.gz, zip, 7z"
             return 1
             ;;
     esac
     
     if [[ -f "$ARCHIVE_NAME" ]]; then
-        printf "${YELLOW}⚠️  Archive '$ARCHIVE_NAME' already exists.${NC}\n"
+        log_warning "⚠️  Archive '$ARCHIVE_NAME' already exists."
         printf "Overwrite? [y/N]: "
         read -r RESPONSE
         if [[ ! "$RESPONSE" =~ ^[Yy]$ ]]; then
-            printf "${CYAN}Operation cancelled.${NC}\n"
+            log_info "Operation cancelled."
             return 0
         fi
     fi
     
-    printf "${CYAN}${ROCKET} Creating archive...${NC}\n"
+    log_section "Creating archive" "$ROCKET"
     
     case "$FORMAT" in
         tar.gz)
             if tar -czf "$ARCHIVE_NAME" "$SOURCE_DIR"; then
-                printf "${GREEN}${CHECK} Created: $ARCHIVE_NAME${NC}\n"
+                log_success "Created: $ARCHIVE_NAME"
             else
-                printf "${RED}${CROSS} Error: Failed to create archive.${NC}\n"
+                log_error "Failed to create archive."
                 return 1
             fi
             ;;
         zip)
             if zip -r "$ARCHIVE_NAME" "$SOURCE_DIR" > /dev/null; then
-                printf "${GREEN}${CHECK} Created: $ARCHIVE_NAME${NC}\n"
+                log_success "Created: $ARCHIVE_NAME"
             else
-                printf "${RED}${CROSS} Error: Failed to create archive.${NC}\n"
+                log_error "Failed to create archive."
                 return 1
             fi
             ;;
         7z)
             if 7z a "$ARCHIVE_NAME" "$SOURCE_DIR" > /dev/null; then
-                printf "${GREEN}${CHECK} Created: $ARCHIVE_NAME${NC}\n"
+                log_success "Created: $ARCHIVE_NAME"
             else
-                printf "${RED}${CROSS} Error: Failed to create archive.${NC}\n"
+                log_error "Failed to create archive."
                 return 1
             fi
             ;;
@@ -490,25 +451,25 @@ packk() {
 
 # Maintenance sequence
 maintain() {
-    print "\n🚀 Starting Maintenance Sequence..."
+    log_section "Starting Maintenance Sequence" "$ROCKET"
     
     # Run dotpull without reloading shell immediately
     # (dotpull already uses --quiet for install.sh)
     dotpull --no-exec
     if [[ $? -ne 0 ]]; then
-        print "\n❌ dotpull failed. Stopping."
+        log_error "dotpull failed. Stopping."
         return 1
     fi
     
     # Note: install.sh is already run by dotpull (in quiet mode)
     
-    print "\n⏱️  Configuration updated."
-    print "    Launching system updates...\n"
+    log_success "Configuration updated."
+    log_info "Launching system updates...\n"
     
     updatep
     
     # Reload shell at the very end
-    print "\n🔄 Reloading zsh configuration..."
+    log_info "\n🔄 Reloading zsh configuration..."
     exec zsh
 }
 
@@ -518,20 +479,20 @@ dotversion() {
     local VERSION_FILE="$DOTFILES_DIR/VERSION"
     
     if [[ ! -f "$VERSION_FILE" ]]; then
-        print -P "%F{red}❌ Error: VERSION file not found.%f"
+        log_error "VERSION file not found."
         return 1
     fi
     
     local VERSION=$(cat "$VERSION_FILE")
-    print -P "%F{cyan}📦 Dotfiles Version:%f %F{green}v${VERSION}%f"
+    printf "${CYAN}${PACKAGE} Dotfiles Version:${NC} ${GREEN}v${VERSION}${NC}\n"
     
     # Optional: Show git info if available
     if [[ -d "$DOTFILES_DIR/.git" ]]; then
         local COMMIT=$(git -C "$DOTFILES_DIR" rev-parse --short HEAD 2>/dev/null)
         local BRANCH=$(git -C "$DOTFILES_DIR" branch --show-current 2>/dev/null)
         if [[ -n "$COMMIT" ]]; then
-            print -P "%F{blue}   Branch:%f $BRANCH"
-            print -P "%F{blue}   Commit:%f $COMMIT"
+            printf "${BLUE}   Branch:${NC} $BRANCH\n"
+            printf "${BLUE}   Commit:${NC} $COMMIT\n"
         fi
     fi
 }
@@ -548,13 +509,13 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
             printf "Enter commit message: "
             read -r COMMIT_MSG
             if [[ -z "$COMMIT_MSG" ]]; then
-                printf "No commit message provided. Aborting.\n"
+                log_error "No commit message provided. Aborting."
                 return 1
             fi
         fi
         
         cd "$HOME/sshsync" || {
-            printf "Error: Could not change to ~/sshsync directory\n"
+            log_error "Could not change to ~/sshsync directory"
             return 1
         }
         
@@ -568,7 +529,7 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
         local EXIT_CODE=$?
         
         cd "$ORIGINAL_DIR" || {
-            printf "Warning: Could not return to original directory: $ORIGINAL_DIR\n"
+            log_warning "Could not return to original directory: $ORIGINAL_DIR"
         }
         
         return $EXIT_CODE
@@ -580,18 +541,18 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
         local SSHSYNC_DIR="$HOME/sshsync"
         
         cd "$SSHSYNC_DIR" || {
-            printf "Error: Could not change to ~/sshsync directory\n"
+            log_error "Could not change to ~/sshsync directory"
             return 1
         }
         
         # Discard local changes to ssh.conf (will be overwritten by symlink anyway)
         git checkout -- ssh.conf 2>/dev/null || true
         
-        printf "⬇️  Pulling latest SSH config changes...\n"
+        log_info "⬇️  Pulling latest SSH config changes..."
         if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
-            printf "✅ SSH config updated successfully.\n"
+            log_success "SSH config updated successfully."
         else
-            printf "❌ Error: Git pull failed.\n"
+            log_error "Git pull failed."
             cd "$ORIGINAL_DIR"
             return 1
         fi

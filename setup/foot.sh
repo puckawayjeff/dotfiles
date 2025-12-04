@@ -5,51 +5,35 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# --- Color Definitions ---
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    BLUE=$(tput setaf 4)
-    CYAN=$(tput setaf 6)
-    RED=$(tput setaf 1)
-    NC=$(tput sgr0)
+# Load shared utilities
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/../lib/utils.sh" ]; then
+    source "$SCRIPT_DIR/../lib/utils.sh"
 else
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    CYAN='\033[0;36m'
-    RED='\033[0;31m'
-    NC='\033[0m'
+    echo "Error: lib/utils.sh not found"
+    exit 1
 fi
 
-# --- Emoji Constants ---
-ROCKET="🚀"
-WRENCH="🔧"
-CHECK="✅"
-CROSS="❌"
-COMPUTER="💻"
-PARTY="🎉"
-
 # --- Main Script ---
-printf "${CYAN}${ROCKET} Starting Foot Terminal Setup...${NC}\n\n"
+log_section "Starting Foot Terminal Setup" "$ROCKET"
 
 # 1. Install packages
-printf "${BLUE}${COMPUTER} Installing packages...${NC}\n"
+log_action "Installing packages..."
 echo "   ↳ Updating package lists..."
 sudo apt update
 
 echo "   ↳ Installing cage, foot, and emoji support..."
 if ! sudo apt install -y cage foot fonts-noto-color-emoji; then
-    printf "${RED}${CROSS} Error: Package installation failed.${NC}\n"
+    log_error "Package installation failed."
     exit 1
 fi
-printf "${GREEN}${CHECK} Packages installed successfully.${NC}\n"
+log_success "Packages installed successfully."
 
 # 1b. Install FiraCode Nerd Font
 SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 printf "\n"
 if ! bash "$SETUP_DIR/_firacodenerdfont.sh"; then
-    printf "${RED}${CROSS} Error: Font installation failed.${NC}\n"
+    log_error "Font installation failed."
     exit 1
 fi
 
@@ -57,7 +41,7 @@ fi
 printf "\n${BLUE}📦 Configuring Foot Terminal...${NC}\n"
 echo "   ↳ Creating configuration directory..."
 mkdir -p ~/.config/foot
-printf "${GREEN}${CHECK} Directory ~/.config/foot created.${NC}\n"
+log_success "Directory ~/.config/foot created."
 
 # 3. Create the foot.ini configuration file
 echo "   ↳ Creating foot.ini with custom font and colors..."
@@ -90,9 +74,9 @@ bright5=ff92df
 bright6=a4ffff
 bright7=ffffff
 EOL
-printf "${GREEN}${CHECK} foot.ini created successfully.${NC}\n"
+log_success "foot.ini created successfully."
 
-printf "\n${GREEN}${PARTY} Foot Terminal setup complete!${NC}\n"
-printf "${YELLOW}Next steps:${NC}\n"
+log_complete "Foot Terminal setup complete!"
+log_warning "Next steps:"
 printf "   ↳ Restart your cage/foot session for changes to take effect\n"
 printf "   ↳ Font configured: FiraCode Nerd Font (with full icon support)\n"

@@ -173,12 +173,13 @@ if [[ "$QUIET_MODE" != "true" ]]; then
         log_warning "Default shell is not zsh - logout/login required for change to take effect"
     fi
 
-    printf "\n${GREEN}${CHECK} Dotfiles installation complete!${NC}\n"
+    log_complete "Dotfiles installation complete!"
     log_section "Next Steps" "$ROCKET"
-    printf "${YELLOW}${INFO}${NC} To apply all changes, run:\n"
-    printf "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}\n"
-    printf "   ${DIM}OR${NC}\n"
-    printf "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}\n\n"
+    log_plain "${YELLOW}${INFO}${NC} To apply all changes, run:"
+    log_plain "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}"
+    log_plain "   ${DIM}OR${NC}"
+    log_plain "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}"
+    log_plain ""
 else
     # In quiet mode, show compact summary
     summary=""
@@ -193,8 +194,8 @@ else
         fi
     fi
     if [ -n "$summary" ]; then
-        printf "${GREEN}${CHECK} Dotfiles: ${summary}${NC}\n"
+        log_success "Dotfiles: ${summary}"
     else
-        printf "${GREEN}${CHECK} Dotfiles updated${NC}\n"
+        log_success "Dotfiles updated"
     fi
 fi
