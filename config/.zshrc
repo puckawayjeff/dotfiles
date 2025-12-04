@@ -123,12 +123,12 @@ fi
 [[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
 
 # ===== Fastfetch Integration =====
+# Note: Fastfetch runs automatically via MOTD on login (see lib/motd.sh)
+# Aliases provided for manual invocation
 if command -v fastfetch >/dev/null 2>&1; then
-    # Compatibility aliases
     alias neofetch="fastfetch -c neofetch"
     alias screenfetch="fastfetch -c screenfetch"
-    # Launch fastfetch on terminal start
-    fastfetch
+    alias ff="fastfetch"  # Quick manual invocation
 fi
 
 # ===== Tool Integrations =====

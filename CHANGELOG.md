@@ -7,6 +7,22 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Added
+- **MOTD Integration**: Fastfetch now runs via update-motd system on terminal login
+  - New `lib/motd.sh` script for dynamic MOTD generation
+  - Standalone fragment at `/etc/update-motd.d/99-dotfiles` that execs `lib/motd.sh`
+  - Follows `man update-motd` best practices (standalone script, not symlink)
+  - Prevents fastfetch from running on every shell reload (better performance)
+  - Extensible framework for future login messages (disk warnings, updates, etc.)
+  - Comprehensive documentation in `docs/MOTD Integration.md`
+  - Graceful fallback on systems without update-motd support
+
+### Changed
+- **`.zshrc` Fastfetch behavior**: Removed auto-launch on shell startup
+  - Fastfetch now displays only on terminal login (via MOTD)
+  - Manual aliases still available: `fastfetch`, `ff`, `neofetch`, `screenfetch`
+  - Faster shell startup time
+
 ### Coming Soon
 - Host-specific configuration overrides
 - Backup/restore functions for safety net

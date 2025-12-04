@@ -120,7 +120,60 @@ else
     log_warning "lib/terminal.sh not found, skipping terminal setup"
 fi
 
-# --- 4. Create symlinks ---
+# --- 4. Setup MOTD integration ---
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "MOTD Setup" "$COMPUTER"
+fi
+
+MOTD_DIR="/etc/update-motd.d"
+MOTD_SCRIPT="$DOTFILES_DIR/lib/motd.sh"
+MOTD_FRAGMENT="$MOTD_DIR/99-dotfiles"
+
+if [ -d "$MOTD_DIR" ]; then
+    # Check if MOTD fragment exists and has correct content
+    if [ -f "$MOTD_FRAGMENT" ]; then
+        if grep -q "exec.*$MOTD_SCRIPT" "$MOTD_FRAGMENT" 2>/dev/null; then
+            log_success "MOTD already configured"
+        else
+            log_info "Updating MOTD fragment..."
+            # Create the fragment that execs our script (per man update-motd best practices)
+            if sudo tee "$MOTD_FRAGMENT" > /dev/null 2>&1 << EOF
+#!/bin/sh
+# Dotfiles MOTD fragment - calls external script
+# This allows the main script to be updated without modifying this file
+exec $MOTD_SCRIPT
+EOF
+            then
+                sudo chmod +x "$MOTD_FRAGMENT" 2>/dev/null
+                log_success "MOTD fragment updated at $MOTD_FRAGMENT"
+                log_substep "Will display system info on terminal login"
+            else
+                log_warning "Failed to update MOTD fragment (sudo required), skipping..."
+            fi
+        fi
+    else
+        log_info "Setting up MOTD integration..."
+        # Create the fragment that execs our script (per man update-motd best practices)
+        if sudo tee "$MOTD_FRAGMENT" > /dev/null 2>&1 << EOF
+#!/bin/sh
+# Dotfiles MOTD fragment - calls external script
+# This allows the main script to be updated without modifying this file
+exec $MOTD_SCRIPT
+EOF
+        then
+            sudo chmod +x "$MOTD_FRAGMENT" 2>/dev/null
+            log_success "MOTD configured at $MOTD_FRAGMENT"
+            log_substep "Will display system info on terminal login"
+        else
+            log_warning "Failed to create MOTD fragment (sudo required), skipping..."
+        fi
+    fi
+else
+    log_info "System does not support update-motd (/etc/update-motd.d not found)"
+    log_substep "Skipping MOTD setup - fastfetch will run from .zshrc instead"
+fi
+
+# --- 5. Create symlinks ---
 log_info "Creating symlinks..."
 
 # Define symlink mappings (source -> target)
@@ -159,7 +212,7 @@ if [ $SKIPPED -gt 0 ]; then
     log_info "Skipped $SKIPPED existing symlink(s)"
 fi
 
-# --- 5. Final instructions ---
+# --- 6. Final instructions ---
 if [[ "$QUIET_MODE" != "true" ]]; then
     log_section "Installation Complete" "$PARTY"
     if [ -f "$HOME/.zshrc" ]; then

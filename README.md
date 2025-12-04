@@ -85,14 +85,15 @@ The automated setup configures a modern, powerful shell environment with intelli
 
 ### Fastfetch - System Information
 
-**Why Fastfetch?** Fast neofetch alternative written in C, shows system info with distro logo on shell startup.
+**Why Fastfetch?** Fast neofetch alternative written in C, shows system info with distro logo on terminal login.
 
 **Automatic Installation:**
 
-- Displays on interactive shell startup
+- Displays on terminal login via MOTD (not on every shell reload)
 - System info, distro logo, hardware details
 - Compatibility aliases for `neofetch` and `screenfetch`
 - Customizable via `config/fastfetch.jsonc`
+- See [MOTD Integration](docs/MOTD%20Integration.md) for details
 
 ### Terminal Font Setup
 
