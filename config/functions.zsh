@@ -51,11 +51,16 @@ updatep() {
         printf "${GREEN}${CHECK} tmux is already installed.${NC}\n"
     fi
     
-    printf "${BLUE}${COMPUTER} Launching update in a new tmux session...${NC}\n"
-    printf "You will be attached to the session. It will close on completion.\n"
+    local LOG_FILE="${HOME}/.cache/updatep.log"
+    mkdir -p "${HOME}/.cache"
+    
+    printf "${BLUE}${COMPUTER} Running system update...${NC}\n"
+    printf "Output will be logged to: ${LOG_FILE}\n\n"
     
     local UPDATE_CMD="
-        printf '${GREEN}--- Starting System Updates ---${NC}\n\n';
+        exec > >(tee '${LOG_FILE}') 2>&1;
+        printf '${GREEN}--- Starting System Updates ---${NC}\n';
+        printf 'Timestamp: %s\n\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
         printf '${CYAN}Running: sudo apt update${NC}\n';
         sudo apt update && \\
         printf '\n${CYAN}Running: sudo apt full-upgrade -y${NC}\n';
@@ -63,21 +68,25 @@ updatep() {
         printf '\n${CYAN}Running: sudo apt autoremove -y${NC}\n';
         sudo apt autoremove -y;
         printf '\n${GREEN}--- Update Process Finished ---${NC}\n';
-        printf 'Please review any messages above.\n';
-        printf '${YELLOW}Session will close in 10 seconds (press any key to close now)...${NC}\n';
-        read -n 1 -s -r -t 10;
+        printf 'Timestamp: %s\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
     "
     
     local SESSION_NAME="system-update-$$"
     
-    if ! tmux new-session -s "$SESSION_NAME" "bash -c \"$UPDATE_CMD\""; then
+    if ! tmux new-session -d -s "$SESSION_NAME" "bash -c \"$UPDATE_CMD\""; then
          printf "${RED}${CROSS} Error: Failed to create tmux session.${NC}\n"
          return 1
     fi
     
+    # Wait for session to complete
+    while tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
+        sleep 1
+    done
+    
     printf "\n${BLUE}========== Process Summary ==========${NC}\n"
-    printf "${GREEN}${CHECK} tmux update session has been closed.${NC}\n"
-    printf "${CYAN}${PARTY} System maintenance task complete!${NC}\n\n"
+    printf "${GREEN}${CHECK} System update completed successfully.${NC}\n"
+    printf "${CYAN}${PARTY} Log saved to: ${LOG_FILE}${NC}\n"
+    printf "${YELLOW}View log: cat ${LOG_FILE}${NC}\n\n"
     
     return 0
 }
