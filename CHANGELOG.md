@@ -7,21 +7,36 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Coming Soon
+- Host-specific configuration overrides
+- Backup/restore functions for safety net
+
+## [1.1.0] - 2025-12-03
+
+This release enhances system maintenance workflows with complete tmux integration and improved update automation.
+
 ### Added
 - **Tmux Integration**: Complete tmux setup with sensible defaults
   - Automatic installation via `lib/terminal.sh`
   - Mouse support enabled for modern workflow
-  - Vim-style keybindings for pane navigation
+  - Vim-style keybindings for pane navigation (`h/j/k/l`)
   - Intuitive split commands (`|` for vertical, `-` for horizontal)
   - Customized status bar with session name, date, and time
   - 10,000 line scrollback buffer
   - Symlinked configuration at `~/.tmux.conf`
-  - Integration with `updatep` function for safe system updates
   - Comprehensive documentation in Setup Scripts Reference
 
-### Coming Soon
-- Host-specific configuration overrides
-- Backup/restore functions for safety net
+### Enhanced
+- **`updatep` function**: Improved system update automation
+  - Runs updates in background tmux session
+  - Logs all output to `~/.cache/updatep.log` (non-cumulative)
+  - Auto-closes after completion (no user input required)
+  - Removed artificial delays for faster execution
+  - Better integration with `maintain` workflow
+
+### Fixed
+- Removed 5-second delay before system updates in `maintain` function
+- Fixed log file creation and output capture in `updatep`
 
 ## [1.0.0] - 2025-12-03
 

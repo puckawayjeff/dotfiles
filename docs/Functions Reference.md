@@ -107,9 +107,9 @@ dotsetup <script-name>
 
 ---
 
-### `updatep()` - Interactive System Update
+### `updatep()` - Background System Update
 
-**Purpose**: Run system updates (`apt update`, `apt full-upgrade`, `apt autoremove`) in an interactive tmux session with colored output and progress indicators.
+**Purpose**: Run system updates (`apt update`, `apt full-upgrade`, `apt autoremove`) in a background tmux session with all output logged to a file.
 
 **Usage**:
 
@@ -120,10 +120,12 @@ updatep
 **How It Works**:
 
 1. Checks if tmux is installed (installs it if missing)
-2. Creates a new tmux session with a unique name
-3. Runs the update commands in sequence with colored output
-4. Waits for user keypress before closing the session
-5. Shows a summary after the session closes
+2. Creates a temporary script with update commands
+3. Launches a detached tmux session to run the script
+4. Waits for the session to complete
+5. Logs all output to `~/.cache/updatep.log` (overwrites previous run)
+6. Auto-closes when finished (no user input required)
+7. Shows a summary with log file location
 
 **Update Commands Executed**:
 
@@ -133,18 +135,26 @@ updatep
 
 **Features**:
 
+- **Background execution**: Runs in detached tmux session (non-blocking)
+- **Automatic logging**: All output saved to `~/.cache/updatep.log`
 - **Auto-install tmux**: Installs tmux automatically if not present
-- **Colored output**: Uses tput-based colors for compatibility
-- **Interactive review**: Pauses before closing so you can review results
-- **Session isolation**: Runs in a separate tmux session
-- **Error handling**: Checks each command and reports failures
+- **Auto-close**: No user interaction required, completes automatically
+- **No delays**: Starts immediately and finishes as soon as updates complete
+- **Review capability**: Check log file anytime with `cat ~/.cache/updatep.log`
+
+**Log File Details**:
+
+- Location: `~/.cache/updatep.log`
+- Format: Plain text with timestamps
+- Behavior: Overwrites previous run (non-cumulative)
+- Includes: All command output and error messages
 
 **Tmux Session Details**:
 
 - Session name: `system-update-<PID>` (e.g., `system-update-12345`)
-- Auto-attaches to the session (you see the output live)
-- Closes automatically after keypress
-- Can be detached with `Ctrl+b d` if needed
+- Runs detached (in background)
+- Auto-closes when complete
+- Temporary script cleaned up after execution
 
 ---
 
