@@ -7,6 +7,19 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Added
+- **Custom Last Login Display**: Core terminal feature replacing SSH's default lastlog
+  - New `lib/last-login.sh` script for custom login messages
+  - IP-to-hostname mapping with configurable lookup table
+  - Cleaner timestamp formatting (e.g., "Thu Dec 4, 2025 at 1:43 PM")
+  - Styled output using `lib/utils.sh` colors (green, cyan, yellow)
+  - Automatic detection of SSH sessions (only displays when appropriate)
+  - Multiple data sources: `last` (wtmp) and `lastlog` for reliability
+  - Integrated into `.zshrc` for automatic execution on SSH login
+  - Integrated into `lib/terminal.sh` for automatic SSH configuration
+  - Disables `PrintLastLog` in `/etc/ssh/sshd_config` during setup
+  - Comprehensive documentation in "Setup Scripts Reference.md" and "Functions Reference.md"
+
 ### Fixed
 - **MOTD fastfetch execution context**: Fixed fastfetch to run as the actual login user during SSH MOTD
   - Detects actual login user via `$PAM_USER`, `$USER`, or `logname`

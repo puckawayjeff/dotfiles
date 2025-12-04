@@ -476,3 +476,74 @@ declare -f dotpush
 # Search for functions containing keyword
 declare -F | grep update
 ```
+
+---
+
+## Library Scripts (`lib/`)
+
+### `lib/last-login.sh` - Custom Last Login Display
+
+**Purpose**: Replaces the default PAM lastlog message with a styled version that includes IP-to-hostname mapping and cleaner timestamp formatting. Automatically runs during SSH sessions.
+
+**Invocation**: Automatically sourced by `.zshrc` when `$SSH_CONNECTION` is set (SSH session detected).
+
+**Manual Testing**:
+
+```bash
+# Test the display without SSH
+SSH_CONNECTION='test' bash ~/dotfiles/lib/last-login.sh
+```
+
+**Output Examples**:
+
+```bash
+# With hostname mapping configured
+Last login: from krang on Thu Dec 4, 2025 at 1:43 PM
+
+# Without hostname mapping (fallback to IP)
+Last login: from 100.100.166.103 on Thu Dec 4, 2025 at 1:43 PM
+
+# Local login (no SSH)
+Last login: locally on Thu Dec 4, 2025 at 1:43 PM
+```
+
+**Customization**:
+
+Edit the `IP_HOSTNAMES` associative array in `lib/last-login.sh`:
+
+```bash
+declare -A IP_HOSTNAMES=(
+    ["100.100.166.103"]="krang"
+    ["192.168.1.100"]="server1"
+    ["10.0.0.50"]="workstation"
+)
+```
+
+**Features**:
+
+- **Styled output** using `lib/utils.sh` colors (green, cyan, yellow)
+- **IP-to-hostname resolution** from custom mapping table
+- **Fallback to IP** if hostname not found in mapping
+- **Cleaner date formatting** (e.g., "Thu Dec 4, 2025 at 1:43 PM")
+- **Multiple data sources** - reads from `last` command (wtmp) and `lastlog`
+- **SSH-only display** - prevents duplicate messages on local terminals
+
+**Dependencies**:
+
+- `lib/utils.sh` - Color definitions and styling
+- PAM lastlog disabled - Use `setup/last-login.sh` to configure
+
+**How It Works**:
+
+1. Checks if running in SSH session (`$SSH_CONNECTION`)
+2. Queries `last` command for recent login history
+3. Falls back to `lastlog` if `last` fails
+4. Resolves IP address to hostname using mapping table
+5. Formats timestamp into human-friendly format
+6. Displays styled output with colors
+
+**Related Configuration**:
+
+- Installation: `sudo setup/last-login.sh`
+- Documentation: See "Setup Scripts Reference.md"
+- PAM config: `/etc/pam.d/sshd` (pam_lastlog disabled)

@@ -5,6 +5,12 @@
 # Skip all this for non-interactive shells
 [[ $- != *i* ]] && return
 
+# ===== Custom Last Login Display =====
+# Show custom last login message for SSH sessions (replaces PAM lastlog)
+if [[ -n "$SSH_CONNECTION" ]] && [[ -f "$HOME/dotfiles/lib/last-login.sh" ]]; then
+    source "$HOME/dotfiles/lib/last-login.sh"
+fi
+
 # ===== History Configuration =====
 HISTFILE=~/.zsh_history
 HISTSIZE=10000

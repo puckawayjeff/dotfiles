@@ -492,6 +492,93 @@ install_tmux() {
 # ============================================================================
 # CONFIGURATION SYMLINKS
 # ============================================================================
+# ============================================================================
+# LAST LOGIN CONFIGURATION
+# ============================================================================
+configure_last_login() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Custom Last Login Display" "$WRENCH"
+    fi
+    
+    local SSHD_CONFIG="/etc/ssh/sshd_config"
+    local BACKUP_SUFFIX=".dotfiles-backup"
+    local needs_restart=false
+    
+    # Check if we have sudo access
+    if ! sudo -n true 2>/dev/null; then
+        log_warning "Sudo access required for last-login configuration"
+        log_info "Run manually: sudo $SCRIPT_DIR/terminal.sh (or skip this feature)"
+        track_skip
+        return 0
+    fi
+    
+    # Backup sshd_config if not already backed up
+    if [[ ! -f "${SSHD_CONFIG}${BACKUP_SUFFIX}" ]]; then
+        if sudo cp "$SSHD_CONFIG" "${SSHD_CONFIG}${BACKUP_SUFFIX}" 2>/dev/null; then
+            log_substep "Created backup of sshd_config"
+        else
+            log_warning "Failed to backup sshd_config - skipping last-login configuration"
+            track_skip
+            return 0
+        fi
+    fi
+    
+    # Check if PrintLastLog is already configured by dotfiles
+    if sudo grep -q "^PrintLastLog no.*# Disabled by dotfiles" "$SSHD_CONFIG" 2>/dev/null; then
+        log_success "PrintLastLog already disabled"
+        track_skip
+    elif sudo grep -q "^#PrintLastLog yes" "$SSHD_CONFIG" 2>/dev/null; then
+        # Uncomment and set to no
+        if sudo sed -i 's/^#PrintLastLog yes.*/PrintLastLog no  # Disabled by dotfiles - using custom last-login.sh/' "$SSHD_CONFIG" 2>/dev/null; then
+            log_success "Disabled PrintLastLog (was commented)"
+            needs_restart=true
+            track_success
+        else
+            log_warning "Failed to modify sshd_config"
+            track_failure
+        fi
+    elif sudo grep -q "^PrintLastLog yes" "$SSHD_CONFIG" 2>/dev/null; then
+        # Change yes to no
+        if sudo sed -i 's/^PrintLastLog yes.*/PrintLastLog no  # Disabled by dotfiles - using custom last-login.sh/' "$SSHD_CONFIG" 2>/dev/null; then
+            log_success "Changed PrintLastLog from yes to no"
+            needs_restart=true
+            track_success
+        else
+            log_warning "Failed to modify sshd_config"
+            track_failure
+        fi
+    elif sudo grep -q "^PrintLastLog no" "$SSHD_CONFIG" 2>/dev/null; then
+        # Already set to no, just update comment
+        if sudo sed -i 's/^PrintLastLog no.*/PrintLastLog no  # Disabled by dotfiles - using custom last-login.sh/' "$SSHD_CONFIG" 2>/dev/null; then
+            log_success "PrintLastLog already disabled, updated comment"
+            track_skip
+        else
+            log_success "PrintLastLog already set to no"
+            track_skip
+        fi
+    else
+        # No PrintLastLog directive found, add it
+        if echo -e "\n# Custom last login display (dotfiles)\nPrintLastLog no  # Disabled by dotfiles - using custom last-login.sh" | sudo tee -a "$SSHD_CONFIG" > /dev/null 2>&1; then
+            log_success "Added PrintLastLog no directive"
+            needs_restart=true
+            track_success
+        else
+            log_warning "Failed to add PrintLastLog directive"
+            track_failure
+        fi
+    fi
+    
+    # Restart SSH service if needed
+    if [ "$needs_restart" = true ]; then
+        log_substep "Restarting SSH service..."
+        if sudo systemctl restart sshd 2>/dev/null || sudo systemctl restart ssh 2>/dev/null; then
+            log_success "SSH service restarted"
+        else
+            log_warning "Failed to restart SSH - restart manually: sudo systemctl restart ssh"
+        fi
+    fi
+}
+
 setup_config_symlinks() {
     if [[ "$QUIET_MODE" != "true" ]]; then
         log_section "Terminal Configuration" "$WRENCH"
@@ -575,6 +662,9 @@ main() {
     
     # Setup configuration symlinks for all installed tools
     setup_config_symlinks
+    
+    # Configure custom last login display
+    configure_last_login
     
     # Print summary only in verbose mode
     if [[ "$QUIET_MODE" != "true" ]]; then

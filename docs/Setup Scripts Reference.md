@@ -326,3 +326,96 @@ systemctl --user status syncthing.service
 **Project Homepage**: [syncthing.net](https://syncthing.net/)
 
 **Project Repository**: [syncthing/syncthing](https://github.com/syncthing/syncthing)
+
+---
+
+### Last Login - Custom SSH Login Display
+
+**Location**: `lib/terminal.sh` (automatic configuration) and `lib/last-login.sh` (display script)
+
+**Type**: 🚀 **Core Feature** (automatically configured during initial setup)
+
+**Purpose**: Replaces the default SSH lastlog message with a custom, styled version that includes IP-to-hostname mapping and cleaner timestamp formatting.
+
+**Installation**: Automatically configured by `lib/terminal.sh` during initial setup. Can also be manually re-run with `sudo ~/dotfiles/lib/terminal.sh`.
+
+**What It Does**:
+
+1. Creates a backup of `/etc/pam.d/sshd` configuration
+2. Disables the default `pam_lastlog.so` module
+3. Verifies the configuration changes
+4. Provides instructions for customizing IP-to-hostname mappings
+
+**How It Works**:
+
+The custom last-login system consists of three components:
+
+1. **`lib/last-login.sh`** - Core script that displays the styled message
+2. **`.zshrc` integration** - Sources the script automatically during SSH sessions
+3. **PAM configuration** - Disables the default lastlog message to prevent duplication
+
+**Default Output**:
+
+```
+Last login: from 100.100.166.103 on Thu Dec 4, 2025 at 1:43 PM
+```
+
+**Custom Output (with hostname mapping)**:
+
+```
+Last login: from krang on Thu Dec 4, 2025 at 1:43 PM
+```
+
+**Customizing IP-to-Hostname Mappings**:
+
+Edit `lib/last-login.sh` and modify the `IP_HOSTNAMES` array:
+
+```bash
+declare -A IP_HOSTNAMES=(
+    ["100.100.166.103"]="krang"
+    ["192.168.1.100"]="server1"
+    ["10.0.0.50"]="workstation"
+)
+```
+
+**Features**:
+
+- **Styled output** - Uses colors and formatting from `lib/utils.sh`
+- **IP resolution** - Maps known IPs to friendly hostnames
+- **Cleaner timestamps** - Formats dates as "Thu Dec 4, 2025 at 1:43 PM"
+- **Smart detection** - Only displays during SSH sessions
+- **Fallback support** - Shows IP address if hostname not in mapping table
+- **Multiple sources** - Reads from both `wtmp` and `lastlog` for reliability
+
+**Manual Activation (if skipped during setup)**:
+
+If you need to manually configure or re-configure:
+
+1. Run terminal.sh with sudo: `sudo ~/dotfiles/lib/terminal.sh`
+2. This will disable `PrintLastLog` in `/etc/ssh/sshd_config`
+3. SSH service will be automatically restarted
+
+The display script is integrated into `.zshrc` and runs automatically during SSH sessions.
+
+**Reverting to Default**:
+
+To restore SSH's original lastlog:
+
+```bash
+# Restore from backup
+sudo cp /etc/ssh/sshd_config.dotfiles-backup /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Or manually edit /etc/ssh/sshd_config
+sudo nano /etc/ssh/sshd_config
+# Change: PrintLastLog no  →  PrintLastLog yes (or comment it out)
+# Then: sudo systemctl restart ssh
+```
+
+**Testing**:
+
+To test the display without SSHing:
+
+```bash
+SSH_CONNECTION='test' bash ~/dotfiles/lib/last-login.sh
+```
