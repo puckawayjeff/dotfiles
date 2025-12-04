@@ -120,7 +120,7 @@
     {
       "type": "title",
       "key": " ",
-      "keyIcon": "",
+      "keyIcon": "",
       "fqdn": false,
       "color": {
         "user": "",
@@ -136,7 +136,7 @@
     },
     {
       "type": "os",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "host",
@@ -144,19 +144,19 @@
     },
     {
       "type": "kernel",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "uptime",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "shell",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "cpu",
-      "keyIcon": "",
+      "keyIcon": "",
       "temp": false,
       "showPeCoreCount": false
     },
@@ -170,7 +170,7 @@
     },
     {
       "type": "memory",
-      "keyIcon": "",
+      "keyIcon": "",
       "percent": {
         "green": 50,
         "yellow": 80,
@@ -189,7 +189,7 @@
     },
     {
       "type": "disk",
-      "keyIcon": "",
+      "keyIcon": "",
       "showRegular": true,
       "showExternal": false,
       "showHidden": false,
@@ -231,7 +231,7 @@
     },
     {
       "type": "battery",
-      "keyIcon": "",
+      "keyIcon": "",
       "temp": false,
       "percent": {
         "green": 50,
@@ -248,14 +248,14 @@
     }
     {
       "type": "command",
-      "keyIcon": "💻",
+      "keyIcon": "󰟀",
       "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_host",
       "shell": "/bin/bash",
       "param": "-c"
     },
     {
       "type": "command",
-      "keyIcon": "🕒",
+      "keyIcon": "󰃰",
       "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_time",
       "shell": "/bin/bash",
       "param": "-c"
