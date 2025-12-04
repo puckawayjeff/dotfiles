@@ -7,6 +7,12 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Fixed
+- **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
+  - Set `TERM=xterm-256color` when not defined or set to "dumb"
+  - Export `COLORTERM=truecolor` to force color support detection
+  - Ensures colored output during SSH login matches interactive execution
+
 ### Added
 - **MOTD Integration**: Fastfetch now runs via update-motd system on terminal login
   - New `lib/motd.sh` script for dynamic MOTD generation

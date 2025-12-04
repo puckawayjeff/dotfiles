@@ -9,8 +9,20 @@
 # Exit on error
 set -e
 
+# --- Ensure proper terminal environment for colors ---
+# MOTD scripts run in a limited environment during SSH login
+# Explicitly set TERM if not already set to enable color output
+if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
+    export TERM=xterm-256color
+fi
+
+# Force color output for fastfetch (it may detect non-interactive context)
+export COLORTERM=truecolor
+
 # --- Fastfetch Display ---
 if command -v fastfetch >/dev/null 2>&1; then
+    # Run fastfetch normally - environment variables ensure color output
+    # The --pipe flag would disable colors, so we explicitly avoid it
     fastfetch
 else
     # Fallback if fastfetch is not installed
