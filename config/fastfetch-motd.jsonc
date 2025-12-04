@@ -245,7 +245,7 @@
       "text": "echo -n 'dotfiles ' && (cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown')",
       "shell": "/bin/bash",
       "param": "-c"
-    }
+    },
     {
       "type": "command",
       "keyIcon": "󰟀",
