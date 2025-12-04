@@ -54,28 +54,38 @@ updatep() {
     local LOG_FILE="${HOME}/.cache/updatep.log"
     mkdir -p "${HOME}/.cache"
     
-    printf "${BLUE}${COMPUTER} Running system update...${NC}\n"
+    printf "${BLUE}${COMPUTER} Running system update in background...${NC}\n"
     printf "Output will be logged to: ${LOG_FILE}\n\n"
-    
-    local UPDATE_CMD="
-        {
-            printf '--- Starting System Updates ---\n';
-            printf 'Timestamp: %s\n\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
-            printf 'Running: sudo apt update\n';
-            sudo apt update && \\
-            printf '\nRunning: sudo apt full-upgrade -y\n';
-            sudo apt full-upgrade -y && \\
-            printf '\nRunning: sudo apt autoremove -y\n';
-            sudo apt autoremove -y;
-            printf '\n--- Update Process Finished ---\n';
-            printf 'Timestamp: %s\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
-        } > '${LOG_FILE}' 2>&1
-    "
     
     local SESSION_NAME="system-update-$$"
     
-    if ! tmux new-session -d -s "$SESSION_NAME" "bash -c \"$UPDATE_CMD\""; then
+    # Create a temporary script file
+    local SCRIPT_FILE="/tmp/updatep-${SESSION_NAME}.sh"
+    cat > "$SCRIPT_FILE" << 'SCRIPT_EOF'
+#!/bin/bash
+LOG_FILE="$1"
+{
+    echo "--- Starting System Updates ---"
+    echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo ""
+    echo "Running: sudo apt update"
+    sudo apt update
+    echo ""
+    echo "Running: sudo apt full-upgrade -y"
+    sudo apt full-upgrade -y
+    echo ""
+    echo "Running: sudo apt autoremove -y"
+    sudo apt autoremove -y
+    echo ""
+    echo "--- Update Process Finished ---"
+    echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
+} > "$LOG_FILE" 2>&1
+SCRIPT_EOF
+    chmod +x "$SCRIPT_FILE"
+    
+    if ! tmux new-session -d -s "$SESSION_NAME" "$SCRIPT_FILE '$LOG_FILE'"; then
          printf "${RED}${CROSS} Error: Failed to create tmux session.${NC}\n"
+         rm -f "$SCRIPT_FILE"
          return 1
     fi
     
@@ -83,6 +93,9 @@ updatep() {
     while tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
         sleep 1
     done
+    
+    # Cleanup script file
+    rm -f "$SCRIPT_FILE"
     
     printf "\n${BLUE}========== Process Summary ==========${NC}\n"
     printf "${GREEN}${CHECK} System update completed successfully.${NC}\n"
