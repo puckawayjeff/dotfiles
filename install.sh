@@ -131,6 +131,7 @@ declare -A SYMLINKS=(
     ["$DOTFILES_DIR/config/starship.toml"]="$HOME/.config/starship.toml"
     ["$DOTFILES_DIR/config/fastfetch.jsonc"]="$HOME/.config/fastfetch/config.jsonc"
     ["$DOTFILES_DIR/config/functions.zsh"]="$HOME/.zsh_functions"
+    ["$DOTFILES_DIR/config/tmux.conf"]="$HOME/.tmux.conf"
 )
 
 CREATED=0

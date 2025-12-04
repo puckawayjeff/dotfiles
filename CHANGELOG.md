@@ -7,8 +7,19 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Added
+- **Tmux Integration**: Complete tmux setup with sensible defaults
+  - Automatic installation via `lib/terminal.sh`
+  - Mouse support enabled for modern workflow
+  - Vim-style keybindings for pane navigation
+  - Intuitive split commands (`|` for vertical, `-` for horizontal)
+  - Customized status bar with session name, date, and time
+  - 10,000 line scrollback buffer
+  - Symlinked configuration at `~/.tmux.conf`
+  - Integration with `updatep` function for safe system updates
+  - Comprehensive documentation in Setup Scripts Reference
+
 ### Coming Soon
-- Tmux configuration and setup script
 - Host-specific configuration overrides
 - Backup/restore functions for safety net
 

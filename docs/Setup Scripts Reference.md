@@ -170,6 +170,84 @@ command -v nvm
 
 ---
 
+### Tmux - Terminal Multiplexer
+
+**Script**: Automatically installed via `lib/terminal.sh` ✅ **Core Tool**
+
+**Project**: [tmux](https://github.com/tmux/tmux) - Terminal multiplexer that allows multiple terminal sessions within a single window. Essential for long-running processes, remote server management, and productivity workflows. Integrates with the `updatep` function for safe system updates.
+
+**Installation**: Automatically installed when running `install.sh`.
+
+**What It Does**:
+
+- Installs tmux from system repositories
+- Creates symlink to dotfiles-managed configuration at `~/.tmux.conf`
+- Provides sensible defaults with modern keybindings
+
+**Configuration Features**:
+
+- **Mouse Support** - Click panes, drag to resize, scroll through history
+- **Vim-style Navigation** - `h/j/k/l` for pane movement
+- **Intuitive Splits** - `|` for vertical, `-` for horizontal
+- **Modern Status Bar** - Shows session name, date, and time
+- **Enhanced Scrollback** - 10,000 line history buffer
+- **256 Color Support** - Full color terminal support
+- **Copy Mode** - Vim keybindings for text selection
+
+**Key Bindings** (Prefix: `Ctrl+b`):
+
+```bash
+# Pane Management
+Prefix + |              # Split vertically
+Prefix + -              # Split horizontally
+Prefix + h/j/k/l        # Navigate panes (vim-style)
+Prefix + H/J/K/L        # Resize panes (vim-style)
+
+# Window Management
+Prefix + c              # New window (in current path)
+Prefix + number         # Switch to window by number
+
+# Utilities
+Prefix + r              # Reload configuration
+Prefix + [              # Enter copy mode (scroll/search)
+Prefix + ?              # List all key bindings
+```
+
+**Usage After Installation**:
+
+```bash
+# Start a new session
+tmux
+
+# Named session
+tmux new -s mysession
+
+# List sessions
+tmux ls
+
+# Attach to session
+tmux attach -t mysession
+
+# Detach from session (inside tmux)
+Ctrl+b d
+
+# Kill session
+tmux kill-session -t mysession
+```
+
+**Integration with updatep**:
+
+The `updatep` function automatically:
+
+- Detects if tmux is installed
+- Installs tmux if missing
+- Runs system updates in a new tmux session
+- Prevents SSH disconnections from interrupting updates
+
+**Project Repository**: [tmux/tmux](https://github.com/tmux/tmux)
+
+---
+
 ### Syncthing - Continuous File Synchronization
 
 **Script**: `setup/syncthing.sh` 📦 **Optional**

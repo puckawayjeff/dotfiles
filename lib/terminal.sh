@@ -414,6 +414,31 @@ install_emoji_fonts() {
 }
 
 # ============================================================================
+# TMUX (Terminal multiplexer)
+# ============================================================================
+install_tmux() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "tmux (Terminal multiplexer)" "$COMPUTER"
+    fi
+    
+    if command -v tmux &> /dev/null; then
+        TMUX_VERSION=$(tmux -V)
+        log_success "tmux already installed: $TMUX_VERSION"
+        track_skip
+    else
+        log_info "Installing tmux..."
+        if sudo apt install -y tmux 2>/dev/null; then
+            TMUX_VERSION=$(tmux -V)
+            log_success "tmux installed successfully: $TMUX_VERSION"
+            track_success
+        else
+            log_warning "tmux installation failed, continuing..."
+            track_failure
+        fi
+    fi
+}
+
+# ============================================================================
 # MAIN EXECUTION
 # ============================================================================
 main() {
@@ -438,6 +463,7 @@ main() {
     install_starship
     install_nerd_font
     install_emoji_fonts
+    install_tmux
     
     # Print summary only in verbose mode
     if [[ "$QUIET_MODE" != "true" ]]; then
