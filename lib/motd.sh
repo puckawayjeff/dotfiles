@@ -43,12 +43,22 @@ if command -v fastfetch >/dev/null 2>&1; then
     # Explicitly specify config file path using detected user home
     FASTFETCH_CONFIG="$USER_HOME/.config/fastfetch/config.jsonc"
     
-    if [ -f "$FASTFETCH_CONFIG" ]; then
-        # Use user's custom config
-        fastfetch --config "$FASTFETCH_CONFIG"
+    if [ -n "$LOGIN_USER" ] && [ "$LOGIN_USER" != "root" ]; then
+        # Run fastfetch as the actual login user with login environment
+        # Use - flag to create a proper login shell environment for correct locale, shell detection
+        # Export TERM and COLORTERM explicitly for color support
+        if [ -f "$FASTFETCH_CONFIG" ]; then
+            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --config '$FASTFETCH_CONFIG'"
+        else
+            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch"
+        fi
     else
-        # Fallback to default config
-        fastfetch
+        # Fallback: run as current user (shouldn't happen in normal MOTD context)
+        if [ -f "$FASTFETCH_CONFIG" ]; then
+            fastfetch --config "$FASTFETCH_CONFIG"
+        else
+            fastfetch
+        fi
     fi
 else
     # Fallback if fastfetch is not installed

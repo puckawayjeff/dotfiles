@@ -8,12 +8,14 @@ and this project adheres to semantic versioning principles for major structural 
 ## [Unreleased]
 
 ### Fixed
-- **MOTD fastfetch configuration**: Fixed fastfetch to load user's custom config during SSH login
+- **MOTD fastfetch execution context**: Fixed fastfetch to run as the actual login user during SSH MOTD
   - Detects actual login user via `$PAM_USER`, `$USER`, or `logname`
-  - Resolves user's home directory via `getent passwd`
-  - Explicitly passes `--config` flag with user's config path
-  - Ensures custom modules (Tailscale, Dotfiles version) display correctly
-  - Respects user's color bar preferences and other config settings
+  - Uses `su - username` to execute fastfetch with proper login environment
+  - Correctly displays `user@hostname` instead of `root@hostname`
+  - Proper locale detection (`en_US.UTF-8` instead of `C`)
+  - Terminal and shell detection work correctly
+  - Custom modules (Tailscale IP, Dotfiles version) display correctly
+  - Respects user's fastfetch config (no color bars, custom formatting)
 - **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
   - Set `TERM=xterm-256color` when not defined or set to "dumb"
   - Export `COLORTERM=truecolor` to force color support detection
