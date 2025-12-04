@@ -58,17 +58,18 @@ updatep() {
     printf "Output will be logged to: ${LOG_FILE}\n\n"
     
     local UPDATE_CMD="
-        exec > >(tee '${LOG_FILE}') 2>&1;
-        printf '${GREEN}--- Starting System Updates ---${NC}\n';
-        printf 'Timestamp: %s\n\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
-        printf '${CYAN}Running: sudo apt update${NC}\n';
-        sudo apt update && \\
-        printf '\n${CYAN}Running: sudo apt full-upgrade -y${NC}\n';
-        sudo apt full-upgrade -y && \\
-        printf '\n${CYAN}Running: sudo apt autoremove -y${NC}\n';
-        sudo apt autoremove -y;
-        printf '\n${GREEN}--- Update Process Finished ---${NC}\n';
-        printf 'Timestamp: %s\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
+        {
+            printf '--- Starting System Updates ---\n';
+            printf 'Timestamp: %s\n\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
+            printf 'Running: sudo apt update\n';
+            sudo apt update && \\
+            printf '\nRunning: sudo apt full-upgrade -y\n';
+            sudo apt full-upgrade -y && \\
+            printf '\nRunning: sudo apt autoremove -y\n';
+            sudo apt autoremove -y;
+            printf '\n--- Update Process Finished ---\n';
+            printf 'Timestamp: %s\n' \"\$(date '+%Y-%m-%d %H:%M:%S')\";
+        } > '${LOG_FILE}' 2>&1
     "
     
     local SESSION_NAME="system-update-$$"
@@ -489,9 +490,7 @@ maintain() {
     # Note: install.sh is already run by dotpull (in quiet mode)
     
     print "\n⏱️  Configuration updated."
-    print -n "    Launching system updates in 5 seconds... "
-    read -t 5 -k 1 -s
-    print "\n"
+    print "    Launching system updates...\n"
     
     updatep
     
