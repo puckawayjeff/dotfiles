@@ -19,10 +19,32 @@ source "$SCRIPT_DIR/utils.sh"
 # Add your known hosts here in the format: "IP:hostname"
 # Example: "100.100.166.103:krang"
 declare -A IP_HOSTNAMES=(
+    ["100.119.235.30"]="486turbo"
+    ["100.121.137.4"]="ahma-sensor"
+    ["100.79.132.105"]="bearmedal-dockarr"
+    ["100.105.99.24"]="bearmedal-dockge"
+    ["100.80.173.59"]="bearmedal-jellyfin"
+    ["100.72.150.27"]="bearmedal"
+    ["100.75.19.2"]="goots"
+    ["100.96.225.119"]="homeassistant"
+    ["100.120.65.113"]="homeassistantpw"
+    ["100.124.217.71"]="i360-vault"
     ["100.100.166.103"]="krang"
-    # Add more mappings as needed:
-    # ["192.168.1.100"]="server1"
-    # ["10.0.0.50"]="workstation"
+    ["100.85.17.10"]="memoryalpha"
+    ["100.108.231.16"]="molterpi"
+    ["100.72.161.73"]="muncle"
+    ["100.127.136.19"]="puckamedia"
+    ["100.80.96.108"]="puckapixelpro"
+    ["100.94.232.123"]="puckasurface"
+    ["100.81.251.77"]="puttputt"
+    ["100.74.28.50"]="rubbermaid-dockge"
+    ["100.125.82.55"]="rubbermaid-qbittorrent"
+    ["100.108.11.1"]="rubbermaid-syncthing"
+    ["100.121.220.125"]="rubbermaid"
+    ["100.108.232.61"]="workshop-sensor"
+    ["100.113.116.36"]="yggyfin"
+    ["100.123.105.87"]="yggymedia"
+    ["100.99.219.32"]="yggystump"
 )
 
 # --- Format timestamp for cleaner display ---
@@ -80,7 +102,7 @@ get_last_login() {
         if [ -n "$from_ip" ] && [ "$from_ip" != "**Never" ]; then
             local resolved=$(resolve_ip "$from_ip")
             local formatted_time=$(format_timestamp "$timestamp")
-            echo "from ${CYAN}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
+            echo "from ${CYAN}${BOLD}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
             return 0
         fi
         
@@ -102,7 +124,7 @@ get_last_login() {
     local resolved=$(resolve_ip "$from_ip")
     local formatted_time=$(format_timestamp "$timestamp")
     
-    echo "from ${CYAN}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
+    echo "from ${CYAN}${BOLD}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
     return 0
 }
 
@@ -112,6 +134,6 @@ if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]; then
     last_login_info=$(get_last_login)
     
     if [ $? -eq 0 ] && [ -n "$last_login_info" ]; then
-        printf "${GREEN}Last login${NC}: ${last_login_info}\n"
+        printf "${GREEN}${CLOCK} Last login${NC}: ${last_login_info}\n"
     fi
 fi
