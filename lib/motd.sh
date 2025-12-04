@@ -52,17 +52,17 @@ if command -v fastfetch >/dev/null 2>&1; then
         # Use - flag to create a proper login shell environment for correct locale, shell detection
         # Export TERM and COLORTERM explicitly for color support
         if [ -f "$FASTFETCH_MOTD_CONFIG" ]; then
-            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --config '$FASTFETCH_MOTD_CONFIG'"
+            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --config '$FASTFETCH_MOTD_CONFIG' --key-type icon"
         else
             # Fallback to default config if MOTD config doesn't exist
-            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch"
+            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --key-type icon"
         fi
     else
         # Fallback: run as current user (shouldn't happen in normal MOTD context)
         if [ -f "$FASTFETCH_MOTD_CONFIG" ]; then
-            fastfetch --config "$FASTFETCH_MOTD_CONFIG"
+            fastfetch --config "$FASTFETCH_MOTD_CONFIG" --key-type icon
         else
-            fastfetch
+            fastfetch --key-type icon
         fi
     fi
 else
