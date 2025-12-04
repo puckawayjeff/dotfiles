@@ -421,20 +421,128 @@ install_tmux() {
         log_section "tmux (Terminal multiplexer)" "$COMPUTER"
     fi
     
+    local tmux_installed=false
+    local config_verified=false
+    
+    # Check/install tmux binary
     if command -v tmux &> /dev/null; then
         TMUX_VERSION=$(tmux -V)
         log_success "tmux already installed: $TMUX_VERSION"
+        tmux_installed=true
         track_skip
     else
         log_info "Installing tmux..."
         if sudo apt install -y tmux 2>/dev/null; then
             TMUX_VERSION=$(tmux -V)
-            log_success "tmux installed successfully: $TMUX_VERSION"
+            log_success "tmux installed: $TMUX_VERSION"
+            tmux_installed=true
             track_success
         else
-            log_warning "tmux installation failed, continuing..."
+            log_warning "tmux installation failed, skipping configuration"
             track_failure
+            return 1
         fi
+    fi
+    
+    # Verify configuration is properly symlinked
+    if [ "$tmux_installed" = true ]; then
+        local TMUX_CONF="$HOME/.tmux.conf"
+        local TMUX_CONF_SOURCE="$DOTFILES_DIR/config/tmux.conf"
+        
+        if [[ -L "$TMUX_CONF" ]]; then
+            local LINK_TARGET=$(readlink -f "$TMUX_CONF" 2>/dev/null)
+            local EXPECTED_TARGET=$(readlink -f "$TMUX_CONF_SOURCE" 2>/dev/null)
+            
+            if [[ "$LINK_TARGET" == "$EXPECTED_TARGET" ]]; then
+                log_substep "Configuration already linked"
+                config_verified=true
+            else
+                log_substep "Fixing configuration symlink..."
+                rm "$TMUX_CONF"
+                ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
+                log_substep "Configuration symlink corrected"
+                config_verified=true
+            fi
+        elif [[ -f "$TMUX_CONF" ]]; then
+            log_substep "Backing up existing config and creating symlink..."
+            local BACKUP_FILE="${TMUX_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
+            mv "$TMUX_CONF" "$BACKUP_FILE"
+            ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
+            log_substep "Configuration symlinked (backup: $(basename $BACKUP_FILE))"
+            config_verified=true
+        elif [[ -f "$TMUX_CONF_SOURCE" ]]; then
+            log_substep "Creating configuration symlink..."
+            ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
+            log_substep "Configuration symlinked"
+            config_verified=true
+        else
+            log_warning "Configuration source not found at $TMUX_CONF_SOURCE"
+        fi
+        
+        # Test configuration syntax if successfully linked
+        if [ "$config_verified" = true ] && [[ -f "$TMUX_CONF" ]]; then
+            if tmux -f "$TMUX_CONF" new-session -d -s tmux-config-test 'exit' 2>/dev/null; then
+                tmux kill-session -t tmux-config-test 2>/dev/null || true
+                log_substep "Configuration syntax validated"
+            fi
+        fi
+    fi
+}
+
+# ============================================================================
+# CONFIGURATION SYMLINKS
+# ============================================================================
+setup_config_symlinks() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Terminal Configuration" "$WRENCH"
+    fi
+    
+    # Define configuration files managed by this script
+    # These are for tools installed by terminal.sh
+    declare -A TERMINAL_CONFIGS=(
+        ["$DOTFILES_DIR/config/.zshrc"]="$HOME/.zshrc"
+        ["$DOTFILES_DIR/config/.zprofile"]="$HOME/.zprofile"
+        ["$DOTFILES_DIR/config/functions.zsh"]="$HOME/.zsh_functions"
+        ["$DOTFILES_DIR/config/starship.toml"]="$HOME/.config/starship.toml"
+        ["$DOTFILES_DIR/config/fastfetch.jsonc"]="$HOME/.config/fastfetch/config.jsonc"
+    )
+    
+    local created=0
+    local skipped=0
+    
+    for source in "${!TERMINAL_CONFIGS[@]}"; do
+        target="${TERMINAL_CONFIGS[$source]}"
+        
+        # Create parent directory if needed
+        target_dir=$(dirname "$target")
+        if [[ ! -d "$target_dir" ]]; then
+            mkdir -p "$target_dir"
+        fi
+        
+        # Check if target already exists and points to correct location
+        if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+            log_substep "$(basename "$target") - already linked"
+            skipped=$((skipped + 1))
+        else
+            # Backup existing file if present
+            if [[ -f "$target" ]] && [[ ! -L "$target" ]]; then
+                local backup="${target}.backup.$(date +%Y%m%d_%H%M%S)"
+                mv "$target" "$backup"
+                log_substep "$(basename "$target") - backed up existing file"
+            fi
+            
+            # Create/update symlink
+            ln -sf "$source" "$target"
+            log_substep "$(basename "$target") - linked"
+            created=$((created + 1))
+        fi
+    done
+    
+    if [ $created -gt 0 ]; then
+        log_success "Linked $created configuration file(s)"
+    fi
+    if [ $skipped -gt 0 ] && [[ "$QUIET_MODE" != "true" ]]; then
+        log_info "Skipped $skipped existing symlink(s)"
     fi
 }
 
@@ -464,6 +572,9 @@ main() {
     install_nerd_font
     install_emoji_fonts
     install_tmux
+    
+    # Setup configuration symlinks for all installed tools
+    setup_config_symlinks
     
     # Print summary only in verbose mode
     if [[ "$QUIET_MODE" != "true" ]]; then

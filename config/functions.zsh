@@ -270,32 +270,31 @@ add-dotfile() {
     ln -s "$dest_path" "$source_path"
     log_success "Symlink created"
     
-    # Update install.sh
-    log_step "Updating install.sh..." "$PENCIL"
+    # Update symlinks.conf
+    log_step "Updating symlinks configuration..." "$PENCIL"
+    
+    local symlinks_conf="$dotfiles_dir/config/symlinks.conf"
     
     # Replace literal home path with $HOME variable
     local install_target_path="${source_path/#$HOME/\$HOME}"
     # Convert dest_path to use $DOTFILES_DIR
     local install_source_path="${dest_path/#$dotfiles_dir/\$DOTFILES_DIR}"
-    local new_entry="    [\"$install_source_path\"]=\"$install_target_path\""
+    local new_entry="$install_source_path:$install_target_path"
     
-    if grep -q "\"$install_target_path\"" "$install_script"; then
-        log_warning "${WARNING}  Entry already exists in install.sh"
+    # Check if entry already exists
+    if grep -qF "$new_entry" "$symlinks_conf" 2>/dev/null; then
+        log_warning "${WARNING}  Entry already exists in symlinks.conf"
     else
-        # Insert into SYMLINKS array
-        # We assume the array definition ends with a closing parenthesis
-        sed -i "/^declare -A SYMLINKS=/,/^)/ {
-            /^)/ i\\
-$new_entry
-        }" "$install_script"
-        log_success "Added to install.sh"
+        # Append to config file
+        echo "$new_entry" >> "$symlinks_conf"
+        log_success "Added to symlinks.conf"
     fi
     
     # Stage changes
     log_step "Staging changes..." "$PACKAGE"
     # Get relative path from dotfiles_dir for git add
     local git_add_path="${dest_path/#$dotfiles_dir\/}"
-    git -C "$dotfiles_dir" add "$git_add_path" "install.sh"
+    git -C "$dotfiles_dir" add "$git_add_path" "config/symlinks.conf"
     
     log_complete "Successfully added '$dest_filename'!"
     log_plain "Next: dotpush 'Add $dest_filename'"

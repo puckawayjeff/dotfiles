@@ -173,43 +173,63 @@ else
     log_substep "Skipping MOTD setup - fastfetch will run from .zshrc instead"
 fi
 
-# --- 5. Create symlinks ---
-log_info "Creating symlinks..."
+# --- 5. Create user-defined symlinks ---
+# NOTE: Core tool configurations (zsh, starship, fastfetch, tmux) are managed by lib/terminal.sh
+# This section handles additional symlinks added via the add-dotfile function
 
-# Define symlink mappings (source -> target)
-# NOTE: SSH config is managed separately (not symlinked from public repo)
-declare -A SYMLINKS=(
-    ["$DOTFILES_DIR/config/.zshrc"]="$HOME/.zshrc"
-    ["$DOTFILES_DIR/config/.zprofile"]="$HOME/.zprofile"
-    ["$DOTFILES_DIR/config/starship.toml"]="$HOME/.config/starship.toml"
-    ["$DOTFILES_DIR/config/fastfetch.jsonc"]="$HOME/.config/fastfetch/config.jsonc"
-    ["$DOTFILES_DIR/config/functions.zsh"]="$HOME/.zsh_functions"
-    ["$DOTFILES_DIR/config/tmux.conf"]="$HOME/.tmux.conf"
-)
+SYMLINKS_CONF="$DOTFILES_DIR/config/symlinks.conf"
 
-CREATED=0
-SKIPPED=0
-
-for source in "${!SYMLINKS[@]}"; do
-    target="${SYMLINKS[$source]}"
+if [ -f "$SYMLINKS_CONF" ] && [ -s "$SYMLINKS_CONF" ]; then
+    log_info "Creating user-defined symlinks..."
     
-    # Check if target already exists and points to correct location
-    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
-        log_substep "$(basename "$target") - already linked"
-        SKIPPED=$((SKIPPED + 1))
-    else
-        # Create/update symlink
-        ln -sf "$source" "$target"
-        log_substep "$(basename "$target") - linked"
-        CREATED=$((CREATED + 1))
+    CREATED=0
+    SKIPPED=0
+    
+    # Read symlinks from config file
+    while IFS=: read -r source target || [ -n "$source" ]; do
+        # Skip empty lines and comments
+        [[ -z "$source" || "$source" =~ ^[[:space:]]*# ]] && continue
+        
+        # Expand variables in paths
+        source=$(eval echo "$source")
+        target=$(eval echo "$target")
+        
+        # Create parent directory if needed
+        target_dir=$(dirname "$target")
+        if [[ ! -d "$target_dir" ]]; then
+            mkdir -p "$target_dir"
+        fi
+        
+        # Check if target already exists and points to correct location
+        if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+            log_substep "$(basename "$target") - already linked"
+            SKIPPED=$((SKIPPED + 1))
+        else
+            # Backup existing file if present
+            if [[ -f "$target" ]] && [[ ! -L "$target" ]]; then
+                local backup="${target}.backup.$(date +%Y%m%d_%H%M%S)"
+                mv "$target" "$backup"
+                log_substep "$(basename "$target") - backed up existing file"
+            fi
+            
+            # Create/update symlink
+            ln -sf "$source" "$target"
+            log_substep "$(basename "$target") - linked"
+            CREATED=$((CREATED + 1))
+        fi
+    done < "$SYMLINKS_CONF"
+    
+    if [ $CREATED -gt 0 ]; then
+        log_success "Created/updated $CREATED user-defined symlink(s)"
     fi
-done
-
-if [ $CREATED -gt 0 ]; then
-    log_success "Created/updated $CREATED symlink(s)."
-fi
-if [ $SKIPPED -gt 0 ]; then
-    log_info "Skipped $SKIPPED existing symlink(s)"
+    if [ $SKIPPED -gt 0 ]; then
+        log_info "Skipped $SKIPPED existing symlink(s)"
+    fi
+else
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_info "No user-defined symlinks configured"
+        log_substep "Use 'add-dotfile <path>' to add configuration files"
+    fi
 fi
 
 # --- 6. Final instructions ---

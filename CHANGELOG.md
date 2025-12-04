@@ -22,6 +22,21 @@ and this project adheres to semantic versioning principles for major structural 
   - Fastfetch now displays only on terminal login (via MOTD)
   - Manual aliases still available: `fastfetch`, `ff`, `neofetch`, `screenfetch`
   - Faster shell startup time
+- **Tmux setup consolidated**: Optimized tmux installation and configuration
+  - Removed redundant `setup/tmux.sh` - tmux is now a core utility
+  - Enhanced `lib/terminal.sh` to handle full tmux setup (install + config + validation)
+  - Configuration symlink automatically created during initial installation
+  - Backs up existing configs before linking
+  - Validates tmux.conf syntax after setup
+  - Removed tmux.conf from `install.sh` SYMLINKS array (handled by terminal.sh)
+- **Symlink management architecture refactored**: Cleaner separation of concerns
+  - Created `config/symlinks.conf` for user-added dotfiles (via `add-dotfile`)
+  - Moved all core tool configs to `lib/terminal.sh` (zsh, starship, fastfetch, tmux)
+  - `install.sh` now only manages user-defined symlinks from symlinks.conf
+  - `add-dotfile` function now writes to symlinks.conf instead of editing install.sh directly
+  - Better separation: core configs with their installers, user configs in dedicated file
+  - Automatic backup of existing files before creating symlinks
+  - Simpler, more maintainable architecture
 
 ### Coming Soon
 - Host-specific configuration overrides

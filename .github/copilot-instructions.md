@@ -5,17 +5,19 @@
 Symlink-based dotfiles management for Linux hosts. Files live in Git and are symlinked to system locations (`~/.zshrc`, `~/.config/`, etc.). The repository is the single source of truth for shell configs and application configs across multiple hosts.
 
 **Key Components:**
-- `install.sh` - Creates all symlinks via SYMLINKS associative array
+- `install.sh` - Orchestrates installation and manages user-defined symlinks
+- `config/symlinks.conf` - User-added dotfiles symlink registry (managed by add-dotfile)
 - `config/functions.zsh` - Common Zsh functions and aliases
 - `config/.zshrc` - Main Zsh configuration file
 - `lib/utils.sh` - Shared library for colors, icons, and helper functions
+- `lib/terminal.sh` - Core terminal utilities installer + configuration management (zsh, starship, fastfetch, tmux)
 - `join.sh` - One-click deployment (installs git/zsh, clones repo, runs `install.sh`)
-- `setup/*.sh` - Optional tool installers (fastfetch, foot, nvm, syncthing)
+- `setup/*.sh` - Optional tool installers (foot, glow, nvm, syncthing)
 
 ## Critical Workflows
 
 ### Adding a New Dotfile
-**ALWAYS** use `add-dotfile <path>` function to create a /dotfiles symlink. Never manually move files.
+**ALWAYS** use `add-dotfile <path>` function to add user files to dotfiles. Never manually move files.
 
 Example:
 ```bash
@@ -24,13 +26,16 @@ add-dotfile ~/.gitconfig
 
 The script:
 1. Validates source exists and destination available
-2. Moves file into repo
+2. Moves file into repo (default: `config/<basename>`)
 3. Creates symlink at original location
-4. Adds entry to SYMLINKS array in `install.sh`
-5. Stages in git
+4. Adds entry to `config/symlinks.conf` (not install.sh)
+5. Stages files in git
 6. Prints next steps (review with `git diff --staged`, then commit/push)
 
-**Critical**: Preserves portability by replacing literal `$HOME` paths with variable via sed.
+**Critical**: 
+- Preserves portability by using `$HOME` and `$DOTFILES_DIR` variables
+- Writes to `config/symlinks.conf` in format: `source:target`
+- Core tool configs (zsh, starship, fastfetch, tmux) are managed by `lib/terminal.sh`, not via add-dotfile
 
 ### New Host Deployment
 Canonical one-liner:
@@ -44,15 +49,26 @@ Flow: Check SSH → Install git/zsh → Configure git user → Clone repo → Ru
 
 If repo exists, stashes uncommitted changes before pulling (shows stash command in output).
 
-### Modifying install.sh
-Structure to preserve:
-1. Create directories (`~/.config/`)
-2. Iterate SYMLINKS array with `ln -sf`
-3. Source `~/.zshrc` at end
+### Symlink Management Architecture
+
+**Core Tool Configs** (managed by `lib/terminal.sh`):
+- `.zshrc`, `.zprofile`, `functions.zsh` - Zsh configuration
+- `starship.toml` - Starship prompt
+- `fastfetch.jsonc` - Fastfetch system info
+- `tmux.conf` - Tmux multiplexer
+
+These are automatically symlinked during `terminal.sh` execution via `setup_config_symlinks()`.
+
+**User-Added Configs** (managed by `config/symlinks.conf`):
+- Format: `$DOTFILES_DIR/path/to/file:$HOME/target/path`
+- Read by `install.sh` during step 5
+- Added via `add-dotfile` function (never edit manually)
+- Supports comments (lines starting with `#`)
 
 **Variables**:
 - `$DOTFILES_DIR` - Resolved via `$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )`
 - Source paths use `$DOTFILES_DIR`, target paths use `$HOME`
+- Variables are expanded at runtime via `eval echo`
 
 ## Git Workflow (Single-User)
 
