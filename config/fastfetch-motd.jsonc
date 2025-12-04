@@ -36,7 +36,7 @@
     "showErrors": false,
     "disableLinewrap": true,
     "hideCursor": false,
-    "separator": ": ",
+    "separator": " ",
     "color": {
       "keys": "",
       "title": "",
@@ -44,6 +44,26 @@
       "separator": ""
     },
     "brightColor": true,
+    "duration": {
+      "abbreviation": false,
+      "spaceBeforeUnit": "default"
+    },
+    "size": {
+      "maxPrefix": "YB",
+      "binaryPrefix": "iec",
+      "ndigits": 2,
+      "spaceBeforeUnit": "default"
+    },
+    "temp": {
+      "unit": "D",
+      "ndigits": 1,
+      "color": {
+        "green": "32",
+        "yellow": "93",
+        "red": "91"
+      },
+      "spaceBeforeUnit": "default"
+    },
     "percent": {
       "type": [
         "num",
@@ -54,13 +74,42 @@
         "green": "32",
         "yellow": "93",
         "red": "91"
-      }
+      },
+      "spaceBeforeUnit": "default",
+      "width": 0
     },
-    "size": {
-      "maxPrefix": "YB",
-      "binaryPrefix": "iec",
+    "bar": {
+      "char": {
+        "elapsed": "■",
+        "total": "-"
+      },
+      "border": {
+        "left": "[ ",
+        "right": " ]",
+        "leftElapsed": "",
+        "rightElapsed": ""
+      },
+      "color": {
+        "elapsed": "auto",
+        "total": "97",
+        "border": "97"
+      },
+      "width": 10
+    },
+    "fraction": {
       "ndigits": 2
-    }
+    },
+    "noBuffer": false,
+    "key": {
+      "width": 0,
+      "type": "icon",
+      "paddingLeft": 0
+    },
+    "freq": {
+      "ndigits": 2,
+      "spaceBeforeUnit": "default"
+    },
+    "constants": []
   },
   "general": {
     "thread": true,
@@ -175,7 +224,6 @@
     },
     {
       "type": "command",
-      "key": "Tailscale IP",
       "keyIcon": "󰛳",
       "text": "tailscale ip -4 2>/dev/null",
       "shell": "/bin/bash",
@@ -193,9 +241,22 @@
     },
     {
       "type": "command",
-      "key": "Dotfiles",
-      "keyIcon": "",
-      "text": "cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown'",
+      "keyIcon": "",
+      "text": "echo -n 'dotfiles ' && (cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown')",
+      "shell": "/bin/bash",
+      "param": "-c"
+    }
+    {
+      "type": "command",
+      "keyIcon": "💻",
+      "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_host",
+      "shell": "/bin/bash",
+      "param": "-c"
+    },
+    {
+      "type": "command",
+      "keyIcon": "🕒",
+      "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_time",
       "shell": "/bin/bash",
       "param": "-c"
     }

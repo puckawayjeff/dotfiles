@@ -40,9 +40,9 @@ source "$DOTFILES_DIR/lib/utils.sh"
 
 This provides:
 
-- **Colors**: `$GREEN`, `$YELLOW`, `$BLUE`, `$CYAN`, `$RED`, `$NC` (portable via tput)
-- **Icons**: `$ROCKET`, `$WRENCH`, `$CHECK`, `$CROSS`, `$COMPUTER`, `$PARTY`, `$PACKAGE`
-- **Helpers**: `log_section()`, `log_success()`, `log_error()`, `log_warning()`, `log_info()`, `log_substep()`
+- **Colors**: `$GREEN`, `$YELLOW`, `$BLUE`, `$CYAN`, `$RED`, `$BOLD`, `$NC` (portable via tput)
+- **Icons**: `$ROCKET`, `$WRENCH`, `$CHECK`, `$CROSS`, `$COMPUTER`, `$PARTY`, `$PACKAGE`, `$FOLDER`, `$LINK`, `$PENCIL`, `$ARROW_DOWN`, `$ARROW_UP`, `$RELOAD`, `$WARNING`, `$CLOCK`
+- **Helpers**: `log_section()`, `log_success()`, `log_error()`, `log_warning()`, `log_info()`, `log_substep()`, `log_step()`, `log_action()`, `log_complete()`, `log_data()`, `log_plain()`
 
 ### When to Define Colors Manually
 
@@ -55,23 +55,36 @@ Only define colors inline for **standalone scripts** that must work outside the 
 - **BLUE** - Major section headers, high-level operations
 - **CYAN** - Command output, sub-operations, detailed progress
 - **RED** - Errors, failures, critical issues
+- **BOLD** - Emphasis on key data (hostnames, values, etc.)
 
 ## Using Helper Functions
 
-Prefer helper functions from `lib/utils.sh` over manual printf/echo commands:
+**CRITICAL**: Always use `log_*` helper functions from `lib/utils.sh` for output. Never use raw `printf` or `echo` with color codes.
+
+**Available log_* functions**:
+- `log_section "Title" "Optional Icon"` - Section headers (cyan, always shown)
+- `log_success "Message"` - Success messages (green with ✅)
+- `log_error "Message"` - Error messages (red with ❌, always shown)
+- `log_info "Message"` - Info messages (blue)
+- `log_warning "Message"` - Warnings (yellow, always shown)
+- `log_step "Message" "Optional Icon"` - Step descriptions (blue with 🔧)
+- `log_action "Message" "Optional Icon"` - Actions in progress (cyan with 💻)
+- `log_complete "Message"` - Completion messages (green with 🎉)
+- `log_data "Icon" "Color" "Message"` - Data display with custom icon/color
+- `log_substep "Message"` - Sub-step indented text
+- `log_plain "Message"` - Plain text without formatting
 
 ```bash
-# Use helper functions for standard messages
+# Always use log_* functions for output
 log_section "Installing Dependencies"             # Section header with icon
-log_substep "Downloading configuration file..."   # Indented sub-step
+log_step "Downloading configuration file"         # Step with icon
+log_substep "Extracting archive..."               # Indented sub-step
+log_data "$COMPUTER" "${CYAN}${BOLD}" "hostname"  # Custom data display
+log_data "$CLOCK" "$YELLOW" "Thu Dec 4, 2025"     # Timestamp display
 log_success "Installation complete"               # Success message
 log_error "Configuration failed"                  # Error message
 log_warning "Please review the settings"          # Warning message
 log_info "Processing 3 files"                     # Info message
-
-# For custom formatted output, icons are available:
-printf "${CYAN}${ROCKET} Starting installation process...${NC}\n"
-printf "${GREEN}${PARTY} Setup finished successfully!${NC}\n"
 ```
 
 ## Output Formatting Patterns

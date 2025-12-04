@@ -36,7 +36,7 @@
     "showErrors": false,
     "disableLinewrap": true,
     "hideCursor": false,
-    "separator": ": ",
+    "separator": " ",
     "color": {
       "keys": "",
       "title": "",
@@ -102,7 +102,7 @@
     "noBuffer": false,
     "key": {
       "width": 0,
-      "type": "string",
+      "type": "icon",
       "paddingLeft": 0
     },
     "freq": {
@@ -251,7 +251,6 @@
     },
     {
       "type": "command",
-      "key": "Tailscale IP",
       "keyIcon": "󰛳",
       "text": "tailscale ip -4 2>/dev/null",
       "shell": "/bin/bash",
@@ -277,13 +276,12 @@
     },
     {
       "type": "version",
-      "keyIcon": ""
+      "keyIcon": "󱔼"
     },
     {
       "type": "command",
-      "key": "Dotfiles",
-      "keyIcon": "",
-      "text": "cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown'",
+      "keyIcon": "",
+      "text": "echo -n 'dotfiles ' && (cat ~/dotfiles/VERSION 2>/dev/null | sed 's/^/v/' || echo 'unknown')",
       "shell": "/bin/bash",
       "param": "-c"
     }

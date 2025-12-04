@@ -78,62 +78,51 @@ resolve_ip() {
     return 1
 }
 
-# --- Get last login information ---
-get_last_login() {
+# --- Get last login host for fastfetch ---
+get_last_login_host() {
     local current_user="${USER}"
-    
-    # Get last login from wtmp (excludes current session)
-    # Format: username tty login_time - IP
     local last_entry=$(last -i -n 2 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
     
     if [ -z "$last_entry" ]; then
-        # Fallback to lastlog if last command fails
         local lastlog_output=$(lastlog -u "$current_user" 2>/dev/null | tail -n 1)
-        
         if echo "$lastlog_output" | grep -q "Never logged in"; then
-            return 1
+            echo "never"
+            return
         fi
-        
-        # Parse lastlog output
-        # Format: Username Port From Latest
         local from_ip=$(echo "$lastlog_output" | awk '{print $3}')
-        local timestamp=$(echo "$lastlog_output" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ \t]*//')
-        
-        if [ -n "$from_ip" ] && [ "$from_ip" != "**Never" ]; then
-            local resolved=$(resolve_ip "$from_ip")
-            local formatted_time=$(format_timestamp "$timestamp")
-            echo "from ${CYAN}${BOLD}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
-            return 0
+        if [ -z "$from_ip" ] || [ "$from_ip" = "**Never" ]; then
+            echo "never"
+            return
         fi
-        
-        return 1
+        resolve_ip "$from_ip"
+        return
     fi
     
-    # Parse 'last' output
-    # Example: jeff     pts/0        100.100.166.103  Thu Dec  4 13:43   still logged in
     local from_ip=$(echo "$last_entry" | awk '{print $3}')
-    local timestamp=$(echo "$last_entry" | awk '{for(i=4;i<=NF-3;i++) printf "%s ", $i; print ""}' | sed 's/ *$//')
-    
-    # Handle cases where there's no IP (local login)
     if [ -z "$from_ip" ] || [ "$from_ip" = "-" ]; then
-        local formatted_time=$(format_timestamp "$timestamp")
-        echo "locally on ${YELLOW}${formatted_time}${NC}"
-        return 0
+        echo "local"
+        return
     fi
     
-    local resolved=$(resolve_ip "$from_ip")
-    local formatted_time=$(format_timestamp "$timestamp")
-    
-    echo "from ${CYAN}${BOLD}${resolved}${NC} on ${YELLOW}${formatted_time}${NC}"
-    return 0
+    resolve_ip "$from_ip"
 }
 
-# --- Main execution ---
-# Only display during SSH sessions to replace PAM's lastlog
-if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]; then
-    last_login_info=$(get_last_login)
+# --- Get last login time for fastfetch ---
+get_last_login_time() {
+    local current_user="${USER}"
+    local last_entry=$(last -i -n 2 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
     
-    if [ $? -eq 0 ] && [ -n "$last_login_info" ]; then
-        printf "${GREEN}${CLOCK} Last login${NC}: ${last_login_info}\n"
+    if [ -z "$last_entry" ]; then
+        local lastlog_output=$(lastlog -u "$current_user" 2>/dev/null | tail -n 1)
+        if echo "$lastlog_output" | grep -q "Never logged in"; then
+            echo "never"
+            return
+        fi
+        local timestamp=$(echo "$lastlog_output" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ \t]*//')
+        format_timestamp "$timestamp"
+        return
     fi
-fi
+    
+    local timestamp=$(echo "$last_entry" | awk '{for(i=4;i<=NF-3;i++) printf "%s ", $i; print ""}' | sed 's/ *$//')
+    format_timestamp "$timestamp"
+}

@@ -8,6 +8,7 @@ if command -v tput &> /dev/null; then
     BLUE=$(tput setaf 4)
     CYAN=$(tput setaf 6)
     RED=$(tput setaf 1)
+    BOLD=$(tput bold)
     NC=$(tput sgr0)
 else
     GREEN='\033[0;32m'
@@ -15,6 +16,7 @@ else
     BLUE='\033[0;34m'
     CYAN='\033[0;36m'
     RED='\033[0;31m'
+    BOLD='\033[1m'
     NC='\033[0m'
 fi
 
@@ -33,6 +35,7 @@ ARROW_DOWN="⬇️"
 ARROW_UP="⬆️"
 RELOAD="🔄"
 WARNING="⚠️"
+CLOCK="🕒"
 
 # --- Logging Helpers ---
 # Supports QUIET_MODE environment variable to suppress verbose output
@@ -117,5 +120,17 @@ log_action() {
         local message="$1"
         local icon="${2:-$COMPUTER}"
         printf "${CYAN}${icon} ${message}${NC}\n"
+    fi
+}
+
+# Print a data item with icon and custom color formatting
+# Usage: log_data "Icon" "Color" "Message"
+# Example: log_data "$CLOCK" "$YELLOW" "Thu Dec 4, 2025 at 3:02 PM"
+log_data() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        local icon="$1"
+        local color="$2"
+        local message="$3"
+        printf "${icon} ${color}${message}${NC}\n"
     fi
 }

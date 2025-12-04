@@ -103,13 +103,34 @@ Testing happens live. No branches. Changes sync immediately via symlinks.
 
 **Colors, Emoji constants, and Output format**:
 
-Defined in `lib/utils.sh` and sourced in `.zshrc`
+Defined in `lib/utils.sh` and sourced in `.zshrc`. **CRITICAL**: Always use `log_*` helper functions for output, never raw `printf` or `echo` with color codes.
 
+**Available log_* functions**:
+- `log_section "Title" "Optional Icon"` - Section headers (cyan, always shown)
+- `log_success "Message"` - Success messages (green with ✅)
+- `log_error "Message"` - Error messages (red with ❌, always shown)
+- `log_info "Message"` - Info messages (blue)
+- `log_warning "Message"` - Warnings (yellow, always shown)
+- `log_step "Message" "Optional Icon"` - Step descriptions (blue with 🔧)
+- `log_action "Message" "Optional Icon"` - Actions in progress (cyan with 💻)
+- `log_complete "Message"` - Completion messages (green with 🎉)
+- `log_data "Icon" "Color" "Message"` - Data display with custom icon/color
+- `log_substep "Message"` - Sub-step indented text
+- `log_plain "Message"` - Plain text without formatting
+
+**Example usage**:
+```bash
+log_section "Installing Package"
+log_step "Downloading dependencies"
+log_data "$COMPUTER" "${CYAN}${BOLD}" "hostname"
+log_data "$CLOCK" "$YELLOW" "Thu Dec 4, 2025 at 3:02 PM"
+log_success "Installation complete"
+```
 
 **Idempotency** - All scripts safe to run multiple times. Check existing state before acting:
 ```bash
 if command -v tool &> /dev/null; then
-    printf "${GREEN}${CHECK} Already installed.${NC}\n"
+    log_success "Already installed"
 else
     # Install logic
 fi
