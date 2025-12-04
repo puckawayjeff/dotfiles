@@ -178,11 +178,13 @@
     },
     {
       "type": "terminal",
-      "keyIcon": ""
+      "keyIcon": "",
+      "hideIfFailed": true
     },
     {
       "type": "terminalfont",
-      "keyIcon": ""
+      "keyIcon": "",
+      "hideIfFailed": true
     },
     {
       "type": "cpu",

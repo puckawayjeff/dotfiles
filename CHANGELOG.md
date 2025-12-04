@@ -16,6 +16,7 @@ and this project adheres to semantic versioning principles for major structural 
   - Terminal and shell detection work correctly
   - Custom modules (Tailscale IP, Dotfiles version) display correctly
   - Respects user's fastfetch config (no color bars, custom formatting)
+  - Terminal module now hidden when detection fails (blank value in MOTD context)
 - **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
   - Set `TERM=xterm-256color` when not defined or set to "dumb"
   - Export `COLORTERM=truecolor` to force color support detection
