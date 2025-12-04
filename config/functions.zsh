@@ -162,7 +162,10 @@ dotpull() {
         
         if [[ "$NO_EXEC" == "true" ]]; then
             log_success "\nDotfiles updated. Reload skipped (--no-exec)."
+            cd "$ORIGINAL_DIR"
         else
+            # Return to original directory before reloading shell
+            cd "$ORIGINAL_DIR" || true
             # Reload shell configuration by replacing the process
             log_info "\n🔄 Reloading zsh configuration..."
             exec zsh
@@ -172,8 +175,6 @@ dotpull() {
         cd "$ORIGINAL_DIR"
         return 1
     fi
-    
-    cd "$ORIGINAL_DIR"
 }
 
 # Add a new dotfile to the repo
@@ -450,6 +451,8 @@ packk() {
 
 # Maintenance sequence
 maintain() {
+    local ORIGINAL_DIR="$PWD"
+    
     log_section "Starting Maintenance Sequence" "$ROCKET"
     
     # Run dotpull without reloading shell immediately
@@ -466,6 +469,9 @@ maintain() {
     log_info "Launching system updates...\n"
     
     updatep
+    
+    # Return to original directory before reloading shell
+    cd "$ORIGINAL_DIR" || true
     
     # Reload shell at the very end
     log_info "\n🔄 Reloading zsh configuration..."
