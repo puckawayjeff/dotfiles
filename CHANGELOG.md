@@ -13,10 +13,10 @@ and this project adheres to semantic versioning principles for major structural 
   - Uses `su - username` to execute fastfetch with proper login environment
   - Correctly displays `user@hostname` instead of `root@hostname`
   - Proper locale detection (`en_US.UTF-8` instead of `C`)
-  - Terminal and shell detection work correctly
+  - Shell detection works correctly
   - Custom modules (Tailscale IP, Dotfiles version) display correctly
   - Respects user's fastfetch config (no color bars, custom formatting)
-  - Terminal module now hidden when detection fails (blank value in MOTD context)
+  - Removed terminal/terminalfont modules (not useful in MOTD context, always blank)
 - **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
   - Set `TERM=xterm-256color` when not defined or set to "dumb"
   - Export `COLORTERM=truecolor` to force color support detection
@@ -31,6 +31,12 @@ and this project adheres to semantic versioning principles for major structural 
   - Extensible framework for future login messages (disk warnings, updates, etc.)
   - Comprehensive documentation in `docs/MOTD Integration.md`
   - Graceful fallback on systems without update-motd support
+- **Dual fastfetch configs**: Separate configs for MOTD vs interactive use
+  - `config/fastfetch.jsonc` - Full config (symlinked to `~/.config/fastfetch/config.jsonc`)
+  - `config/fastfetch-motd.jsonc` - Streamlined MOTD config (called directly by motd.sh)
+  - MOTD config removes: packages, DE/WM/themes, display info, poweradapter, locale, version
+  - MOTD config keeps: system identity, uptime, shell, CPU/GPU, memory/swap/disk, IPs, battery, dotfiles version
+  - Faster MOTD execution (3s timeout vs 5s, version detection disabled)
 
 ### Changed
 - **`.zshrc` Fastfetch behavior**: Removed auto-launch on shell startup

@@ -40,22 +40,27 @@ fi
 
 # --- Fastfetch Display ---
 if command -v fastfetch >/dev/null 2>&1; then
-    # Explicitly specify config file path using detected user home
-    FASTFETCH_CONFIG="$USER_HOME/.config/fastfetch/config.jsonc"
+    # Determine dotfiles directory (script location)
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+    
+    # Use MOTD-specific config (streamlined for login screen)
+    FASTFETCH_MOTD_CONFIG="$DOTFILES_DIR/config/fastfetch-motd.jsonc"
     
     if [ -n "$LOGIN_USER" ] && [ "$LOGIN_USER" != "root" ]; then
         # Run fastfetch as the actual login user with login environment
         # Use - flag to create a proper login shell environment for correct locale, shell detection
         # Export TERM and COLORTERM explicitly for color support
-        if [ -f "$FASTFETCH_CONFIG" ]; then
-            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --config '$FASTFETCH_CONFIG'"
+        if [ -f "$FASTFETCH_MOTD_CONFIG" ]; then
+            su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch --config '$FASTFETCH_MOTD_CONFIG'"
         else
+            # Fallback to default config if MOTD config doesn't exist
             su - "$LOGIN_USER" -c "export TERM='$TERM' COLORTERM='$COLORTERM'; fastfetch"
         fi
     else
         # Fallback: run as current user (shouldn't happen in normal MOTD context)
-        if [ -f "$FASTFETCH_CONFIG" ]; then
-            fastfetch --config "$FASTFETCH_CONFIG"
+        if [ -f "$FASTFETCH_MOTD_CONFIG" ]; then
+            fastfetch --config "$FASTFETCH_MOTD_CONFIG"
         else
             fastfetch
         fi

@@ -44,26 +44,6 @@
       "separator": ""
     },
     "brightColor": true,
-    "duration": {
-      "abbreviation": false,
-      "spaceBeforeUnit": "default"
-    },
-    "size": {
-      "maxPrefix": "YB",
-      "binaryPrefix": "iec",
-      "ndigits": 2,
-      "spaceBeforeUnit": "default"
-    },
-    "temp": {
-      "unit": "D",
-      "ndigits": 1,
-      "color": {
-        "green": "32",
-        "yellow": "93",
-        "red": "91"
-      },
-      "spaceBeforeUnit": "default"
-    },
     "percent": {
       "type": [
         "num",
@@ -74,55 +54,24 @@
         "green": "32",
         "yellow": "93",
         "red": "91"
-      },
-      "spaceBeforeUnit": "default",
-      "width": 0
+      }
     },
-    "bar": {
-      "char": {
-        "elapsed": "■",
-        "total": "-"
-      },
-      "border": {
-        "left": "[ ",
-        "right": " ]",
-        "leftElapsed": "",
-        "rightElapsed": ""
-      },
-      "color": {
-        "elapsed": "auto",
-        "total": "97",
-        "border": "97"
-      },
-      "width": 10
-    },
-    "fraction": {
+    "size": {
+      "maxPrefix": "YB",
+      "binaryPrefix": "iec",
       "ndigits": 2
-    },
-    "noBuffer": false,
-    "key": {
-      "width": 0,
-      "type": "string",
-      "paddingLeft": 0
-    },
-    "freq": {
-      "ndigits": 2,
-      "spaceBeforeUnit": "default"
-    },
-    "constants": []
+    }
   },
   "general": {
     "thread": true,
-    "processingTimeout": 5000,
-    "detectVersion": true,
-    "playerName": "",
-    "dsForceDrm": false
+    "processingTimeout": 3000,
+    "detectVersion": false
   },
   "modules": [
     {
       "type": "title",
       "key": " ",
-      "keyIcon": "",
+      "keyIcon": "",
       "fqdn": false,
       "color": {
         "user": "",
@@ -138,7 +87,7 @@
     },
     {
       "type": "os",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "host",
@@ -146,39 +95,19 @@
     },
     {
       "type": "kernel",
-      "keyIcon": ""
+      "keyIcon": ""
     },
     {
       "type": "uptime",
-      "keyIcon": ""
-    },
-    {
-      "type": "packages",
-      "keyIcon": "󰏖",
-      "disabled": [
-        "winget"
-      ],
-      "combined": false
+      "keyIcon": ""
     },
     {
       "type": "shell",
-      "keyIcon": ""
-    },
-    {
-      "type": "display",
-      "keyIcon": "󰍹",
-      "compactType": "none",
-      "preciseRefreshRate": false,
-      "order": null
-    },
-    {
-      "type": "de",
-      "keyIcon": "",
-      "slowVersionDetection": false
+      "keyIcon": ""
     },
     {
       "type": "cpu",
-      "keyIcon": "",
+      "keyIcon": "",
       "temp": false,
       "showPeCoreCount": false
     },
@@ -188,16 +117,11 @@
       "driverSpecific": false,
       "detectionMethod": "pci",
       "temp": false,
-      "hideType": "none",
-      "percent": {
-        "green": 50,
-        "yellow": 80,
-        "type": 0
-      }
+      "hideType": "none"
     },
     {
       "type": "memory",
-      "keyIcon": "",
+      "keyIcon": "",
       "percent": {
         "green": 50,
         "yellow": 80,
@@ -216,12 +140,12 @@
     },
     {
       "type": "disk",
-      "keyIcon": "",
+      "keyIcon": "",
       "showRegular": true,
-      "showExternal": true,
+      "showExternal": false,
       "showHidden": false,
       "showSubvolumes": false,
-      "showReadOnly": true,
+      "showReadOnly": false,
       "showUnknown": false,
       "folders": "",
       "hideFolders": "/efi:/boot:/boot/*",
@@ -259,25 +183,13 @@
     },
     {
       "type": "battery",
-      "keyIcon": "",
+      "keyIcon": "",
       "temp": false,
       "percent": {
         "green": 50,
         "yellow": 20,
         "type": 0
       }
-    },
-    {
-      "type": "poweradapter",
-      "keyIcon": "󰚥"
-    },
-    {
-      "type": "locale",
-      "keyIcon": ""
-    },
-    {
-      "type": "version",
-      "keyIcon": ""
     },
     {
       "type": "command",
