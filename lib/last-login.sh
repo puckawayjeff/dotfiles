@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # lib/last-login.sh - Custom last login display for SSH sessions
-# Replaces PAM's pam_lastlog with styled output and IP-to-hostname mapping
+# Uses 'last' command (wtmp) for login history with styled output and IP-to-hostname mapping
 
 # Source our utilities for colors and styling
 # Handle both bash and zsh
@@ -81,48 +81,49 @@ resolve_ip() {
 # --- Get last login host for fastfetch ---
 get_last_login_host() {
     local current_user="${USER}"
-    local last_entry=$(last -i -n 2 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
+    
+    # Get the most recent completed login (excluding current session)
+    # -i shows IPs instead of hostnames, -n limits results
+    local last_entry=$(last -i -n 3 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
     
     if [ -z "$last_entry" ]; then
-        local lastlog_output=$(lastlog -u "$current_user" 2>/dev/null | tail -n 1)
-        if echo "$lastlog_output" | grep -q "Never logged in"; then
-            echo "never"
-            return
-        fi
-        local from_ip=$(echo "$lastlog_output" | awk '{print $3}')
-        if [ -z "$from_ip" ] || [ "$from_ip" = "**Never" ]; then
-            echo "never"
-            return
-        fi
-        resolve_ip "$from_ip"
+        echo "never"
         return
     fi
     
-    local from_ip=$(echo "$last_entry" | awk '{print $3}')
-    if [ -z "$from_ip" ] || [ "$from_ip" = "-" ]; then
+    # Extract the source (3rd column)
+    local from_source=$(echo "$last_entry" | awk '{print $3}')
+    
+    if [ -z "$from_source" ] || [ "$from_source" = "-" ]; then
         echo "local"
         return
     fi
     
-    resolve_ip "$from_ip"
+    # Check if it's an IP address (contains dots or colons for IPv6)
+    if [[ "$from_source" =~ [.:] ]]; then
+        resolve_ip "$from_source"
+    else
+        # Already a hostname or display (e.g., :0, tty)
+        echo "$from_source"
+    fi
 }
 
 # --- Get last login time for fastfetch ---
 get_last_login_time() {
     local current_user="${USER}"
-    local last_entry=$(last -i -n 2 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
+    
+    # Get the most recent completed login (excluding current session)
+    local last_entry=$(last -i -n 3 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
     
     if [ -z "$last_entry" ]; then
-        local lastlog_output=$(lastlog -u "$current_user" 2>/dev/null | tail -n 1)
-        if echo "$lastlog_output" | grep -q "Never logged in"; then
-            echo "never"
-            return
-        fi
-        local timestamp=$(echo "$lastlog_output" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ \t]*//')
-        format_timestamp "$timestamp"
+        echo "never"
         return
     fi
     
+    # Extract timestamp from last output
+    # Format: username tty source day month date time - time year
+    # Example: jeff pts/0 100.75.19.2 Thu Dec 5 14:23 - 15:30 (01:07)
     local timestamp=$(echo "$last_entry" | awk '{for(i=4;i<=NF-3;i++) printf "%s ", $i; print ""}' | sed 's/ *$//')
+    
     format_timestamp "$timestamp"
 }
