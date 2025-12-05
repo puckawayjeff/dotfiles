@@ -249,14 +249,14 @@
     {
       "type": "command",
       "keyIcon": "󰟀",
-      "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_host",
+      "text": "source ~/dotfiles/lib/last-login.sh && host=$(get_last_login_host) && [ \"$host\" != \"never\" ] && echo \"$host\" || echo",
       "shell": "/bin/bash",
       "param": "-c"
     },
     {
       "type": "command",
       "keyIcon": "󰃰",
-      "text": "source ~/dotfiles/lib/last-login.sh && get_last_login_time",
+      "text": "source ~/dotfiles/lib/last-login.sh && time=$(get_last_login_time) && [ \"$time\" != \"never\" ] && echo \"$time\" || echo",
       "shell": "/bin/bash",
       "param": "-c"
     }
