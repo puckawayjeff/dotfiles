@@ -82,16 +82,22 @@ resolve_ip() {
 get_last_login_host() {
     local current_user="${USER}"
     
-    # Get the most recent completed login (excluding current session)
-    # -i shows IPs instead of hostnames, -n limits results
-    local last_entry=$(last -i -n 3 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
+    # Try to get the second-to-last login (current session is usually first)
+    # Use -w to show full information including IPs
+    local last_entry=$(last -w -i "$current_user" 2>/dev/null | head -n 5 | grep -v "still logged in" | head -n 1)
     
+    # Fallback: try getting any login record if no completed sessions found
     if [ -z "$last_entry" ]; then
+        last_entry=$(last -w -i "$current_user" 2>/dev/null | head -n 2 | tail -n 1)
+    fi
+    
+    # Check if we have valid data (not header line or empty)
+    if [ -z "$last_entry" ] || echo "$last_entry" | grep -q "^wtmp begins" || echo "$last_entry" | grep -q "^$"; then
         echo "never"
         return
     fi
     
-    # Extract the source (3rd column)
+    # Extract the source (3rd column in last output)
     local from_source=$(echo "$last_entry" | awk '{print $3}')
     
     if [ -z "$from_source" ] || [ "$from_source" = "-" ]; then
@@ -112,16 +118,22 @@ get_last_login_host() {
 get_last_login_time() {
     local current_user="${USER}"
     
-    # Get the most recent completed login (excluding current session)
-    local last_entry=$(last -i -n 3 "$current_user" 2>/dev/null | grep -v "still logged in" | head -n 1)
+    # Try to get the second-to-last login (current session is usually first)
+    local last_entry=$(last -w -i "$current_user" 2>/dev/null | head -n 5 | grep -v "still logged in" | head -n 1)
     
+    # Fallback: try getting any login record if no completed sessions found
     if [ -z "$last_entry" ]; then
+        last_entry=$(last -w -i "$current_user" 2>/dev/null | head -n 2 | tail -n 1)
+    fi
+    
+    # Check if we have valid data (not header line or empty)
+    if [ -z "$last_entry" ] || echo "$last_entry" | grep -q "^wtmp begins" || echo "$last_entry" | grep -q "^$"; then
         echo "never"
         return
     fi
     
     # Extract timestamp from last output
-    # Format: username tty source day month date time - time year
+    # Format with -w: username tty source day month date time - time year
     # Example: jeff pts/0 100.75.19.2 Thu Dec 5 14:23 - 15:30 (01:07)
     local timestamp=$(echo "$last_entry" | awk '{for(i=4;i<=NF-3;i++) printf "%s ", $i; print ""}' | sed 's/ *$//')
     
