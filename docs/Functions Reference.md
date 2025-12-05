@@ -206,6 +206,118 @@ Warning: PATH entry does not exist: /home/jeff/.cargo/bin
 
 ---
 
+### `maintain()` - Complete Maintenance Workflow
+
+**Purpose**: All-in-one maintenance command that updates dotfiles, reinstalls configuration, updates system packages, and reloads the shell in a single streamlined workflow.
+
+**Usage**:
+
+```bash
+maintain
+```
+
+**How It Works**:
+
+1. Saves your current directory
+2. Runs `dotpull --no-exec` to get latest dotfiles (auto-stashes local changes)
+3. Runs `install.sh` in quiet mode (symlinks are already handled by dotpull)
+4. Launches `updatep` to update system packages in background tmux session
+5. Returns to original directory
+6. Reloads zsh configuration with `exec zsh`
+
+**What Gets Updated**:
+
+- **Dotfiles**: Latest changes from GitHub
+- **Symlinks**: Configuration links verified/created
+- **System packages**: `apt update`, `apt full-upgrade`, `apt autoremove`
+- **Flatpak apps**: If flatpak is installed
+- **Shell environment**: Fresh zsh session with updated configs
+
+**Typical Output**:
+
+```text
+Starting Maintenance Sequence...
+⬇️  Pulling latest changes...
+✅ Git pull successful.
+🔧 Running install.sh...
+✅ Configuration updated.
+Launching system updates...
+
+Starting system update process...
+✅ tmux is already installed.
+💻 Running system update...
+Output will be logged to: /home/jeff/.cache/updatep.log
+Press Ctrl+B then D to detach if needed
+
+🔄 Reloading zsh configuration...
+```
+
+**When to Use**:
+
+- Regular maintenance routine (weekly/monthly)
+- After making changes on another host
+- Before starting important work (ensure everything is current)
+- After system updates to sync environment
+
+**Error Handling**:
+
+- Stops if `dotpull` fails (reports git errors)
+- Continues even if system updates fail (logs errors)
+- Always attempts to return to original directory
+- Always reloads shell (even if updates fail)
+
+**Time to Complete**: 1-5 minutes depending on updates available
+
+**Related Functions**: `dotpull`, `updatep`, `dotpush`
+
+---
+
+### `dotversion()` - Display Dotfiles Version
+
+**Purpose**: Shows the current version of your dotfiles repository along with git branch and commit information.
+
+**Usage**:
+
+```bash
+dotversion
+```
+
+**Example Output**:
+
+```text
+📦 Dotfiles Version: v1.2.0
+   Branch: main
+   Commit: 8a1cbbd
+```
+
+**How It Works**:
+
+1. Reads version from `~/dotfiles/VERSION` file
+2. Queries git for current branch name
+3. Queries git for latest commit hash (short form)
+4. Displays formatted output with colors and emojis
+
+**When to Use**:
+
+- Checking which version is deployed on a host
+- Debugging configuration issues (version mismatches)
+- Confirming successful updates after `dotpull`
+- System information gathering
+
+**Integration**:
+
+This version is also displayed in:
+- Fastfetch system information (custom module)
+- MOTD on terminal login
+
+**Error Handling**:
+
+- Returns error if `VERSION` file not found
+- Gracefully handles missing git information
+- Works even if not in a git repository
+
+---
+
 ### `packk()` - Create Archive from Directory
 
 **Purpose**: Create compressed archives (tar.gz, zip, or 7z) from directories with interactive prompts and colored output.
@@ -547,3 +659,89 @@ declare -A IP_HOSTNAMES=(
 - Installation: `sudo setup/last-login.sh`
 - Documentation: See "Setup Scripts Reference.md"
 - PAM config: `/etc/pam.d/sshd` (pam_lastlog disabled)
+
+---
+
+## SSH Sync Functions (Optional)
+
+These functions are conditionally loaded only when a companion private repository exists at `~/sshsync/.git`. They provide git workflow commands for managing SSH configuration separately from the main dotfiles repository.
+
+### `sshpush()` - Push SSH Config Changes
+
+**Purpose**: Simplified git workflow for committing and pushing SSH configuration changes from the companion sshsync repository.
+
+**Availability**: Only loaded when `~/sshsync/.git` exists
+
+**Usage**:
+
+```bash
+# With commit message
+sshpush "Add new server configuration"
+
+# Without message (will prompt)
+sshpush
+```
+
+**How It Works**:
+
+1. Saves your current directory
+2. Changes to `~/sshsync`
+3. Stages all changes (`git add .`)
+4. Commits with your provided message
+5. Pushes to remote repository (`git push`)
+6. Returns to your original directory
+
+**The ssh.conf File**:
+
+The `~/sshsync/ssh.conf` file is the actual SSH configuration file. A symlink at `~/.ssh/config` points to it. Changes made to SSH configuration are committed and pushed as part of the normal git workflow.
+
+**Error Handling**:
+
+- Returns error code 1 if no commit message provided (after prompt)
+- Returns error code 1 if `~/sshsync` directory doesn't exist
+- Warns but continues if return to original directory fails
+- Propagates git command exit codes
+
+---
+
+### `sshpull()` - Pull SSH Config Updates
+
+**Purpose**: Pull the latest SSH configuration changes from the companion sshsync repository.
+
+**Availability**: Only loaded when `~/sshsync/.git` exists
+
+**Usage**:
+
+```bash
+sshpull
+```
+
+**How It Works**:
+
+1. Saves your current directory
+2. Changes to `~/sshsync`
+3. Pulls latest changes from remote (`git pull`)
+4. Reports success or failure
+5. Returns to your original directory
+
+**Features**:
+
+- **Quiet SSH**: Uses `LogLevel=ERROR` to suppress verbose SSH output
+- **Error reporting**: Clear success/failure messages
+- **Directory restoration**: Returns to original directory after completion
+
+**When to Use**:
+
+- After making SSH config changes on another host
+- Before adding new SSH configurations (to get latest version)
+- As part of system maintenance routine
+
+**Error Handling**:
+
+- Returns error code 1 if `~/sshsync` directory doesn't exist
+- Propagates git pull exit codes for script integration
+- Returns to original directory even if pull fails
+
+---
+
+**Note**: These functions follow the same pattern as `dotpush` and `dotpull` but operate on the separate sshsync repository. They are designed to work alongside the main dotfiles workflow without interfering with it.

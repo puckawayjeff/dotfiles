@@ -1,103 +1,114 @@
-# Dotfiles v1.1.0 Release Notes
+# Dotfiles v1.2.0 Release Notes
 
-## 🚀 Enhanced System Maintenance Release
+**Release Date**: December 5, 2025
 
-This release improves system maintenance workflows with complete tmux integration and streamlined update automation.
+## Welcome Home - The Login Experience Release
 
-## ✨ What's New in v1.1.0
+This release focuses on making terminal login more informative and pleasant. The generic "Last login" message is replaced with styled output, fastfetch displays system info via MOTD, and the configuration architecture got cleaner.
 
-### Tmux Terminal Multiplexer Integration
+## What's New
 
-Complete tmux setup is now included as a core component:
+### Better Login Display
 
-- **Automatic Installation**: Tmux is automatically installed via `lib/terminal.sh` during `install.sh`
-- **Sensible Configuration**: Pre-configured with modern defaults at `~/.tmux.conf` (symlinked)
-- **Mouse Support**: Click panes, drag to resize, scroll through history
-- **Vim-style Navigation**: Use `h/j/k/l` for pane navigation, `H/J/K/L` for resizing
-- **Intuitive Splits**: `Prefix + |` for vertical split, `Prefix + -` for horizontal split
-- **Beautiful Status Bar**: Shows session name, date, and time with custom colors
-- **Enhanced Scrollback**: 10,000 line history buffer for reviewing long outputs
-- **Copy Mode**: Vim keybindings for text selection and copying
+The standard PAM lastlog message is gone. Now when logging in via SSH:
 
-**Key Bindings** (Prefix: `Ctrl+b`):
-```bash
-Prefix + |         # Split vertically
-Prefix + -         # Split horizontally  
-Prefix + h/j/k/l   # Navigate panes
-Prefix + H/J/K/L   # Resize panes
-Prefix + r         # Reload configuration
-Prefix + [         # Enter copy mode
+**MOTD shows fastfetch output:**
+- Distribution logo (ASCII art)
+- System identity, uptime, shell
+- Hardware specs (CPU, GPU, memory, disk)
+- Network info including Tailscale IPs
+- Battery status on mobile devices
+- Dotfiles version
+
+**Then a styled login message:**
+```
+Last login: from krang on Thu Dec 5, 2025 at 9:23 AM
 ```
 
-**Documentation**: Complete tmux setup guide added to `docs/Setup Scripts Reference.md`
+IP addresses can map to friendly hostnames via a lookup table in `lib/last-login.sh`. Timestamps are formatted more readably. Nothing revolutionary, just cleaner.
 
-### Improved `updatep` Function
+### Fastfetch Split Into Two Configs
 
-System update automation has been completely redesigned:
+Fastfetch now has separate configs for different contexts:
 
-- **Background Execution**: Runs in detached tmux session, no blocking terminal
-- **Automatic Logging**: All output saved to `~/.cache/updatep.log` (overwrites previous run)
-- **Auto-close**: Completes automatically without requiring user input
-- **No Delays**: Removed artificial waiting periods for faster execution
-- **Better Integration**: Seamlessly works with `maintain` workflow
+**Login Display** (`config/fastfetch-motd.jsonc`):
+- System identity and health metrics
+- 3-second timeout for speed
+- Drops package counts, desktop environment details, display info
 
-**Before v1.1.0**:
-- Attached to tmux session (blocking)
-- Required keypress to close
-- Had 5-second delay before starting
-- No persistent log file
+**Interactive Use** (`config/fastfetch.jsonc`):
+- Full system information with all modules
+- Available via `fastfetch`, `ff`, `neofetch`, or `screenfetch` aliases
 
-**After v1.1.0**:
-- Runs in background (non-blocking)
-- Auto-closes when complete
-- Starts immediately (no delays)
-- Logs saved to `~/.cache/updatep.log`
+Fastfetch no longer runs on every shell reload, just at login. Shells start faster, system info appears when it's actually useful.
 
-### Enhanced `maintain` Workflow
+### Configuration Architecture Refactored
 
-The all-in-one maintenance function is now faster and more efficient:
+How configs are managed got reorganized:
 
-- **Removed delays**: No more waiting before system updates
-- **Streamlined execution**: Pull → Install → Update → Reload in quick succession
-- **Better feedback**: Clear progress indicators throughout the process
+**Core tools** (zsh, starship, fastfetch, tmux):
+- Handled by their installer scripts in `lib/terminal.sh`
+- Installed and configured as a unit
+- Automatic setup during initial deployment
 
-## 🔧 Bug Fixes
+**User-added configs** (via `add-dotfile`):
+- Tracked in `config/symlinks.conf`
+- Separate from core tool management
+- Easier to add and track individual dotfiles
 
-- Fixed 5-second delay in `maintain` function before launching `updatep`
-- Fixed log file creation issue in `updatep` (now properly writes to `~/.cache/updatep.log`)
-- Improved tmux session handling to ensure proper cleanup
+This makes `install.sh` cleaner and troubleshooting simpler.
 
-## 📚 Documentation Updates
+### Other Improvements
 
-- Added comprehensive tmux documentation to Setup Scripts Reference
-- Updated Functions Reference with new `updatep` behavior
-- Updated copilot instructions to reflect completed tmux integration
-- Updated CHANGELOG with detailed v1.1.0 changes
+**IP-to-Hostname Mapping**: The last login script has a lookup table for mapping IPs to friendly names. Edit the associative array in `lib/last-login.sh` to add mappings.
 
-## ⬆️ Upgrade Instructions
+**Directory Context in `maintain`**: The `maintain` function now properly returns to the original directory before reloading the shell.
 
-### From v1.0.0 to v1.1.0
+**MOTD Color Rendering**: Fixed fastfetch color output in MOTD context by forcing `TERM` and `COLORTERM` environment variables.
+
+## Upgrading from v1.1.0
 
 ```bash
-# Pull latest changes
 dotpull
-
-# Or use the full maintenance workflow
+# or
 maintain
 ```
 
-The update is seamless with no breaking changes. All existing functionality is preserved.
+**What changes:**
 
-### What Happens During Update
+1. Login screen shows fastfetch via MOTD plus styled last login message
+2. Fastfetch no longer runs on shell reload (faster startup)
+3. New functions: `maintain`, `dotversion`, and optional `sshpush`/`sshpull`
+4. Configuration architecture reorganized (symlinks.conf added)
 
-1. **Tmux Installation**: If tmux isn't installed, it will be installed automatically
-2. **Configuration Symlink**: `~/.tmux.conf` will be created pointing to `config/tmux.conf`
-3. **Function Updates**: Updated `updatep` and `maintain` functions take effect immediately
-4. **No Data Loss**: All your existing configurations remain intact
+**What stays the same:**
 
-## 🎯 Quick Start with New Features
+Everything else. All existing aliases, functions, and workflows work as before. This is purely additive.
 
-### Try tmux
+## Documentation Updates
+
+Filled in the missing pieces:
+
+- **Functions Reference** now documents `maintain()`, `dotversion()`, and the SSH sync functions
+- **MOTD Integration** guide covers the new login system
+- **Last Login Display** documented in Setup Scripts Reference
+- **Changelog** has full technical details
+
+## Implementation Details
+
+- **MOTD Integration**: Uses Debian's `update-motd` system
+- **Custom Last Login**: Replaces PAM lastlog with styled version
+- **Execution Context**: Fixed fastfetch to run as login user (not root) in MOTD
+- **Color Support**: Forces truecolor mode in MOTD context
+- **Symlink Architecture**: Core configs separated from user configs
+- **Conditional Loading**: SSH sync functions only load when `~/sshsync` exists
+
+Full technical details in [CHANGELOG](CHANGELOG.md).
+
+---
+
+Documentation: `docs/` directory  
+Functions: [Functions Reference](docs/Functions%20Reference.md)
 
 ```bash
 # Start a new tmux session

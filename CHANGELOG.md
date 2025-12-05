@@ -7,11 +7,19 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Coming Soon
+- Host-specific configuration overrides
+- Backup/restore functions for safety net
+
+## [1.2.0] - 2025-12-05
+
+This release transforms the terminal login experience with polished system information display, custom login messages, and improved configuration organization.
+
 ### Added
 - **Custom Last Login Display**: Core terminal feature replacing SSH's default lastlog
   - New `lib/last-login.sh` script for custom login messages
   - IP-to-hostname mapping with configurable lookup table
-  - Cleaner timestamp formatting (e.g., "Thu Dec 4, 2025 at 1:43 PM")
+  - Cleaner timestamp formatting (e.g., "Thu Dec 5, 2025 at 9:23 AM")
   - Styled output using `lib/utils.sh` colors (green, cyan, yellow)
   - Automatic detection of SSH sessions (only displays when appropriate)
   - Multiple data sources: `last` (wtmp) and `lastlog` for reliability
@@ -19,23 +27,6 @@ and this project adheres to semantic versioning principles for major structural 
   - Integrated into `lib/terminal.sh` for automatic SSH configuration
   - Disables `PrintLastLog` in `/etc/ssh/sshd_config` during setup
   - Comprehensive documentation in "Setup Scripts Reference.md" and "Functions Reference.md"
-
-### Fixed
-- **MOTD fastfetch execution context**: Fixed fastfetch to run as the actual login user during SSH MOTD
-  - Detects actual login user via `$PAM_USER`, `$USER`, or `logname`
-  - Uses `su - username` to execute fastfetch with proper login environment
-  - Correctly displays `user@hostname` instead of `root@hostname`
-  - Proper locale detection (`en_US.UTF-8` instead of `C`)
-  - Shell detection works correctly
-  - Custom modules (Tailscale IP, Dotfiles version) display correctly
-  - Respects user's fastfetch config (no color bars, custom formatting)
-  - Removed terminal/terminalfont modules (not useful in MOTD context, always blank)
-- **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
-  - Set `TERM=xterm-256color` when not defined or set to "dumb"
-  - Export `COLORTERM=truecolor` to force color support detection
-  - Ensures colored output during SSH login matches interactive execution
-
-### Added
 - **MOTD Integration**: Fastfetch now runs via update-motd system on terminal login
   - New `lib/motd.sh` script for dynamic MOTD generation
   - Standalone fragment at `/etc/update-motd.d/99-dotfiles` that execs `lib/motd.sh`
@@ -50,6 +41,17 @@ and this project adheres to semantic versioning principles for major structural 
   - MOTD config removes: packages, DE/WM/themes, display info, poweradapter, locale, version
   - MOTD config keeps: system identity, uptime, shell, CPU/GPU, memory/swap/disk, IPs, battery, dotfiles version
   - Faster MOTD execution (3s timeout vs 5s, version detection disabled)
+- **SSH Sync Functions**: Optional companion repo workflow functions
+  - `sshpush()` and `sshpull()` functions for managing separate SSH config repository
+  - Conditionally loaded only when `~/sshsync/.git` exists
+  - Documented in "Functions Reference.md" with availability notes
+
+### Enhanced
+- **Functions Documentation**: Added missing function documentation
+  - `maintain()` - Complete maintenance workflow fully documented
+  - `dotversion()` - Version display command documented
+  - `sshpush()` / `sshpull()` - SSH sync functions documented (optional)
+  - All functions now have comprehensive documentation in "Functions Reference.md"
 
 ### Changed
 - **`.zshrc` Fastfetch behavior**: Removed auto-launch on shell startup
@@ -72,9 +74,21 @@ and this project adheres to semantic versioning principles for major structural 
   - Automatic backup of existing files before creating symlinks
   - Simpler, more maintainable architecture
 
-### Coming Soon
-- Host-specific configuration overrides
-- Backup/restore functions for safety net
+### Fixed
+- **MOTD fastfetch execution context**: Fixed fastfetch to run as the actual login user during SSH MOTD
+  - Detects actual login user via `$PAM_USER`, `$USER`, or `logname`
+  - Uses `su - username` to execute fastfetch with proper login environment
+  - Correctly displays `user@hostname` instead of `root@hostname`
+  - Proper locale detection (`en_US.UTF-8` instead of `C`)
+  - Shell detection works correctly
+  - Custom modules (Tailscale IP, Dotfiles version) display correctly
+  - Respects user's fastfetch config (no color bars, custom formatting)
+  - Removed terminal/terminalfont modules (not useful in MOTD context, always blank)
+- **MOTD color output**: Fixed fastfetch color rendering in SSH MOTD context
+  - Set `TERM=xterm-256color` when not defined or set to "dumb"
+  - Export `COLORTERM=truecolor` to force color support detection
+  - Ensures colored output during SSH login matches interactive execution
+- **Directory navigation**: Fixed `dotpull` and `maintain` functions to properly restore original directory before reloading shell
 
 ## [1.1.0] - 2025-12-03
 

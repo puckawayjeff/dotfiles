@@ -524,9 +524,6 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
             return 1
         }
         
-        # Discard local changes to ssh.conf (will be overwritten by symlink anyway)
-        git checkout -- ssh.conf 2>/dev/null || true
-        
         git add . && \
         git commit -m "$COMMIT_MSG" && \
         git push
@@ -549,9 +546,6 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
             log_error "Could not change to ~/sshsync directory"
             return 1
         }
-        
-        # Discard local changes to ssh.conf (will be overwritten by symlink anyway)
-        git checkout -- ssh.conf 2>/dev/null || true
         
         log_info "⬇️  Pulling latest SSH config changes..."
         if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
