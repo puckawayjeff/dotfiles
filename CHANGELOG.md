@@ -7,6 +7,15 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+### Added
+- **Micro Text Editor**: Core terminal tool for intuitive text editing
+  - Automatic installation via `lib/terminal.sh`
+  - Dracula color scheme matching dotfiles aesthetic
+  - Familiar keyboard shortcuts (Ctrl+S, Ctrl+Q, etc.)
+  - Configuration symlinked to `~/.config/micro/settings.json`
+  - Features: syntax highlighting, diff gutter, mouse support, trailing whitespace removal
+  - Comprehensive documentation in "Setup Scripts Reference.md"
+
 ### Coming Soon
 - Host-specific configuration overrides
 - Backup/restore functions for safety net

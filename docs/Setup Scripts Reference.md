@@ -19,6 +19,7 @@ These tools are automatically installed by `join.sh`:
 - **eza** - Modern ls replacement
 - **fastfetch** - System information display
 - **starship** - Cross-shell prompt
+- **micro** - Terminal text editor with intuitive keybindings
 
 **Optional Tools (Manual Installation)**:
 
@@ -245,6 +246,96 @@ The `updatep` function automatically:
 - Prevents SSH disconnections from interrupting updates
 
 **Project Repository**: [tmux/tmux](https://github.com/tmux/tmux)
+
+---
+
+### Micro - Terminal Text Editor
+
+**Script**: Automatically installed via `lib/terminal.sh` ✅ **Core Tool**
+
+**Project**: [micro](https://micro-editor.github.io/) - Modern and intuitive terminal-based text editor. Designed to be easy to use while providing the capabilities of traditional Unix text editors. Features familiar keyboard shortcuts (Ctrl+S to save, Ctrl+Q to quit), syntax highlighting, and mouse support.
+
+**Installation**: Automatically installed when running `install.sh`.
+
+**What It Does**:
+
+- Installs micro from system repositories
+- Creates symlink to dotfiles-managed configuration at `~/.config/micro/settings.json`
+- Provides sensible defaults with a Dracula color scheme
+
+**Configuration Features**:
+
+- **Dracula Color Scheme** - Dark theme matching the dotfiles aesthetic
+- **Mouse Support** - Click to position cursor, select text
+- **Syntax Highlighting** - Automatic detection for most languages
+- **Diff Gutter** - Shows git changes in the margin
+- **Trailing Whitespace Removal** - Automatically removes on save
+- **Tab to Spaces** - Converts tabs to 4 spaces
+- **Cursor Line Highlighting** - Easy line tracking
+- **External Clipboard** - Integration with system clipboard
+
+**Key Bindings** (familiar shortcuts):
+
+```bash
+# File Operations
+Ctrl+S              # Save file
+Ctrl+Q              # Quit
+Ctrl+O              # Open file
+
+# Editing
+Ctrl+Z              # Undo
+Ctrl+Y              # Redo
+Ctrl+C              # Copy
+Ctrl+X              # Cut
+Ctrl+V              # Paste
+Ctrl+A              # Select all
+
+# Navigation
+Ctrl+F              # Find
+Ctrl+N              # Find next
+Ctrl+G              # Go to line
+
+# Help
+Alt+G               # Toggle keybinding help
+Ctrl+E              # Command bar
+```
+
+**Usage After Installation**:
+
+```bash
+# Open a file
+micro filename.txt
+
+# Open multiple files
+micro file1.txt file2.txt
+
+# Create new file
+micro newfile.md
+```
+
+**Configuration Location**:
+
+The micro settings are managed at `~/.config/micro/settings.json` which is symlinked to `config/micro/settings.json` in the dotfiles repository.
+
+**Customization**:
+
+To customize micro, edit the settings file in the dotfiles repo:
+
+```bash
+micro ~/dotfiles/config/micro/settings.json
+```
+
+Or use micro's built-in settings command:
+
+```bash
+# Inside micro, press Ctrl+E then type:
+set colorscheme monokai
+set tabsize 2
+```
+
+**Project Homepage**: [micro-editor.github.io](https://micro-editor.github.io/)
+
+**Project Repository**: [zyedidia/micro](https://github.com/zyedidia/micro)
 
 ---
 

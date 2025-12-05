@@ -490,6 +490,81 @@ install_tmux() {
 }
 
 # ============================================================================
+# MICRO (Terminal text editor)
+# ============================================================================
+install_micro() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "micro (Terminal text editor)" "$COMPUTER"
+    fi
+    
+    local micro_installed=false
+    local config_verified=false
+    
+    # Check/install micro binary
+    if command -v micro &> /dev/null; then
+        MICRO_VERSION=$(micro --version | head -n1)
+        log_success "micro already installed: $MICRO_VERSION"
+        micro_installed=true
+        track_skip
+    else
+        log_info "Installing micro..."
+        if sudo apt install -y micro 2>/dev/null; then
+            MICRO_VERSION=$(micro --version | head -n1)
+            log_success "micro installed: $MICRO_VERSION"
+            micro_installed=true
+            track_success
+        else
+            log_warning "micro installation failed, skipping configuration"
+            track_failure
+            return 1
+        fi
+    fi
+    
+    # Verify configuration is properly symlinked
+    if [ "$micro_installed" = true ]; then
+        local MICRO_CONF_DIR="$HOME/.config/micro"
+        local MICRO_CONF="$MICRO_CONF_DIR/settings.json"
+        local MICRO_CONF_SOURCE="$DOTFILES_DIR/config/micro/settings.json"
+        
+        # Create config directory if needed
+        if [[ ! -d "$MICRO_CONF_DIR" ]]; then
+            mkdir -p "$MICRO_CONF_DIR"
+            log_substep "Created config directory"
+        fi
+        
+        if [[ -L "$MICRO_CONF" ]]; then
+            local LINK_TARGET=$(readlink -f "$MICRO_CONF" 2>/dev/null)
+            local EXPECTED_TARGET=$(readlink -f "$MICRO_CONF_SOURCE" 2>/dev/null)
+            
+            if [[ "$LINK_TARGET" == "$EXPECTED_TARGET" ]]; then
+                log_substep "Configuration already linked"
+                config_verified=true
+            else
+                log_substep "Fixing configuration symlink..."
+                rm "$MICRO_CONF"
+                ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
+                log_substep "Configuration symlink corrected"
+                config_verified=true
+            fi
+        elif [[ -f "$MICRO_CONF" ]]; then
+            log_substep "Backing up existing config and creating symlink..."
+            local BACKUP_FILE="${MICRO_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
+            mv "$MICRO_CONF" "$BACKUP_FILE"
+            ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
+            log_substep "Configuration symlinked (backup: $(basename $BACKUP_FILE))"
+            config_verified=true
+        elif [[ -f "$MICRO_CONF_SOURCE" ]]; then
+            log_substep "Creating configuration symlink..."
+            ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
+            log_substep "Configuration symlinked"
+            config_verified=true
+        else
+            log_warning "Configuration source not found at $MICRO_CONF_SOURCE"
+        fi
+    fi
+}
+
+# ============================================================================
 # CONFIGURATION SYMLINKS
 # ============================================================================
 # ============================================================================
@@ -659,6 +734,7 @@ main() {
     install_nerd_font
     install_emoji_fonts
     install_tmux
+    install_micro
     
     # Setup configuration symlinks for all installed tools
     setup_config_symlinks
