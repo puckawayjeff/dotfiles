@@ -524,7 +524,7 @@ install_micro() {
     if [ "$micro_installed" = true ]; then
         local MICRO_CONF_DIR="$HOME/.config/micro"
         local MICRO_CONF="$MICRO_CONF_DIR/settings.json"
-        local MICRO_CONF_SOURCE="$DOTFILES_DIR/config/micro/settings.json"
+        local MICRO_CONF_SOURCE="$DOTFILES_DIR/config/micro.json"
         
         # Create config directory if needed
         if [[ ! -d "$MICRO_CONF_DIR" ]]; then

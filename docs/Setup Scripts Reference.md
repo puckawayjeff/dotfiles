@@ -315,14 +315,14 @@ micro newfile.md
 
 **Configuration Location**:
 
-The micro settings are managed at `~/.config/micro/settings.json` which is symlinked to `config/micro/settings.json` in the dotfiles repository.
+The micro settings are managed at `~/.config/micro/settings.json` which is symlinked to `config/micro.json` in the dotfiles repository.
 
 **Customization**:
 
 To customize micro, edit the settings file in the dotfiles repo:
 
 ```bash
-micro ~/dotfiles/config/micro/settings.json
+micro ~/dotfiles/config/micro.json
 ```
 
 Or use micro's built-in settings command:
