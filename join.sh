@@ -73,6 +73,12 @@ log_substep() {
 
 # --- Main Script ---
 
+# Determine if we need sudo (root doesn't need it)
+SUDO=""
+if [ "$EUID" -ne 0 ]; then
+    SUDO="sudo"
+fi
+
 log_section "Starting dotfiles setup (public version)" "$ROCKET"
 
 log_section "Installing Base Utilities" "$PACKAGE"
@@ -80,7 +86,7 @@ if ! command -v apt &> /dev/null; then
     log_error "Cannot update packages without apt package manager."
 else
     log_warning "Updating package lists..."
-    sudo apt update &> /dev/null
+    $SUDO apt update &> /dev/null
     log_success "Package lists updated"
 fi
 # Check if Git is installed
@@ -93,7 +99,7 @@ if ! command -v git &> /dev/null; then
     fi
     
     log_warning "Git is not installed. Installing..."
-    sudo apt install -y git
+    $SUDO apt install -y git
     log_success "Git installed successfully"
 else
     log_success "Git is already installed"
