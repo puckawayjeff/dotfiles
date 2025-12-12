@@ -29,14 +29,6 @@ if ! sudo apt install -y cage foot fonts-noto-color-emoji; then
 fi
 log_success "Packages installed successfully."
 
-# 1b. Install FiraCode Nerd Font
-SETUP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-printf "\n"
-if ! bash "$SETUP_DIR/_firacodenerdfont.sh"; then
-    log_error "Font installation failed."
-    exit 1
-fi
-
 # 2. Create configuration directory
 printf "\n${BLUE}📦 Configuring Foot Terminal...${NC}\n"
 echo "   ↳ Creating configuration directory..."
@@ -51,7 +43,7 @@ cat > ~/.config/foot/foot.ini << EOL
 
 # Set the font to FiraCode Nerd Font with a size of 12.
 # Nerd Fonts include thousands of glyphs for icons, powerline, etc.
-font=FiraCode Nerd Font:size=12
+font=FiraCode Nerd Font Mono:size=12
 
 # Example color scheme (Dracula-like)
 [colors]
