@@ -156,3 +156,7 @@ fi
 
 printf "\n${GREEN}${PARTY} New host setup complete!${NC}\n"
 log_info "Start a new shell with: zsh"
+log_info ""
+log_info "${CYAN}📚 Quick Help:${NC}"
+log_substep "dothelp - Show all available commands"
+log_substep "dotkeys - Show keyboard shortcuts"

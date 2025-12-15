@@ -8,6 +8,49 @@ and this project adheres to semantic versioning principles for major structural 
 ## [Unreleased]
 
 ### Added
+- **Help Function Visibility**: Enhanced discoverability across the system
+  - MOTD now displays quick help reminder after fastfetch: "📚 Quick Help: dothelp - Show all commands | dotkeys - Keyboard shortcuts"
+  - Custom `command_not_found_handler` adds tip after unknown commands: "💡 Tip: Type dothelp to see all available commands"
+  - Color-coded messages using cyan and yellow for visual clarity
+
+### Coming Soon
+- Host-specific configuration overrides
+- Backup/restore functions for safety net
+
+## [1.3.0] - 2025-12-15
+
+This release refines documentation, improves command naming consistency, and enhances user experience with better help resources and examples.
+
+### Changed
+- **Function Rename**: `packk()` renamed to `dotpack()` for naming consistency
+  - Aligns with other dotfiles commands (`dotpush`, `dotpull`, `dothelp`, etc.)
+  - Updated all references across documentation and code
+  - Function behavior unchanged, only name updated
+- **Documentation Organization**: Consolidated and streamlined documentation
+  - Removed "Custom Last Login Implementation.md" (details now in Functions Reference.md)
+  - Updated Repository Structure in README.md with complete file listings
+  - Improved plugin descriptions (replaced "8 power-user plugins" with category-based list)
+  - Enhanced Example 3 in Examples.md to demonstrate custom destination paths with micro.json use case
+
+### Added
+- **Enhanced Quick Help**: Added prominent references to help functions
+  - `dothelp` and `dotkeys` now featured in QUICKSTART.md Quick Help section
+  - `join.sh` completion output now mentions these commands
+  - Improved discoverability for new users
+- **Copilot Instructions**: Added reminders to always use centralized libraries
+  - Explicit instructions to source `lib/utils.sh` in all scripts
+  - Reminder to use color/emoji constants from utils.sh instead of hardcoding
+  - Improved AI assistant consistency in code generation
+
+### Fixed
+- Documentation accuracy improvements across multiple files
+- Consistent function references throughout all documentation
+
+## [1.2.0] - 2025-12-05
+
+This release transforms the terminal login experience with polished system information display, custom login messages, and improved configuration organization. It also adds powerful oh-my-zsh plugin integration and helpful quick reference functions.
+
+### Added
 - **Oh-My-Zsh Plugin Integration**: Eight curated plugins loaded via Zinit snippets
   - `git` - Comprehensive git aliases (`gst`, `gco`, `gp`, `gl`, `gcmsg`, etc.)
   - `docker` - Docker shortcuts and completions (`dps`, `dex`, `dlog`, `dstop`)
@@ -29,23 +72,6 @@ and this project adheres to semantic versioning principles for major structural 
   - Configuration symlinked to `~/.config/micro/settings.json`
   - Features: syntax highlighting, diff gutter, mouse support, trailing whitespace removal
   - Comprehensive documentation in "Setup Scripts Reference.md"
-
-### Changed
-- **Archive Extraction**: Replaced custom `unpackk` function with oh-my-zsh `extract` plugin
-  - More format support (30+ archive types vs 4)
-  - Better maintained and tested
-  - Simpler command name
-  - Updated all documentation references
-
-### Coming Soon
-- Host-specific configuration overrides
-- Backup/restore functions for safety net
-
-## [1.2.0] - 2025-12-05
-
-This release transforms the terminal login experience with polished system information display, custom login messages, and improved configuration organization.
-
-### Added
 - **Custom Last Login Display**: Core terminal feature replacing SSH's default lastlog
   - New `lib/last-login.sh` script for custom login messages
   - IP-to-hostname mapping with configurable lookup table
@@ -84,6 +110,11 @@ This release transforms the terminal login experience with polished system infor
   - All functions now have comprehensive documentation in "Functions Reference.md"
 
 ### Changed
+- **Archive Extraction**: Replaced custom `unpackk` function with oh-my-zsh `extract` plugin
+  - More format support (30+ archive types vs 4)
+  - Better maintained and tested
+  - Simpler command name
+  - Updated all documentation references
 - **`.zshrc` Fastfetch behavior**: Removed auto-launch on shell startup
   - Fastfetch now displays only on terminal login (via MOTD)
   - Manual aliases still available: `fastfetch`, `ff`, `neofetch`, `screenfetch`
@@ -203,7 +234,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - Symlink-based dotfiles management
 - Git workflow functions (`dotpush`, `dotpull`)
 - System update automation (`updatep` with tmux)
-- Archive utilities (`packk` for creating, `extract` plugin for extracting)
+- Archive utilities (`dotpack` for creating, `extract` plugin for extracting)
 - Maintenance workflow (`maintain`)
 - Path validation (`paths`)
 - Setup script runner (`dotsetup`)

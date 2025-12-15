@@ -318,14 +318,14 @@ This version is also displayed in:
 
 ---
 
-### `packk()` - Create Archive from Directory
+### `dotpack()` - Create Archive from Directory
 
 **Purpose**: Create compressed archives (tar.gz, zip, or 7z) from directories with interactive prompts and colored output.
 
 **Usage**:
 
 ```bash
-packk <directory> [format]
+dotpack <directory> [format]
 ```
 
 **Parameters**:
@@ -346,19 +346,19 @@ packk <directory> [format]
 
 ```bash
 # Create tar.gz archive (default)
-packk myapp
+dotpack myapp
 # Creates: myapp.tar.gz
 
 # Create zip archive
-packk reports zip
+dotpack reports zip
 # Creates: reports.zip
 
 # Create 7z archive for maximum compression
-packk data 7z
+dotpack data 7z
 # Creates: data.7z
 
 # Archive with absolute path
-packk /var/www/html
+dotpack /var/www/html
 # Creates: html.tar.gz in current directory
 ```
 
@@ -380,17 +380,17 @@ packk /var/www/html
 
 ```bash
 # Backup configuration directory
-packk .config
+dotpack .config
 
 # Archive logs before rotation
-packk /var/log/application
+dotpack /var/log/application
 mv application.tar.gz ~/archives/logs-$(date +%Y%m%d).tar.gz
 
 # Create distribution package
-packk ~/projects/release zip
+dotpack ~/projects/release zip
 
 # Maximum compression for large datasets
-packk analytics 7z
+dotpack analytics 7z
 ```
 
 **Error Messages**:
@@ -487,7 +487,7 @@ dothelp
 
 **Categories**:
 - **Dotfiles Management**: dotpush, dotpull, add-dotfile, dotsetup, dotversion, maintain
-- **System Utilities**: updatep, paths, mkd, packk
+- **System Utilities**: updatep, paths, mkd, dotpack
 - **Plugin Commands**: extract, copypath, copyfile, git aliases, docker shortcuts
 - **Navigation & Search**: zoxide (j/z), eza listings, fastfetch
 

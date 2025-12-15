@@ -87,32 +87,40 @@ Next: dotpush 'Add tmux.conf'
 
 **Note:** The function uses the basename of the file (`tmux.conf`), but preserves the full path for the symlink target.
 
-### Example 3: Adding Application Config with Custom Name
+### Example 3: Renaming During Add (Custom Destination)
 
-Some apps have specific config file locations. Here's adding a VS Code settings file:
+Sometimes the original filename lacks context (like `settings.json`). Use the second parameter to provide a more descriptive name. This example shows renaming `~/.config/micro/settings.json` to `micro.json`:
+
+**Before:**
+```bash
+$ ls -la ~/.config/micro/settings.json
+-rw-r--r-- 1 jeff jeff 456 Dec 10 09:30 /home/jeff/.config/micro/settings.json
+```
 
 **Command:**
 ```bash
-$ add-dotfile ~/.config/Code/User/settings.json
+$ add-dotfile ~/.config/micro/settings.json config/micro.json
 ```
 
 **Output:**
 ```
-🔧 Moving file to repo (config/)...
-✅ Moved to /home/jeff/dotfiles/config/settings.json
+🔧 Moving file to repo (config/micro.json)...
+✅ Moved to /home/jeff/dotfiles/config/micro.json
 🔗 Creating symlink...
 ✅ Symlink created
-📝 Updating install.sh...
-✅ Added to install.sh
+📝 Updating config/symlinks.conf...
+✅ Added to config/symlinks.conf
 📦 Staging changes...
 
-🎉 Successfully added 'settings.json'!
-Next: dotpush 'Add VS Code settings'
+🎉 Successfully added 'micro.json'!
+Next: dotpush 'Add micro editor settings'
 ```
 
 **Result:**
-- Repo file: `~/dotfiles/config/settings.json`
-- Symlink: `~/.config/Code/User/settings.json -> ~/dotfiles/config/settings.json`
+- Repo file: `~/dotfiles/config/micro.json` (renamed for clarity)
+- Symlink: `~/.config/micro/settings.json -> ~/dotfiles/config/micro.json`
+
+**Why rename?** The name `micro.json` immediately tells you which app it belongs to, unlike the generic `settings.json`.
 
 ### Example 4: What Happens on Error
 
@@ -321,14 +329,14 @@ Warning: PATH entry does not exist: /opt/nonexistent/bin
 Package a directory for backup or transfer:
 
 ```bash
-$ packk ~/projects/myapp
+$ dotpack ~/projects/myapp
 🚀 Creating archive...
 ✅ Created: myapp.tar.gz
 ```
 
 With custom format:
 ```bash
-$ packk ~/documents/notes zip
+$ dotpack ~/documents/notes zip
 🚀 Creating archive...
 ✅ Created: notes.zip
 ```

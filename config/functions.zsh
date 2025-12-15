@@ -354,10 +354,10 @@ paths() {
 }
 
 # Pack directory into archive
-packk() {
+dotpack() {
     if [[ -z "$1" ]]; then
         log_error "No directory specified."
-        log_plain "Usage: packk <directory> [format]"
+        log_plain "Usage: dotpack <directory> [format]"
         log_plain "Formats: tar.gz (default), zip, 7z"
         return 1
     fi
@@ -542,7 +542,7 @@ dothelp() {
     
     printf "${BOLD}${GREEN}System Utilities${NC}\n"
     printf "  ${YELLOW}updatep${NC}            ${ARROW} System update in tmux              ${YELLOW}paths${NC}             ${ARROW} Check PATH validity\n"
-    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd              ${YELLOW}packk <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
+    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd              ${YELLOW}dotpack <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
     
     printf "${BOLD}${GREEN}Plugin Commands (oh-my-zsh)${NC}\n"
     printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction       ${YELLOW}copypath${NC}          ${ARROW} Copy current path\n"

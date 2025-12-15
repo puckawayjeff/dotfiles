@@ -105,6 +105,15 @@ Testing happens live. No branches. Changes sync immediately via symlinks.
 
 Defined in `lib/utils.sh` and sourced in `.zshrc`. **CRITICAL**: Always use `log_*` helper functions for output, never raw `printf` or `echo` with color codes.
 
+**IMPORTANT: Always source lib/utils.sh in your scripts:**
+```bash
+# At the top of any new script in setup/, lib/, or the root directory
+DOTFILES_DIR="${HOME}/dotfiles"
+source "${DOTFILES_DIR}/lib/utils.sh"
+```
+
+This provides access to all color constants, emoji constants, and log_* functions. Never hardcode colors or emojis - always use the centralized definitions from utils.sh.
+
 **Available log_* functions**:
 - `log_section "Title" "Optional Icon"` - Section headers (cyan, always shown)
 - `log_success "Message"` - Success messages (green with ✅)
@@ -194,7 +203,7 @@ Apply to all optional tools: Deno, dotnet, NVM, etc.
 - Prints ✔ (green) for existing directories
 - Prints ✘ (red) + warning to stderr for missing
 
-**`packk <directory> [format]`** - Create archive from directory
+**`dotpack <directory> [format]`** - Create archive from directory
 - Supports tar.gz (default), zip, and 7z formats
 - Interactive overwrite protection
 - Validates directory exists and is not empty

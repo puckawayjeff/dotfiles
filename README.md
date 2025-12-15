@@ -33,15 +33,9 @@ The automated setup configures a modern, powerful shell environment with intelli
 
 - Zsh 5.9+ as default shell
 - [Zinit](https://github.com/zdharma-continuum/zinit) plugin manager
-- 8 power-user plugins:
-  - **zsh-autosuggestions** - Fish-like inline suggestions from history
-  - **fast-syntax-highlighting** - Real-time command syntax validation
-  - **zsh-completions** - Additional completion definitions
-  - **zsh-history-substring-search** - Arrow key history filtering
-  - **FZF** - Fuzzy finder for files, history, processes
-  - **zoxide** - Smarter cd with frecency algorithm
-  - **fd** - Modern, faster find replacement
-  - **direnv** - Automatic environment loading per directory
+- Modern shell plugins for productivity:
+  - **Core Zinit**: autosuggestions, syntax highlighting, completions, history search
+  - **Oh-My-Zsh**: git aliases, docker shortcuts, sudo, extract, command-not-found, colored-man-pages, copypath, copyfile
 - FiraCode Nerd Font for icon display
 
 **First Use:** Log out and back in after installation. On first zsh session, Zinit auto-installs all plugins (~30 seconds, one-time only).
@@ -161,23 +155,36 @@ The symlinks ensure changes take effect immediately (or after sourcing shell con
 
 ```text
 dotfiles/
-├── join.sh                 # Initial setup script (auto-installs core tools)
-├── install.sh              # Creates all symlinks
+├── join.sh                 # One-line deployment script (auto-installs core tools)
+├── install.sh              # Symlink creator (reads config/symlinks.conf)
+├── test.sh                 # Validation script for testing changes
+├── VERSION                 # Current version number
+├── CHANGELOG.md            # Version history and changes
+├── QUICKSTART.md           # Essential commands quick reference
 ├── config/                 # Configuration files
-│   ├── .zshrc              # Zsh configuration
-│   ├── .zprofile           # Zsh profile
-│   ├── functions.zsh       # Custom Zsh functions
+│   ├── .zshrc              # Zsh shell configuration
+│   ├── functions.zsh       # Custom Zsh functions and aliases
 │   ├── starship.toml       # Starship prompt configuration
-│   └── fastfetch.jsonc     # Fastfetch configuration
-├── lib/                    # Shared libraries
-│   └── utils.sh            # Common functions for scripts
-├── setup/                  # Software setup scripts
+│   ├── fastfetch.jsonc     # Fastfetch system info display
+│   ├── fastfetch-motd.jsonc # MOTD-specific fastfetch config
+│   ├── tmux.conf           # Tmux multiplexer configuration
+│   ├── micro.json          # Micro text editor settings
+│   ├── ssh_config          # SSH configuration template
+│   └── symlinks.conf       # User-added dotfile registry
+├── lib/                    # Shared libraries and core scripts
+│   ├── utils.sh            # Common functions, colors, logging
+│   ├── terminal.sh         # Core terminal setup (zsh, starship, eza, etc.)
+│   ├── motd.sh             # Message of the day configuration
+│   └── last-login.sh       # Custom last login display
+├── setup/                  # Optional software installers
 │   ├── foot.sh             # 📦 Wayland terminal emulator
 │   ├── glow.sh             # 📦 Markdown viewer
 │   ├── nvm.sh              # 📦 Node Version Manager
-│   └── syncthing.sh        # 📦 File synchronization
+│   └── syncthing.sh        # 📦 File synchronization service
 └── docs/                   # Extended documentation
+    ├── Examples.md
     ├── Functions Reference.md
+    ├── MOTD Integration.md
     ├── New Host Deployment.md
     ├── Script Development Best Practices.md
     ├── Setup Scripts Reference.md
@@ -213,7 +220,7 @@ Modern shell configuration using **Zinit** plugin manager with curated plugins:
 - `updatep()` - Interactive system update in tmux with colored output
 - `mkd()` - Create and enter directory in one command
 - `paths()` - Diagnostic tool to verify PATH entries
-- `packk()` - Create compressed archives (tar.gz, zip, 7z) from directories
+- `dotpack()` - Create compressed archives (tar.gz, zip, 7z) from directories
 - `maintain()` - Quick `dotpull` and `updatep` combo
 
 Conditional blocks prevent errors when optional software isn't installed:

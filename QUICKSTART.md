@@ -12,7 +12,16 @@ wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh 
 
 Then log out and back in for zsh to become default shell.
 
-## 📦 Core Commands
+## � Quick Help
+
+New to the setup? Start here:
+
+- **`dothelp`** - Shows all available commands and functions (colorful multi-column reference)
+- **`dotkeys`** - Displays keyboard shortcuts and keybindings
+
+These two commands are your built-in documentation - use them anytime!
+
+## �📦 Core Commands
 
 ### Dotfiles Management
 
@@ -32,7 +41,7 @@ Then log out and back in for zsh to become default shell.
 | `updatep` | System update in tmux (full-upgrade + cleanup) |
 | `paths` | Check if all PATH directories exist |
 | `mkd <dir>` | Create directory and cd into it |
-| `packk <dir> [format]` | Create archive (tar.gz/zip/7z) |
+| `dotpack <dir> [format]` | Create archive (tar.gz/zip/7z) |
 | `extract <archive>` | Extract any archive format (oh-my-zsh plugin) |
 | `dothelp` | Show all available commands and functions |
 | `dotkeys` | Show keyboard shortcuts reference |

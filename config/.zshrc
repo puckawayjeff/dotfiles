@@ -97,6 +97,26 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 # 9. command-not-found - Suggests packages for missing commands
 zinit snippet OMZ::plugins/command-not-found/command-not-found.plugin.zsh
 
+# Override command_not_found_handler to add dothelp reminder
+command_not_found_handler() {
+    # First, try the system command-not-found (if available)
+    if [[ -x /usr/lib/command-not-found ]]; then
+        /usr/lib/command-not-found -- "$1"
+        local exit_code=$?
+    elif [[ -x /usr/share/command-not-found/command-not-found ]]; then
+        /usr/share/command-not-found/command-not-found -- "$1"
+        local exit_code=$?
+    else
+        printf "zsh: command not found: %s\n" "$1" >&2
+        local exit_code=127
+    fi
+    
+    # Add helpful reminder about dothelp
+    printf "\n${CYAN}💡 Tip:${NC} Type ${YELLOW}dothelp${NC} to see all available commands\n" >&2
+    
+    return $exit_code
+}
+
 # 10. colored-man-pages - Syntax highlighted man pages
 zinit snippet OMZ::plugins/colored-man-pages/colored-man-pages.plugin.zsh
 

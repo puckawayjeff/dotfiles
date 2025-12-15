@@ -39,6 +39,8 @@ The MOTD integration is configured automatically when running `install.sh`:
 
 ```bash
 cd ~/dotfiles && ./install.sh
+```
+
 ### What Happens
 
 1. Checks if `/etc/update-motd.d/` exists (standard on Debian/Ubuntu)
@@ -47,6 +49,7 @@ cd ~/dotfiles && ./install.sh
 4. Removes auto-launch from `.zshrc` (keeps aliases)
 
 **Note:** Following `man update-motd` best practices, we create a standalone script rather than a symlink. This allows administrators to modify the fragment without having changes overwritten during dotfiles updates.on Debian/Ubuntu)
+
 ### Manual Setup
 
 If `install.sh` was run without sudo, or on a system that doesn't support update-motd:
@@ -61,9 +64,6 @@ EOF
 
 sudo chmod +x /etc/update-motd.d/99-dotfiles
 
-# Or skip MOTD and let fastfetch run from .zshrc instead
-# (No action needed - .zshrc will auto-launch if MOTD isn't configured)
-```
 # Or skip MOTD and let fastfetch run from .zshrc instead
 # (No action needed - .zshrc will auto-launch if MOTD isn't configured)
 ```
@@ -132,22 +132,6 @@ If the system doesn't support `update-motd`:
 - `install.sh` displays info message and skips MOTD setup
 - `.zshrc` can be modified to auto-launch fastfetch as before
 - No errors or broken functionality
-
-### PAM Configuration
-
-The MOTD system requires PAM configuration (standard on Debian/Ubuntu):
-
-```bash
-### MOTD Not Showing
-
-1. **Check fragment exists and is executable:**
-   ```bash
-   ls -la /etc/update-motd.d/99-dotfiles
-   test -x /etc/update-motd.d/99-dotfiles && echo "Executable" || echo "Not executable"
-   ```
-/etc/pam.d/login:session    optional   pam_motd.so motd=/run/motd.dynamic
-/etc/pam.d/sshd:session     optional   pam_motd.so motd=/run/motd.dynamic
-```
 
 ## Troubleshooting
 
