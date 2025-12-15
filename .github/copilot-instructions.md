@@ -199,10 +199,36 @@ Apply to all optional tools: Deno, dotnet, NVM, etc.
 - Interactive overwrite protection
 - Validates directory exists and is not empty
 
-**`unpackk <archive>`** - Extract archive to directory
-- Supports tar.gz, tgz, zip, and 7z formats
-- Automatic nested directory handling
-- Optional source archive deletion after extraction
+**`extract <archive>`** - Extract any archive format (oh-my-zsh plugin)
+- Universal extractor for all common archive types
+- Automatic format detection
+- No configuration needed
+
+**`dothelp()`** - Display custom functions quick reference
+- Colorful multi-column reference of all commands
+- Categorized by type (Dotfiles, System, Plugins, Navigation)
+- Includes custom functions and oh-my-zsh plugin commands
+- Optimized for IDE terminal windows
+
+**`dotkeys()`** - Display keyboard shortcuts quick reference
+- Shows all available keybindings and shortcuts
+- Color-coded categories (Shell, Tmux, Plugins)
+- Multi-column layout for space efficiency
+- Quick lookup for frequently-used shortcuts
+
+## Oh-My-Zsh Plugins (via Zinit)
+
+The repository uses Zinit to load oh-my-zsh plugins without the full framework overhead:
+
+**Loaded plugins:**
+- **git** - Git aliases (`gst`, `gco`, `gp`, `gl`, `gcmsg`, etc.)
+- **docker** - Docker shortcuts (`dps`, `dex`, `dlog`, `dstop`)
+- **sudo** - ESC ESC to prepend sudo
+- **extract** - Universal archive extraction
+- **command-not-found** - Package suggestions
+- **colored-man-pages** - Syntax highlighting for man pages
+- **copypath** - Copy current directory path
+- **copyfile** - Copy file contents to clipboard
 
 ## SSH Key Management
 

@@ -33,7 +33,9 @@ Then log out and back in for zsh to become default shell.
 | `paths` | Check if all PATH directories exist |
 | `mkd <dir>` | Create directory and cd into it |
 | `packk <dir> [format]` | Create archive (tar.gz/zip/7z) |
-| `unpackk <archive>` | Extract archive intelligently |
+| `extract <archive>` | Extract any archive format (oh-my-zsh plugin) |
+| `dothelp` | Show all available commands and functions |
+| `dotkeys` | Show keyboard shortcuts reference |
 
 ### File Operations (with eza)
 
@@ -100,6 +102,8 @@ Alt+C              # cd into directory (fuzzy)
 
 ## 🎯 Keyboard Shortcuts
 
+Run `dotkeys` for a full colorful reference!
+
 ### Command Line
 
 | Shortcut | Action |
@@ -110,6 +114,7 @@ Alt+C              # cd into directory (fuzzy)
 | `Ctrl+T` | Fuzzy find files |
 | `Alt+C` | Fuzzy cd to directory |
 | `↑` / `↓` | Filter history by typed prefix |
+| `ESC ESC` | Prepend sudo to current command |
 
 ### Completion
 
@@ -118,6 +123,21 @@ Alt+C              # cd into directory (fuzzy)
 | `Tab` | Show completion menu |
 | `Tab Tab` | Navigate completions |
 | `Shift+Tab` | Navigate backwards |
+
+## 🔌 Oh-My-Zsh Plugins (via Zinit)
+
+These plugins are automatically loaded:
+
+| Plugin | Key Commands | Purpose |
+|--------|--------------|---------|
+| **git** | `gst`, `gco`, `gp`, `gl`, `gcmsg` | Git aliases and shortcuts |
+| **docker** | `dps`, `dex`, `dlog`, `dstop` | Docker command shortcuts |
+| **sudo** | `ESC ESC` | Prepend sudo to command |
+| **extract** | `extract <file>` | Universal archive extraction |
+| **command-not-found** | automatic | Suggests package to install |
+| **colored-man-pages** | automatic | Syntax-highlighted man pages |
+| **copypath** | `copypath` | Copy current directory path |
+| **copyfile** | `copyfile <file>` | Copy file contents to clipboard |
 
 ## 🔍 Troubleshooting Quick Fixes
 

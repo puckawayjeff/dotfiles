@@ -502,6 +502,61 @@ dotversion() {
     fi
 }
 
+# Display keyboard shortcuts quick reference
+dotkeys() {
+    # Get dynamic horizontal rule from utils
+    local HR=$(get_hr)
+    
+    printf "\n${BOLD}${CYAN}${KEYBOARD}  KEYBOARD SHORTCUTS${NC}\n"
+    printf "${BLUE}${HR}${NC}\n"
+    
+    # Multi-column layout
+    printf "${BOLD}${GREEN}Shell Completion & History${NC}\n"
+    printf "  ${YELLOW}Ctrl+Space${NC}     ${ARROW} Accept autosuggestion             ${YELLOW}Ctrl+P / Ctrl+N${NC}  ${ARROW} History prev/next\n"
+    printf "  ${YELLOW}Up / Down${NC}      ${ARROW} History substring search          ${YELLOW}Ctrl+R${NC}           ${ARROW} FZF fuzzy search\n\n"
+    
+    printf "${BOLD}${GREEN}Tmux Multiplexer${NC}\n"
+    printf "  ${YELLOW}Ctrl+B, D${NC}      ${ARROW} Detach from session               ${YELLOW}Ctrl+B, C${NC}        ${ARROW} Create new window\n"
+    printf "  ${YELLOW}Ctrl+B, [0-9]${NC}  ${ARROW} Switch to window number           ${YELLOW}Ctrl+B, \"${NC}        ${ARROW} Split horizontal\n"
+    printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n\n"
+    
+    printf "${BOLD}${GREEN}Plugin Shortcuts${NC}\n"
+    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} Prepend sudo to command           ${YELLOW}Ctrl+T${NC}           ${ARROW} FZF file search\n"
+    printf "  ${YELLOW}Alt+C${NC}          ${ARROW} FZF directory navigation\n"
+    
+    printf "${BLUE}${HR}${NC}\n\n"
+}
+
+# Display custom functions quick reference
+dothelp() {
+    # Get dynamic horizontal rule from utils
+    local HR=$(get_hr)
+    
+    printf "\n${BOLD}${CYAN}${BOOK} DOTFILES COMMANDS & FUNCTIONS${NC}\n"
+    printf "${BLUE}${HR}${NC}\n"
+    
+    printf "${BOLD}${GREEN}Dotfiles Management${NC}\n"
+    printf "  ${YELLOW}dotpush <msg>${NC}      ${ARROW} Commit & push changes              ${YELLOW}dotpull${NC}           ${ARROW} Pull latest & reload\n"
+    printf "  ${YELLOW}add-dotfile <path>${NC} ${ARROW} Add file to repo & symlink         ${YELLOW}dotsetup [tool]${NC}   ${ARROW} Run/list setup scripts\n"
+    printf "  ${YELLOW}dotversion${NC}         ${ARROW} Show version & git info            ${YELLOW}maintain${NC}          ${ARROW} Full update sequence\n\n"
+    
+    printf "${BOLD}${GREEN}System Utilities${NC}\n"
+    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update in tmux              ${YELLOW}paths${NC}             ${ARROW} Check PATH validity\n"
+    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd              ${YELLOW}packk <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
+    
+    printf "${BOLD}${GREEN}Plugin Commands (oh-my-zsh)${NC}\n"
+    printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction       ${YELLOW}copypath${NC}          ${ARROW} Copy current path\n"
+    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents                 ${YELLOW}gst, gco, gp${NC}      ${ARROW} Git status/checkout/push\n"
+    printf "  ${YELLOW}dps, dex, dlog${NC}     ${ARROW} Docker ps/exec/logs shortcuts\n\n"
+    
+    printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
+    printf "  ${YELLOW}j <dir>${NC}            ${ARROW} Jump to directory (zoxide)         ${YELLOW}z <dir>${NC}           ${ARROW} Smart cd (zoxide alias)\n"
+    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza               ${YELLOW}ff${NC}                ${ARROW} Run fastfetch\n"
+    
+    printf "${BLUE}${HR}${NC}\n"
+    printf "${MAGENTA}💡 Tip: Type 'dotkeys' for keyboard shortcuts${NC}\n\n"
+}
+
 # ===== SSH Sync Functions (Optional - only loaded if sshsync repo exists) =====
 if [[ -d "$HOME/sshsync/.git" ]]; then
     

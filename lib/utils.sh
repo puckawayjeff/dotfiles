@@ -6,6 +6,7 @@ if command -v tput &> /dev/null; then
     GREEN=$(tput setaf 2)
     YELLOW=$(tput setaf 3)
     BLUE=$(tput setaf 4)
+    MAGENTA=$(tput setaf 5)
     CYAN=$(tput setaf 6)
     RED=$(tput setaf 1)
     BOLD=$(tput bold)
@@ -14,6 +15,7 @@ else
     GREEN='\033[0;32m'
     YELLOW='\033[0;33m'
     BLUE='\033[0;34m'
+    MAGENTA='\033[0;35m'
     CYAN='\033[0;36m'
     RED='\033[0;31m'
     BOLD='\033[1m'
@@ -36,6 +38,10 @@ ARROW_UP="⬆️"
 RELOAD="🔄"
 WARNING="⚠️"
 CLOCK="🕒"
+KEYBOARD="⌨️"
+BOOK="📚"
+ARROW="→"
+LIGHTBULB="💡"
 
 # --- Logging Helpers ---
 # Supports QUIET_MODE environment variable to suppress verbose output
@@ -133,4 +139,14 @@ log_data() {
         local message="$3"
         printf "${icon} ${color}${message}${NC}\n"
     fi
+}
+
+# --- Terminal Utilities ---
+
+# Get terminal width-adjusted horizontal rule
+# Usage: HR=$(get_hr)
+# Returns: String of box-drawing characters (━) matching terminal width
+get_hr() {
+    local term_width=$(tput cols 2>/dev/null || echo 80)
+    printf "━%.0s" $(seq 1 $term_width)
 }

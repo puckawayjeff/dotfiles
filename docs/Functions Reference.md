@@ -404,77 +404,94 @@ packk analytics 7z
 
 ---
 
-### `unpackk()` - Extract Archive to Directory
+### `extract()` - Universal Archive Extraction (oh-my-zsh plugin)
 
-**Purpose**: Extract compressed archives (tar.gz, tgz, zip, or 7z) to directories with automatic nested directory handling, overwrite protection, and optional source deletion.
+**Purpose**: Universal archive extraction supporting all common archive formats with automatic format detection.
 
 **Usage**:
 
 ```bash
-unpackk <archive_file>
+extract <archive_file> [archive_file2 ...]
 ```
 
-**How It Works**:
-
-1. Validates archive file exists
-2. Determines archive format from extension
-3. Checks if required extraction tool is installed
-4. Creates target directory (prompts if exists)
-5. Extracts archive to target directory
-6. Fixes nested directory structure if detected
-7. Optionally deletes source archive after extraction
+**Supported Formats**:
+- tar.gz, tgz, tar.bz2, tbz2, tar.xz, txz, tar.lz, tar.zst
+- zip, rar, 7z
+- gz, bz2, xz, lz, zst
+- deb, rpm
+- jar, war, ear
+- And many more...
 
 **Examples**:
 
 ```bash
-# Extract 7z archive
-unpackk data.7z
-# Creates: data/ directory
-
-# Extract with full path
-unpackk ~/downloads/backup.tar.gz
-# Creates: backup/ in current directory
-```
-
-**Supported Formats**:
-
-- **tar.gz** - Standard Unix compressed tar (uses `tar` command)
-- **tgz** - Alternate tar.gz extension (uses `tar` command)
-- **zip** - Cross-platform ZIP format (requires `unzip` package)
-- **7z** - 7-Zip format (requires `p7zip-full` package)
-
-**Features**:
-
-- **Format detection**: Automatically detects archive type from extension
-- **Tool detection**: Verifies required extractor is installed, provides install commands
-- **Overwrite protection**: Prompts before overwriting existing directories
-- **Nested directory fix**: Automatically flattens single-directory archives
-- **Source cleanup**: Optional deletion of archive after extraction
-- **Progress feedback**: Color output with emojis for visual status
-- **Error handling**: Clear error messages with appropriate exit codes
-
-**Common Use Cases**:
-
-```bash
-# Extract downloaded software
-cd ~/downloads
-unpackk node-v18.tar.gz
-cd node-v18
-
-# Restore configuration backup
-cd ~
-unpackk config-backup.tar.gz
-
-# Extract and cleanup
-unpackk archive.zip
-# Prompts: "Delete source archive 'archive.zip'? [y/N]:"
-# Answer 'y' to delete original zip file
+# Extract single archive
+extract data.tar.gz
 
 # Extract multiple archives
-for archive in *.tar.gz; do
-    unpackk "$archive"
-done
+extract file1.zip file2.tar.gz file3.7z
+
+# Works with any supported format
+extract backup.tar.xz
+extract software.rar
 ```
+
+**Features**:
+- Automatic format detection from file extension
+- No configuration needed
+- Handles nested archives
+- Simple, memorable command name
+
+---
+
+### `dotkeys()` - Keyboard Shortcuts Quick Reference
+
+**Purpose**: Display colorful, organized reference of available keyboard shortcuts and keybindings.
+
+**Usage**:
+
+```bash
+dotkeys
+```
+
+**Features**:
+- Multi-column layout optimized for IDE terminal windows (140x20)
+- Color-coded categories (Shell, Tmux, Plugins)
+- Emoji icons for visual clarity
+- Quick lookup for frequently-forgotten shortcuts
+
+**Example Output**:
+
+Shows shortcuts for:
+- Shell completion and history navigation
+- Tmux multiplexer commands
+- Plugin-provided keybindings (sudo, FZF)
+
+---
+
+### `dothelp()` - Custom Functions Quick Reference
+
+**Purpose**: Display comprehensive reference of all custom functions and plugin commands.
+
+**Usage**:
+
+```bash
+dothelp
+```
+
+**Features**:
+- Categorized by function type (Dotfiles, System, Plugins, Navigation)
+- Multi-column format for space efficiency
+- Color-coded sections with emoji icons
+- Includes both custom functions and oh-my-zsh plugin commands
+
+**Categories**:
+- **Dotfiles Management**: dotpush, dotpull, add-dotfile, dotsetup, dotversion, maintain
+- **System Utilities**: updatep, paths, mkd, packk
+- **Plugin Commands**: extract, copypath, copyfile, git aliases, docker shortcuts
+- **Navigation & Search**: zoxide (j/z), eza listings, fastfetch
+
+---
 
 ## Command Aliases
 

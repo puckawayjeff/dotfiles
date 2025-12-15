@@ -86,7 +86,7 @@ When running on a host that already has the dotfiles repository:
 These tools are installed automatically by `join.sh`:
 
 - **bat** - Cat clone with syntax highlighting (Debian package: `bat`, command: `batcat`)
-- **p7zip-full** - 7-Zip compression tool (required by `packk`/`unpackk` functions)
+- **p7zip-full** - 7-Zip compression tool (required by `packk` function)
 - **tree** - Directory tree visualization
 - **zsh** - Modern shell with Zinit plugin manager and 8 power-user plugins
 - **eza** - Modern ls replacement with git integration

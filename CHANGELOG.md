@@ -8,6 +8,20 @@ and this project adheres to semantic versioning principles for major structural 
 ## [Unreleased]
 
 ### Added
+- **Oh-My-Zsh Plugin Integration**: Eight curated plugins loaded via Zinit snippets
+  - `git` - Comprehensive git aliases (`gst`, `gco`, `gp`, `gl`, `gcmsg`, etc.)
+  - `docker` - Docker shortcuts and completions (`dps`, `dex`, `dlog`, `dstop`)
+  - `sudo` - Press ESC twice to prepend sudo to any command
+  - `extract` - Universal archive extraction (replaces `unpackk` function)
+  - `command-not-found` - Suggests package installations for missing commands
+  - `colored-man-pages` - Syntax-highlighted documentation pages
+  - `copypath` - Copy current directory path to clipboard
+  - `copyfile` - Copy file contents to clipboard
+- **Quick Reference Functions**: Two new colorful help functions
+  - `dothelp()` - Multi-column reference of all custom functions and plugin commands
+  - `dotkeys()` - Keyboard shortcuts quick reference with color-coded categories
+  - Optimized layout for IDE terminal windows (140x20 typical size)
+  - Emoji icons and bold formatting for visual clarity
 - **Micro Text Editor**: Core terminal tool for intuitive text editing
   - Automatic installation via `lib/terminal.sh`
   - Dracula color scheme matching dotfiles aesthetic
@@ -15,6 +29,13 @@ and this project adheres to semantic versioning principles for major structural 
   - Configuration symlinked to `~/.config/micro/settings.json`
   - Features: syntax highlighting, diff gutter, mouse support, trailing whitespace removal
   - Comprehensive documentation in "Setup Scripts Reference.md"
+
+### Changed
+- **Archive Extraction**: Replaced custom `unpackk` function with oh-my-zsh `extract` plugin
+  - More format support (30+ archive types vs 4)
+  - Better maintained and tested
+  - Simpler command name
+  - Updated all documentation references
 
 ### Coming Soon
 - Host-specific configuration overrides
@@ -182,7 +203,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - Symlink-based dotfiles management
 - Git workflow functions (`dotpush`, `dotpull`)
 - System update automation (`updatep` with tmux)
-- Archive utilities (`packk`, `unpackk`)
+- Archive utilities (`packk` for creating, `extract` plugin for extracting)
 - Maintenance workflow (`maintain`)
 - Path validation (`paths`)
 - Setup script runner (`dotsetup`)

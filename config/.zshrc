@@ -79,6 +79,33 @@ zinit light zsh-users/zsh-history-substring-search
 zinit ice wait lucid
 zinit light zdharma-continuum/fast-syntax-highlighting
 
+# ===== Oh-My-Zsh Plugin Snippets =====
+# Load select oh-my-zsh plugins via Zinit
+
+# 5. git - Essential git aliases and functions
+zinit snippet OMZ::plugins/git/git.plugin.zsh
+
+# 6. docker - Docker completion and aliases
+zinit snippet OMZ::plugins/docker/docker.plugin.zsh
+
+# 7. sudo - Press ESC twice to prepend sudo
+zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
+
+# 8. extract - Universal archive extraction (replaces unpackk)
+zinit snippet OMZ::plugins/extract/extract.plugin.zsh
+
+# 9. command-not-found - Suggests packages for missing commands
+zinit snippet OMZ::plugins/command-not-found/command-not-found.plugin.zsh
+
+# 10. colored-man-pages - Syntax highlighted man pages
+zinit snippet OMZ::plugins/colored-man-pages/colored-man-pages.plugin.zsh
+
+# 11. copypath - Copy current directory path to clipboard
+zinit snippet OMZ::plugins/copypath/copypath.plugin.zsh
+
+# 12. copyfile - Copy file contents to clipboard
+zinit snippet OMZ::plugins/copyfile/copyfile.plugin.zsh
+
 # Initialize completion system
 autoload -Uz compinit
 # Only regenerate .zcompdump once a day

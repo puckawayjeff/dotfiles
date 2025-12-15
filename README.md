@@ -188,15 +188,32 @@ dotfiles/
 
 ### Shell Configuration (`.zshrc`)
 
-Contains custom functions and host-aware setup:
+Modern shell configuration using **Zinit** plugin manager with curated plugins:
 
+**Core Zinit Plugins:**
+- `zsh-completions` - Additional completion definitions
+- `zsh-autosuggestions` - Fish-like command suggestions
+- `zsh-history-substring-search` - Filter history with arrow keys
+- `fast-syntax-highlighting` - Real-time command validation
+
+**Oh-My-Zsh Plugins (via Zinit snippets):**
+- `git` - Comprehensive git aliases (`gst`, `gco`, `gp`, `gl`, etc.)
+- `docker` - Docker shortcuts and completions
+- `sudo` - Press ESC twice to prepend sudo
+- `extract` - Universal archive extraction
+- `command-not-found` - Suggests package installations
+- `colored-man-pages` - Syntax-highlighted documentation
+- `copypath` / `copyfile` - Clipboard utilities
+
+**Custom Functions:**
 - `dotpush()` - One-command git workflow (add, commit, push) from any directory
 - `dotpull()` - Pull latest changes from GitHub with automatic stashing
+- `dothelp()` - Show all available commands and functions (colorful reference)
+- `dotkeys()` - Display keyboard shortcuts quick reference
 - `updatep()` - Interactive system update in tmux with colored output
 - `mkd()` - Create and enter directory in one command
 - `paths()` - Diagnostic tool to verify PATH entries
 - `packk()` - Create compressed archives (tar.gz, zip, 7z) from directories
-- `unpackk()` - Extract archives with nested directory handling
 - `maintain()` - Quick `dotpull` and `updatep` combo
 
 Conditional blocks prevent errors when optional software isn't installed:
