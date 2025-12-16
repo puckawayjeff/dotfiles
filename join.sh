@@ -11,6 +11,12 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# --- IMPORTANT: Self-Contained Design ---
+# This script CANNOT use lib/utils.sh because it's downloaded independently via wget
+# before the dotfiles repository exists on the target system. All color definitions
+# and logging functions must be embedded here for bootstrap functionality.
+# Once dotfiles is cloned, subsequent scripts (sync.sh, etc.) use lib/utils.sh.
+
 # --- Color Definitions ---
 # Define colors using tput (portable across terminals)
 if command -v tput &> /dev/null; then

@@ -5,350 +5,255 @@
 > ```bash
 > wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 > ```
->
-> **Two Modes Available:**
-> - **Standalone**: Public dotfiles only (one-way sync from GitHub) - works immediately
-> - **Enhanced**: Private SSH sync + dotfiles (two-way sync, requires [setup](PRIVATE_SETUP.md))
 
 ## Overview
 
-This repository provides a symlink-based dotfiles management system for maintaining consistent shell configuration and application config across multiple Linux hosts (servers, VMs, and desktops).
+Symlink-based dotfiles management for consistent shell configuration across Linux hosts (servers, VMs, desktops). Configuration files live in Git and are symlinked to system locations (`~/.zshrc`, `~/.config/`, etc.).
 
-Files are stored in this Git repository and symlinked to their expected system locations (`~/.zshrc`, `~/.config/starship.toml`, etc.). The repository serves as the single source of truth, with version control enabling change tracking, rollbacks, and safe experimentation.
+**Two Modes**:
+- **Standalone**: Public dotfiles only (works immediately, one-way sync)
+- **Enhanced**: Private SSH keys + configs (requires setup, two-way sync)
 
-## 🚀 Modes of Operation
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed system design.
+
+## 🚀 Quick Start
 
 ### Standalone Mode (Default)
 
-Perfect for: Anyone who wants a solid terminal setup without private sync.
+No setup required - just run the command above!
 
-**What you get:**
-- ✅ Zsh shell with custom configuration and plugins
-- ✅ Starship prompt (modern, fast, customizable)
-- ✅ Public dotfiles and configurations
+**What you get**:
+- ✅ Modern Zsh with plugins (autosuggestions, syntax highlighting, FZF, zoxide)
+- ✅ Starship prompt with Git integration
+- ✅ Fastfetch system info display
+- ✅ Enhanced tools (eza, tmux, micro, bat)
 - ✅ Sensible Git defaults
-- ✅ Core utilities (eza, fastfetch, bat, etc.)
-- ✅ One-way sync from GitHub (pull only)
+- ✅ Pull updates from GitHub
 
-**Setup:** Just run the Quick Start command above. No preparation needed!
+**First login**: Type `dothelp` for commands or `dotkeys` for keyboard shortcuts.
 
-### Enhanced Mode
+### Enhanced Mode (Optional)
 
-Perfect for: Managing multiple machines with private SSH keys and configurations.
+For managing multiple machines with SSH keys and private configurations.
 
-**Everything from Standalone Mode, plus:**
-- ✅ Encrypted SSH keys download and setup
-- ✅ SSH config from your private sshsync repository
-- ✅ Personal Git configuration
-- ✅ Two-way sync with both repos (push and pull)
-- ✅ Commands: `dotpush`, `sshpush`, `sshpull`
+**Additional features**:
+- ✅ Encrypted SSH keys auto-deployment
+- ✅ Private SSH config repository
+- ✅ Personal Git credentials
+- ✅ Two-way sync commands: `dotpush`, `sshpush`, `sshpull`
 
-**Setup:** See **[PRIVATE_SETUP.md](PRIVATE_SETUP.md)** for complete guide.
+**Setup**: See [PRIVATE_SETUP.md](PRIVATE_SETUP.md) for step-by-step guide.
 
-**Quick Setup:**
-1. Create `~/.config/dotfiles/dotfiles.env` (template: [dotfiles.env.example](dotfiles.env.example))
-2. Run the same join.sh command - it auto-detects enhanced mode!
+## Essential Commands
 
-## Key Features
+```bash
+# View all commands
+dothelp              # Show command reference
+dotkeys              # Show keyboard shortcuts
 
-- **One-click deployment** - Automated setup on new hosts
-- **Symlink-based** - Live editing without manual copying
-- **Version controlled** - Full history and rollback capability
-- **Host-aware configs** - Gracefully handles missing software
-- **Mode detection** - Automatically uses enhanced mode when configured
+# Manage dotfiles
+dotpull              # Pull latest changes (standalone + enhanced)
+dotpush "message"    # Commit and push changes (enhanced only)
+add-dotfile <path>   # Add file to repo with symlink
 
-## Terminal Environment
+# System maintenance
+updatep              # System update in tmux
+maintain             # Full maintenance workflow (pull + update)
 
-The automated setup configures a modern, powerful shell environment with intelligent completions, fuzzy finding, and visual enhancements:
+# Setup optional tools
+dotsetup             # List available installers
+dotsetup nvm         # Install Node Version Manager
+```
 
-### Zsh - Modern Shell with Plugins
+See [docs/Functions Reference.md](docs/Functions%20Reference.md) for complete documentation.
 
-**Why Zsh?** Modern shell with intelligent completions, command history, and syntax validation. Autosuggestions save hundreds of keystrokes per day. FZF and zoxide revolutionize navigation. Fully compatible with existing bash scripts.
+## Terminal Features
 
-**Automatic Installation:**
-
-- Zsh 5.9+ as default shell
-- [Zinit](https://github.com/zdharma-continuum/zinit) plugin manager
-- Modern shell plugins for productivity:
-  - **Core Zinit**: autosuggestions, syntax highlighting, completions, history search
-  - **Oh-My-Zsh**: git aliases, docker shortcuts, sudo, extract, command-not-found, colored-man-pages, copypath, copyfile
-- FiraCode Nerd Font for icon display
-
-**First Use:** Log out and back in after installation. On first zsh session, Zinit auto-installs all plugins (~30 seconds, one-time only).
-
-**Key Features:**
-
-- **Autosuggestions** - Type partial command, press → to accept grey suggestion
-- **Syntax Highlighting** - Green = valid, Red = invalid, instantly as you type
+### Shell Environment
+- **Zsh** with Zinit plugin manager
+- **Autosuggestions** - Press → to accept grey completions
+- **Syntax highlighting** - Instant validation (green=valid, red=invalid)
 - **FZF** - Ctrl+R (history), Ctrl+T (files), Alt+C (directories)
-- **Zoxide** - `z dotfiles` jumps intelligently based on frecency
-- **History Substring** - Up/Down arrows filter history by typed prefix
-- **Fast Startup** - Plugins lazy-load in background (~0.1s prompt)
+- **Zoxide** - Smart directory jumping with `z` command
 
-### Eza - Modern ls Replacement
+### Visual Tools
+- **Starship** - Fast, informative prompt with Git status
+- **Eza** - Modern `ls` with icons and Git integration
+- **Fastfetch** - System info on terminal login
+- **Tmux** - Terminal multiplexer with sensible defaults
 
-**Why Eza?** Better defaults, git integration, and icon support. Shows more information at a glance while remaining familiar.
+### Plugins
+- **Oh-My-Zsh**: git, docker, sudo (ESC ESC), extract, command-not-found, colored-man-pages
+- **Core**: completions, history search, syntax highlighting
 
-**Automatic Installation:**
+## Adding Your Own Dotfiles
 
-- Replaces `ls` with enhanced version via aliases
-- Git status integration (modified/staged indicators)
-- File type icons with Nerd Fonts
-- Directories listed before files
-- Tree view for hierarchies
-- Written in Rust for performance
-
-**Conditional Aliases:** Automatically used when available, gracefully falls back to standard `ls` on systems without eza.
-
-### Starship - Cross-Shell Prompt
-
-**Why Starship?** Fast, informative prompt with git status, language versions, and context-aware modules.
-
-**Automatic Installation:**
-
-- Cross-shell prompt with Nerd Font support
-- Git branch and status indicators
-- Language version detection (Node, Python, Rust, etc.)
-- Command duration for long-running tasks
-- Exit status indicators
-- Customizable via `config/starship.toml`
-
-### Fastfetch - System Information
-
-**Why Fastfetch?** Fast neofetch alternative written in C, shows system info with distro logo on terminal login.
-
-**Automatic Installation:**
-
-- Displays on terminal login via MOTD (not on every shell reload)
-- System info, distro logo, hardware details
-- Compatibility aliases for `neofetch` and `screenfetch`
-- Customizable via `config/fastfetch.jsonc`
-- See [MOTD Integration](docs/MOTD%20Integration.md) for details
-
-### Terminal Font Setup
-
-For proper icon display in prompts and eza output, configure your terminal to use **FiraCode Nerd Font** (auto-installed by setup). See [Terminal Font Setup](docs/Terminal%20Font%20Setup.md) for terminal-specific configuration instructions.
-
-## Quick Start
-
-### Deploy to a New Host
-
-The `join.sh` script automates the complete setup process:
-
-**Standalone Mode** (default):
-1. Updates package lists
-2. Installs Git (if needed)
-3. Installs core utilities: `bat`, `p7zip-full`, `tree`
-4. Clones this repository via HTTPS
-5. Runs sync script to set up:
-   - **zsh** - Modern shell with Zinit, autosuggestions, syntax highlighting, FZF, zoxide
-   - **eza** - Modern ls replacement with git integration
-   - **fastfetch** - Fast system information display
-   - **starship** - Cross-shell prompt with Nerd Font support
-6. Creates all symlinks
-
-**Enhanced Mode** (when `~/.config/dotfiles/dotfiles.env` exists):
-- All standalone mode features
-- Downloads and decrypts SSH keys
-- Configures Git with your credentials
-- Clones sshsync repository via SSH
-- Symlinks SSH config from sshsync
-- Enables two-way sync commands
+Use the `add-dotfile` command to automate the process:
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
+# Simple usage (moves to config/ directory)
+add-dotfile ~/.gitconfig
+
+# Custom destination
+add-dotfile ~/.config/app/config.json config/app-config.json
+
+# Then push changes
+dotpush "Add gitconfig"
 ```
 
-For enhanced mode setup, see **[PRIVATE_SETUP.md](PRIVATE_SETUP.md)**.
+The script:
+1. Moves file into the repository
+2. Creates symlink at original location
+3. Updates `config/symlinks.conf`
+4. Stages changes in Git
 
-**Note**: You'll need to log out and log back in for Zsh to become your default shell.
-
-### Add a New Dotfile
-
-Use the `add-dotfile` function to automate the process:
-
-```bash
-add-dotfile /path/to/file
-```
-
-This script will:
-
-1. Move the file into the repository
-2. Create a symlink at the original location
-3. Update `sync.sh` with the new symlink command
-4. Stage changes in Git, commit, and push.
-
-### Sync Changes to Other Hosts
-
-**Pushing changes:**
-
-```bash
-dotpush "Description of changes"
-```
-
-The `dotpush` function can be run from any directory. If you don't provide a message, it will prompt you for one.
-
-**Pulling changes on other hosts:**
-
-```bash
-dotpull
-```
-
-The `dotpull` function can be run from any directory. It automatically handles stashing uncommitted changes before pulling to prevent conflicts. See [Bash Functions Reference](docs/Bash%20Functions%20Reference.md) for details.
-
-The symlinks ensure changes take effect immediately (or after sourcing shell config files).
+See [docs/Examples.md](docs/Examples.md) for workflows and patterns.
 
 ## Repository Structure
 
 ```text
 dotfiles/
-├── join.sh                 # One-line deployment script (auto-installs core tools)
-├── sync.sh                 # Symlink creator and sync script (reads config/symlinks.conf)
-├── test.sh                 # Validation script for testing changes
-├── VERSION                 # Current version number
-├── CHANGELOG.md            # Version history and changes
-├── QUICKSTART.md           # Essential commands quick reference
-├── config/                 # Configuration files
-│   ├── .zshrc              # Zsh shell configuration
-│   ├── functions.zsh       # Custom Zsh functions and aliases
-│   ├── starship.toml       # Starship prompt configuration
-│   ├── fastfetch.jsonc     # Fastfetch system info display
-│   ├── fastfetch-motd.jsonc # MOTD-specific fastfetch config
-│   ├── tmux.conf           # Tmux multiplexer configuration
-│   ├── micro.json          # Micro text editor settings
-│   ├── ssh_config          # SSH configuration template
-│   └── symlinks.conf       # User-added dotfile registry
-├── lib/                    # Shared libraries and core scripts
-│   ├── utils.sh            # Common functions, colors, logging
-│   ├── terminal.sh         # Core terminal setup (zsh, starship, eza, etc.)
-│   ├── motd.sh             # Message of the day configuration
-│   └── last-login.sh       # Custom last login display
-├── setup/                  # Optional software installers
-│   ├── foot.sh             # 📦 Wayland terminal emulator
-│   ├── glow.sh             # 📦 Markdown viewer
-│   ├── nvm.sh              # 📦 Node Version Manager
-│   └── syncthing.sh        # 📦 File synchronization service
-└── docs/                   # Extended documentation
-    ├── Examples.md
-    ├── Functions Reference.md
-    ├── MOTD Integration.md
-    ├── New Host Deployment.md
-    ├── Script Development Best Practices.md
-    ├── Setup Scripts Reference.md
-    └── Terminal Font Setup.md
-```
-
-## Key Files & Components
-
-### Shell Configuration (`.zshrc`)
-
-Modern shell configuration using **Zinit** plugin manager with curated plugins:
-
-**Core Zinit Plugins:**
-- `zsh-completions` - Additional completion definitions
-- `zsh-autosuggestions` - Fish-like command suggestions
-- `zsh-history-substring-search` - Filter history with arrow keys
-- `fast-syntax-highlighting` - Real-time command validation
-
-**Oh-My-Zsh Plugins (via Zinit snippets):**
-- `git` - Comprehensive git aliases (`gst`, `gco`, `gp`, `gl`, etc.)
-- `docker` - Docker shortcuts and completions
-- `sudo` - Press ESC twice to prepend sudo
-- `extract` - Universal archive extraction
-- `command-not-found` - Suggests package installations
-- `colored-man-pages` - Syntax-highlighted documentation
-- `copypath` / `copyfile` - Clipboard utilities
-
-**Custom Functions:**
-- `dotpush()` - One-command git workflow (add, commit, push) from any directory
-- `dotpull()` - Pull latest changes from GitHub with automatic stashing
-- `dothelp()` - Show all available commands and functions (colorful reference)
-- `dotkeys()` - Display keyboard shortcuts quick reference
-- `updatep()` - Interactive system update in tmux with colored output
-- `mkd()` - Create and enter directory in one command
-- `paths()` - Diagnostic tool to verify PATH entries
-- `dotpack()` - Create compressed archives (tar.gz, zip, 7z) from directories
-- `maintain()` - Quick `dotpull` and `updatep` combo
-
-Conditional blocks prevent errors when optional software isn't installed:
-
-```bash
-if [ -d "$HOME/.deno" ]; then
-  export DENO_INSTALL="$HOME/.deno"
-  export PATH="$DENO_INSTALL/bin:$PATH"
-fi
-```
-
-### SSH Configuration
-
-SSH configuration is not managed by this repository. You'll need to configure it manually:
-
-1. **Generate SSH keys:**
-
-   ```bash
-   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_github -C "your-email@example.com"
-   ```
-
-2. **Add public key to GitHub:**
-   - Copy contents of `~/.ssh/id_ed25519_github.pub`
-   - Add at [https://github.com/settings/keys]
-
-3. **Create/Modify SSH config** (`~/.ssh/config`):
-
-   ```bash
-   Host github.com
-     HostName github.com
-     User git
-     IdentityFile ~/.ssh/id_ed25519_github
-     IdentitiesOnly yes
-   ```
-
-### Setup Scripts (`setup/`)
-
-Standardized installation scripts for system tools. All follow consistent patterns:
-
-- Color output with emojis for visual feedback
-- Idempotent (safe to run multiple times)
-- Error handling with clear messages
-- Progress indicators
-
-**Available Scripts**:
-
-- `foot.sh` - Foot terminal with Cage compositor (Wayland only)
-- `glow.sh` - Terminal-based Markdown viewer
-- `nvm.sh` - Node Version Manager with Node.js LTS
-- `syncthing.sh` - File synchronization service
-
-Run optional setup scripts using the `dotsetup` helper:
-
-```bash
-dotsetup glow
-dotsetup nvm
-
-# Or list all available scripts
-dotsetup
-```
-
-Alternatively, run directly:
-
-```bash
-bash ~/dotfiles/setup/glow.sh
+├── join.sh                    # One-command deployment
+├── sync.sh                    # Main sync script
+├── test.sh                    # Validation suite
+├── VERSION                    # Version tracking
+├── ARCHITECTURE.md            # System design documentation
+├── PRIVATE_SETUP.md           # Enhanced mode setup guide
+├── QUICKSTART.md              # Command reference card
+├── config/                    # Configuration files
+│   ├── .zshrc                 # Shell configuration
+│   ├── functions.zsh          # Custom functions
+│   ├── symlinks.conf          # User-added dotfiles
+│   ├── starship.toml          # Prompt configuration
+│   ├── fastfetch.jsonc        # System info display
+│   ├── tmux.conf              # Terminal multiplexer
+│   └── micro.json             # Text editor settings
+├── lib/                       # Shared libraries
+│   ├── utils.sh               # Colors, logging, helpers
+│   ├── terminal.sh            # Core tool installation
+│   ├── motd.sh                # Login message
+│   └── last-login.sh          # Last login display
+├── setup/                     # Optional tool installers
+│   ├── foot.sh                # Wayland terminal
+│   ├── glow.sh                # Markdown viewer
+│   ├── nvm.sh                 # Node Version Manager
+│   └── syncthing.sh           # File synchronization
+└── docs/                      # Extended documentation
 ```
 
 ## Documentation
 
-Detailed guides are available in the `docs/` directory:
+### Core Documentation
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design and repository pattern
+- **[PRIVATE_SETUP.md](PRIVATE_SETUP.md)** - Enhanced mode setup guide
+- **[QUICKSTART.md](QUICKSTART.md)** - Essential commands reference
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
 
-### Getting Started
-
-- **[New Host Deployment](docs/New%20Host%20Deployment.md)** - Complete guide to `join.sh`, stash behavior, and recovery workflows
-- **[Terminal Font Setup](docs/Terminal%20Font%20Setup.md)** - Nerd Font setup instructions
-
-### Configuration & Tools
-
-- **[Functions Reference](docs/Functions%20Reference.md)** - Complete documentation of `dotpush`, `dotpull`, `updatep`, `mkd`, `paths`, and all aliases
-- **[Setup Scripts Reference](docs/Setup%20Scripts%20Reference.md)** - Installation scripts for foot, glow, NVM, and Syncthing
+### Guides
+- **[Functions Reference](docs/Functions%20Reference.md)** - Complete command documentation
+- **[New Host Deployment](docs/New%20Host%20Deployment.md)** - join.sh workflow and recovery
+- **[Terminal Font Setup](docs/Terminal%20Font%20Setup.md)** - Nerd Fonts installation
+- **[Setup Scripts Reference](docs/Setup%20Scripts%20Reference.md)** - Optional tool installers
+- **[Examples](docs/Examples.md)** - Practical workflows and patterns
 
 ### Development
+- **[Script Development Best Practices](docs/Script%20Development%20Best%20Practices.md)** - Coding standards
 
-- **[Script Development Best Practices](docs/Script%20Development%20Best%20Practices.md)** - Standards for writing consistent shell scripts
+## Testing
+
+Validate repository health:
+
+```bash
+./test.sh
+```
+
+Runs 9 tests checking:
+- Core files exist
+- Symlink sources valid
+- Shell files source correctly
+- Setup scripts properly formatted
+- Documentation complete
+- Git repository valid
+
+## SSH Configuration
+
+**Standalone Mode**: Manual SSH setup required for Git push access.
+
+```bash
+# Generate key
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_github
+
+# Add to GitHub at https://github.com/settings/keys
+
+# Create SSH config
+cat >> ~/.ssh/config << 'EOF'
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_github
+  IdentitiesOnly yes
+EOF
+```
+
+**Enhanced Mode**: SSH keys automatically deployed from encrypted archive.
+
+## Forking This Repository
+
+To create your own dotfiles:
+
+1. **Fork** this repository on GitHub
+2. **Clone** your fork: `git clone git@github.com:yourusername/dotfiles.git`
+3. **Customize** configurations in `config/` directory
+4. **Update** `join.sh` with your repository URL
+5. **Test** with `./test.sh`
+6. **Deploy** to your machines
+
+For enhanced mode:
+1. Create private `sshsync` repository
+2. Package SSH keys with `./package-ssh-keys.sh`
+3. Host encrypted archive on your web server
+4. Create `dotfiles.env` with your credentials
+
+See [PRIVATE_SETUP.md](PRIVATE_SETUP.md) for detailed instructions.
+
+## System Requirements
+
+- **OS**: Debian-based Linux (Debian, Ubuntu, Mint, Pi OS, Proxmox VE)
+- **Shell**: Bash 4.0+ (script compatibility)
+- **Terminal**: ANSI color and Unicode support
+- **Network**: Internet access for package installation
+- **Privileges**: User with sudo access
+
+Zsh, Git, and other tools are auto-installed if missing.
+
+## Version
+
+Current version: **1.3.0**
+
+Check installed version:
+```bash
+dotversion
+```
+
+## License
+
+MIT License - See [LICENSE.md](LICENSE.md)
+
+## Contributing
+
+This is a personal dotfiles repository optimized for my workflow. Feel free to:
+- Fork for your own use
+- Open issues for bugs
+- Submit PRs for improvements to the framework
+
+For personal customization, fork the repository and make it your own!
+
+## Support
+
+- **Issues**: Report bugs or ask questions via GitHub Issues
+- **Documentation**: Check `docs/` directory for detailed guides
+- **Quick Help**: Run `dothelp` in your terminal after installation
+
+---
+
+**Made with ❤️ for efficient terminal workflows**

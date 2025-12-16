@@ -4,29 +4,16 @@
 
 set -e
 
-# Color definitions
-if command -v tput &> /dev/null; then
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    BLUE=$(tput setaf 4)
-    RED=$(tput setaf 1)
-    NC=$(tput sgr0)
+# Get script directory and load shared utilities
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/lib/utils.sh" ]; then
+    source "$SCRIPT_DIR/lib/utils.sh"
 else
-    GREEN='\033[0;32m'
-    YELLOW='\033[0;33m'
-    BLUE='\033[0;34m'
-    RED='\033[0;31m'
-    NC='\033[0m'
+    echo "Error: lib/utils.sh not found."
+    exit 1
 fi
 
-log_info() { printf "${BLUE}ℹ️  $1${NC}\n"; }
-log_success() { printf "${GREEN}✅ $1${NC}\n"; }
-log_error() { printf "${RED}❌ Error: $1${NC}\n" >&2; }
-log_warning() { printf "${YELLOW}⚠️  $1${NC}\n"; }
-
-echo ""
-log_info "SSH Keys Packaging Script"
-echo ""
+log_section "SSH Keys Packaging Script" "$PACKAGE"
 
 # Check if ~/.ssh exists
 if [ ! -d "$HOME/.ssh" ]; then

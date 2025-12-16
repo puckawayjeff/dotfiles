@@ -42,6 +42,7 @@ KEYBOARD="⌨️"
 BOOK="📚"
 ARROW="→"
 LIGHTBULB="💡"
+INFO="ℹ️"
 
 # --- Logging Helpers ---
 # Supports QUIET_MODE environment variable to suppress verbose output

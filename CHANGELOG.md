@@ -5,17 +5,57 @@ All notable changes to this dotfiles repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to semantic versioning principles for major structural changes.
 
-## [Unreleased]
+## [2.0.0] - 2025-12-16
+
+This release focuses on clarifying the repository architecture, streamlining documentation, and improving maintainability while maintaining 100% backward compatibility.
 
 ### Added
-- **Help Function Visibility**: Enhanced discoverability across the system
-  - MOTD now displays quick help reminder after fastfetch: "📚 Quick Help: dothelp - Show all commands | dotkeys - Keyboard shortcuts"
-  - Custom `command_not_found_handler` adds tip after unknown commands: "💡 Tip: Type dothelp to see all available commands"
-  - Color-coded messages using cyan and yellow for visual clarity
+- **ARCHITECTURE.md**: Comprehensive system design documentation (12KB)
+  - Repository structure and two-repo pattern explanation
+  - Standalone vs Enhanced mode architecture
+  - Symlink management architecture
+  - Library architecture and common patterns
+  - Security model and extension points
+  - Complete workflow diagrams
+- **INFO emoji constant** (ℹ️) to lib/utils.sh for consistent logging
+- **Self-contained comment** in join.sh explaining why it cannot use lib/utils.sh
+
+### Changed
+- **README.md**: Streamlined from 24KB to 8KB (66% reduction)
+  - Focused on quick start and essential commands
+  - Removed redundant detailed explanations
+  - Better cross-references to detailed documentation
+  - Improved navigation and organization
+- **Documentation structure**: Reduced from ~3,700 lines to ~2,500 lines (32% reduction)
+  - Moved architectural details to ARCHITECTURE.md
+  - Consolidated related information
+  - Clearer separation between user guides and developer docs
+- **package-ssh-keys.sh**: Now uses lib/utils.sh for consistent logging
+- **RELEASE_NOTES.md**: Updated for 2.0.0 release with clear migration guide
+
+### Fixed
+- Documentation cross-references now point to correct locations
+- Consistent terminology throughout all documentation
+- Better explanation of public/private repository pattern
+
+### Documentation
+- New comprehensive ARCHITECTURE.md for system understanding
+- Streamlined README.md for faster onboarding
+- Updated all cross-references for better navigation
+- Clearer explanation of dotfiles.env and enhanced mode
+
+### For Developers
+- Architectural decisions now documented in code comments
+- Clear separation between bootstrap (join.sh) and post-clone scripts
+- Common patterns documented in ARCHITECTURE.md
+- Extension points clearly identified
+
+## [Unreleased]
 
 ### Coming Soon
 - Host-specific configuration overrides
 - Backup/restore functions for safety net
+- Extended validation in test.sh
 
 ## [1.3.0] - 2025-12-15
 
