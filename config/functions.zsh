@@ -165,10 +165,10 @@ dotpull() {
     if GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull; then
         log_success "Git pull successful."
         
-        # Run install.sh to update symlinks/config
-        if [[ -f "./install.sh" ]]; then
-            log_info "\n${WRENCH} Running install.sh..."
-            ./install.sh --quiet
+        # Run sync.sh to update symlinks/config
+        if [[ -f "./sync.sh" ]]; then
+            log_info "\n${WRENCH} Running sync.sh..."
+            ./sync.sh --quiet
         fi
         
         if [[ "$NO_EXEC" == "true" ]]; then
@@ -220,7 +220,7 @@ add-dotfile() {
     local source_path=$(realpath "$file")
     local basename=$(basename "$source_path")
     local dotfiles_dir="$HOME/dotfiles"
-    local install_script="$dotfiles_dir/install.sh"
+    local sync_script="$dotfiles_dir/sync.sh"
     
     # Determine destination path
     local dest_path
@@ -261,8 +261,8 @@ add-dotfile() {
         return 1
     fi
     
-    if [[ ! -f "$install_script" ]]; then
-        log_error "install.sh not found."
+    if [[ ! -f "$sync_script" ]]; then
+        log_error "sync.sh not found."
         return 1
     fi
     
@@ -467,14 +467,14 @@ maintain() {
     log_section "Starting Maintenance Sequence" "$ROCKET"
     
     # Run dotpull without reloading shell immediately
-    # (dotpull already uses --quiet for install.sh)
+    # (dotpull already uses --quiet for sync.sh)
     dotpull --no-exec
     if [[ $? -ne 0 ]]; then
         log_error "dotpull failed. Stopping."
         return 1
     fi
     
-    # Note: install.sh is already run by dotpull (in quiet mode)
+    # Note: sync.sh is already run by dotpull (in quiet mode)
     
     log_success "Configuration updated."
     log_info "Launching system updates...\n"

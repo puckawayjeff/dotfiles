@@ -44,7 +44,7 @@ log_section "Dotfiles Validation Tests" "$ROCKET"
 test_start "Required core files exist"
 MISSING_FILES=()
 REQUIRED_FILES=(
-    "install.sh"
+    "sync.sh"
     "join.sh"
     "README.md"
     "lib/utils.sh"
@@ -66,11 +66,11 @@ else
     test_fail "Missing files: ${MISSING_FILES[*]}"
 fi
 
-# Test 2: Check symlink targets in install.sh are valid
-test_start "Symlink sources in install.sh exist"
+# Test 2: Check symlink targets in sync.sh are valid
+test_start "Symlink sources in sync.sh exist"
 BROKEN_SOURCES=()
 
-# Extract symlink sources from install.sh
+# Extract symlink sources from sync.sh
 while IFS= read -r line; do
     # Match lines like: ["$DOTFILES_DIR/config/file"]="$HOME/target"
     if [[ $line =~ \[\"([^\"]+)\"\]=\"([^\"]+)\" ]]; then
@@ -83,7 +83,7 @@ while IFS= read -r line; do
             BROKEN_SOURCES+=("$source_path")
         fi
     fi
-done < <(sed -n '/^declare -A SYMLINKS=/,/^)/p' "$SCRIPT_DIR/install.sh")
+done < <(sed -n '/^declare -A SYMLINKS=/,/^)/p' "$SCRIPT_DIR/sync.sh")
 
 if [ ${#BROKEN_SOURCES[@]} -eq 0 ]; then
     test_pass

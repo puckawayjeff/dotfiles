@@ -220,7 +220,7 @@ maintain
 
 1. Saves your current directory
 2. Runs `dotpull --no-exec` to get latest dotfiles (auto-stashes local changes)
-3. Runs `install.sh` in quiet mode (symlinks are already handled by dotpull)
+3. Runs `sync.sh` in quiet mode (symlinks are already handled by dotpull)
 4. Launches `updatep` to update system packages in background tmux session
 5. Returns to original directory
 6. Reloads zsh configuration with `exec zsh`
@@ -239,7 +239,7 @@ maintain
 Starting Maintenance Sequence...
 ⬇️  Pulling latest changes...
 ✅ Git pull successful.
-🔧 Running install.sh...
+🔧 Running sync.sh...
 ✅ Configuration updated.
 Launching system updates...
 

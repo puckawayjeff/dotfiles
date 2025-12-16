@@ -173,7 +173,7 @@ git config --global user.email "your@email.com"
 
 ```bash
 cd ~/dotfiles
-./install.sh  # Recreates all symlinks
+./sync.sh  # Recreates all symlinks
 ```
 
 ### Want to see what changed?

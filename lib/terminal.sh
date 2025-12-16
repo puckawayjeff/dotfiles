@@ -755,7 +755,7 @@ main() {
         
         if [ $INSTALLS_FAILED -gt 0 ]; then
             log_warning "Some installations failed but the system is functional"
-            log_info "Re-run install.sh to retry failed installations"
+            log_info "Re-run sync.sh to retry failed installations"
         else
             log_success "All terminal utilities installed successfully!"
         fi

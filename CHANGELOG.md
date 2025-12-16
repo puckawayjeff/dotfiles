@@ -223,7 +223,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - GitHub Copilot instructions for AI-assisted development
 
 ### Structure
-- `install.sh` - Symlink creation and system setup
+- `sync.sh` - Symlink creation and system setup
 - `join.sh` - One-command new host deployment
 - `config/` - Configuration files (.zshrc, .zprofile, functions.zsh)
 - `lib/` - Shared libraries (utils.sh for colors/logging, terminal.sh for setup)

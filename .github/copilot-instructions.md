@@ -5,13 +5,13 @@
 Symlink-based dotfiles management for Linux hosts. Files live in Git and are symlinked to system locations (`~/.zshrc`, `~/.config/`, etc.). The repository is the single source of truth for shell configs and application configs across multiple hosts.
 
 **Key Components:**
-- `install.sh` - Orchestrates installation and manages user-defined symlinks
+- `sync.sh` - Orchestrates installation and manages user-defined symlinks
 - `config/symlinks.conf` - User-added dotfiles symlink registry (managed by add-dotfile)
 - `config/functions.zsh` - Common Zsh functions and aliases
 - `config/.zshrc` - Main Zsh configuration file
 - `lib/utils.sh` - Shared library for colors, icons, and helper functions
 - `lib/terminal.sh` - Core terminal utilities installer + configuration management (zsh, starship, fastfetch, tmux)
-- `join.sh` - One-click deployment (installs git/zsh, clones repo, runs `install.sh`)
+- `join.sh` - One-click deployment (installs git/zsh, clones repo, runs `sync.sh`)
 - `setup/*.sh` - Optional tool installers (foot, glow, nvm, syncthing)
 
 ## Critical Workflows
@@ -28,7 +28,7 @@ The script:
 1. Validates source exists and destination available
 2. Moves file into repo (default: `config/<basename>`)
 3. Creates symlink at original location
-4. Adds entry to `config/symlinks.conf` (not install.sh)
+4. Adds entry to `config/symlinks.conf` (not sync.sh)
 5. Stages files in git
 6. Prints next steps (review with `git diff --staged`, then commit/push)
 
@@ -45,7 +45,7 @@ wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh 
 
 **Prerequisites:** SSH keys must be manually configured before running if wanting to interact with GitHub beyond initial clone.
 
-Flow: Check SSH → Install git/zsh → Configure git user → Clone repo → Run `install.sh`
+Flow: Check SSH → Install git/zsh → Configure git user → Clone repo → Run `sync.sh`
 
 If repo exists, stashes uncommitted changes before pulling (shows stash command in output).
 
@@ -61,7 +61,7 @@ These are automatically symlinked during `terminal.sh` execution via `setup_conf
 
 **User-Added Configs** (managed by `config/symlinks.conf`):
 - Format: `$DOTFILES_DIR/path/to/file:$HOME/target/path`
-- Read by `install.sh` during step 5
+- Read by `sync.sh` during step 5
 - Added via `add-dotfile` function (never edit manually)
 - Supports comments (lines starting with `#`)
 

@@ -77,7 +77,7 @@ When running on a host that already has the dotfiles repository:
 
    **Note**: After initial setup, you can use the `dotpull` function (documented in [Functions Reference](Functions%20Reference.md)) which provides the same automatic stashing behavior from any directory.
 
-4. **Re-run Installation** - Runs `install.sh` to update any new symlinks.
+4. **Re-run Installation** - Runs `sync.sh` to update any new symlinks.
 
 ## Core vs Optional Tools
 
@@ -121,7 +121,7 @@ The `join.sh` script is fully idempotent - safe to run multiple times:
 - **Core Utilities**: Only installs missing packages
 - **Repository**: Stashes changes and pulls if exists, clones if not
 - **Setup Scripts**: Each script is idempotent and checks existing installations
-- **Symlinks**: `install.sh` uses `ln -sf` (creates or updates symlinks)
+- **Symlinks**: `sync.sh` uses `ln -sf` (creates or updates symlinks)
 
 You can safely re-run the script to:
 
