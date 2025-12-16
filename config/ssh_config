@@ -3,4 +3,5 @@ Host github.com
     User git
     IdentityFile ~/.ssh/id_ed25519_github
     IdentitiesOnly yes
+    LogLevel ERROR
 
