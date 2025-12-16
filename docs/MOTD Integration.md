@@ -23,7 +23,7 @@ The dotfiles repository provides:
    - Graceful fallback if fastfetch isn't installed
 
 2. **`/etc/update-motd.d/99-dotfiles`** - Standalone script that execs `lib/motd.sh`:
-   - Created automatically by `install.sh` (not a symlink, per man update-motd)
+   - Created automatically by `sync.sh` (not a symlink, per man update-motd)
    - Simple wrapper that calls `exec ~/dotfiles/lib/motd.sh`
    - Runs last (99-prefix) to display after system MOTD fragments
    - Requires sudo for initial setup
@@ -35,10 +35,10 @@ The dotfiles repository provides:
 
 ## Setup
 
-The MOTD integration is configured automatically when running `install.sh`:
+The MOTD integration is configured automatically when running `sync.sh`:
 
 ```bash
-cd ~/dotfiles && ./install.sh
+cd ~/dotfiles && ./sync.sh
 ```
 
 ### What Happens
@@ -52,7 +52,7 @@ cd ~/dotfiles && ./install.sh
 
 ### Manual Setup
 
-If `install.sh` was run without sudo, or on a system that doesn't support update-motd:
+If `sync.sh` was run without sudo, or on a system that doesn't support update-motd:
 
 ```bash
 # Create the MOTD fragment manually (not a symlink, per man update-motd)
@@ -129,7 +129,7 @@ sudo rm /etc/update-motd.d/99-dotfiles
 ### Fallback Behavior
 
 If the system doesn't support `update-motd`:
-- `install.sh` displays info message and skips MOTD setup
+- `sync.sh` displays info message and skips MOTD setup
 - `.zshrc` can be modified to auto-launch fastfetch as before
 - No errors or broken functionality
 

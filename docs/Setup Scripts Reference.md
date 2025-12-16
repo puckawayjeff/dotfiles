@@ -177,7 +177,7 @@ command -v nvm
 
 **Project**: [tmux](https://github.com/tmux/tmux) - Terminal multiplexer that allows multiple terminal sessions within a single window. Essential for long-running processes, remote server management, and productivity workflows. Integrates with the `updatep` function for safe system updates.
 
-**Installation**: Automatically installed when running `install.sh`.
+**Installation**: Automatically installed when running `sync.sh`.
 
 **What It Does**:
 
@@ -255,7 +255,7 @@ The `updatep` function automatically:
 
 **Project**: [micro](https://micro-editor.github.io/) - Modern and intuitive terminal-based text editor. Designed to be easy to use while providing the capabilities of traditional Unix text editors. Features familiar keyboard shortcuts (Ctrl+S to save, Ctrl+Q to quit), syntax highlighting, and mouse support.
 
-**Installation**: Automatically installed when running `install.sh`.
+**Installation**: Automatically installed when running `sync.sh`.
 
 **What It Does**:
 

@@ -1,17 +1,37 @@
 #!/usr/bin/env bash
-# install.sh - Creates symlinks for dotfiles configuration
+# sync.sh - Sync and configure dotfiles
 # Safe to run multiple times (idempotent)
-# Usage: install.sh [--quiet]  # Suppress verbose output for already-configured hosts
+# Usage: sync.sh [--from-join] [--quiet]
+#   --from-join: First-time setup (verbose, from join.sh)
+#   --quiet:     Suppress verbose output (for cron/auto-updates)
 
 # Don't exit on error for graceful degradation
 set +e
 
 # Parse arguments
 QUIET_MODE=false
-if [[ "$1" == "--quiet" || "$1" == "-q" ]]; then
-    QUIET_MODE=true
-fi
+FROM_JOIN=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --quiet|-q)
+            QUIET_MODE=true
+            shift
+            ;;
+        --from-join)
+            FROM_JOIN=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: sync.sh [--from-join] [--quiet]"
+            exit 1
+            ;;
+    esac
+done
+
 export QUIET_MODE
+export FROM_JOIN
 
 # --- Configuration ---
 # Get the directory of the script itself
@@ -26,32 +46,103 @@ else
 fi
 
 # --- Main Script ---
-if [[ "$QUIET_MODE" != "true" ]]; then
-    log_section "Starting dotfiles installation" "$ROCKET"
-fi
-
-# --- 1. Configure git if needed ---
-if [[ "$QUIET_MODE" != "true" ]]; then
-    log_section "Git Configuration" "$WRENCH"
-fi
-if ! git config --global user.name > /dev/null 2>&1; then
-    log_info "Setting default git user.name..."
-    git config --global user.name "dotfiles-user"
-    log_warning "Git user.name set to 'dotfiles-user' - update with: git config --global user.name 'Your Name'"
-fi
-if ! git config --global user.email > /dev/null 2>&1; then
-    log_info "Setting default git user.email..."
-    git config --global user.email "dotfiles@change.me"
-    log_warning "Git user.email set to 'dotfiles@change.me' - update with: git config --global user.email 'your@email.com'"
-fi
-
-# Check if values are still defaults
-CURRENT_NAME=$(git config --global user.name)
-CURRENT_EMAIL=$(git config --global user.email)
-if [ "$CURRENT_NAME" = "dotfiles-user" ] || [ "$CURRENT_EMAIL" = "dotfiles@change.me" ]; then
-    log_warning "Using default git credentials - update before committing!"
+if [[ "$FROM_JOIN" == "true" ]]; then
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Starting dotfiles sync (first-time setup)" "$ROCKET"
+    fi
 else
-    log_success "Git configured: $CURRENT_NAME <$CURRENT_EMAIL>"
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Syncing dotfiles" "$ROCKET"
+    fi
+    
+    # Pull latest changes from dotfiles
+    if [ -d "$DOTFILES_DIR/.git" ]; then
+        if [[ "$QUIET_MODE" != "true" ]]; then
+            log_info "Pulling latest dotfiles changes..."
+        fi
+        cd "$DOTFILES_DIR"
+        if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+            git stash push -m "Auto-stash before sync on $(date '+%Y-%m-%d %H:%M:%S')" &>/dev/null
+        fi
+        GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull &>/dev/null
+        cd - >/dev/null
+    fi
+    
+    # Pull latest changes from sshsync if it exists (enhanced mode)
+    if [ -d "$HOME/sshsync/.git" ]; then
+        if [[ "$QUIET_MODE" != "true" ]]; then
+            log_info "Pulling latest sshsync changes..."
+        fi
+        cd "$HOME/sshsync"
+        if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+            git stash push -m "Auto-stash before sync on $(date '+%Y-%m-%d %H:%M:%S')" &>/dev/null
+        fi
+        GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull &>/dev/null
+        cd - >/dev/null
+    fi
+fi
+
+# Detect enhanced mode
+ENHANCED_MODE=false
+if [ -d "$HOME/sshsync/.git" ]; then
+    ENHANCED_MODE=true
+fi
+
+# --- 1. Configure git if needed (only in standalone mode or from join) ---
+if [ "$ENHANCED_MODE" = false ] && [ "$FROM_JOIN" = true ]; then
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "Git Configuration" "$WRENCH"
+    fi
+    if ! git config --global user.name > /dev/null 2>&1; then
+        log_info "Setting default git user.name..."
+        git config --global user.name "dotfiles-user"
+        log_warning "Git user.name set to 'dotfiles-user' - update with: git config --global user.name 'Your Name'"
+    fi
+    if ! git config --global user.email > /dev/null 2>&1; then
+        log_info "Setting default git user.email..."
+        git config --global user.email "dotfiles@change.me"
+        log_warning "Git user.email set to 'dotfiles@change.me' - update with: git config --global user.email 'your@email.com'"
+    fi
+
+    # Check if values are still defaults
+    CURRENT_NAME=$(git config --global user.name)
+    CURRENT_EMAIL=$(git config --global user.email)
+    if [ "$CURRENT_NAME" = "dotfiles-user" ] || [ "$CURRENT_EMAIL" = "dotfiles@change.me" ]; then
+        log_warning "Using default git credentials - update before committing!"
+    else
+        log_success "Git configured: $CURRENT_NAME <$CURRENT_EMAIL>"
+    fi
+fi
+
+# --- 1a. Enhanced mode: Symlink SSH config from sshsync ---
+if [ "$ENHANCED_MODE" = true ]; then
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "SSH Configuration" "$WRENCH"
+    fi
+    
+    SSH_CONFIG_SOURCE="$HOME/sshsync/ssh.conf"
+    SSH_CONFIG_TARGET="$HOME/.ssh/config"
+    
+    if [ -f "$SSH_CONFIG_SOURCE" ]; then
+        # Check if already symlinked correctly
+        if [ -L "$SSH_CONFIG_TARGET" ] && [ "$(readlink "$SSH_CONFIG_TARGET")" = "$SSH_CONFIG_SOURCE" ]; then
+            if [[ "$QUIET_MODE" != "true" ]]; then
+                log_success "SSH config already linked"
+            fi
+        else
+            # Backup existing config if it's a regular file
+            if [ -f "$SSH_CONFIG_TARGET" ] && [ ! -L "$SSH_CONFIG_TARGET" ]; then
+                mv "$SSH_CONFIG_TARGET" "$SSH_CONFIG_TARGET.backup.$(date +%Y%m%d_%H%M%S)"
+                log_info "Backed up existing SSH config"
+            fi
+            
+            # Create symlink
+            ln -sf "$SSH_CONFIG_SOURCE" "$SSH_CONFIG_TARGET"
+            log_success "SSH config linked from sshsync"
+        fi
+    else
+        log_warning "sshsync/ssh.conf not found - SSH config not updated"
+    fi
 fi
 
 # --- 2. Install core utilities ---
@@ -234,7 +325,16 @@ fi
 
 # --- 6. Final instructions ---
 if [[ "$QUIET_MODE" != "true" ]]; then
-    log_section "Installation Complete" "$PARTY"
+    log_section "Sync Complete" "$PARTY"
+    
+    if [ "$ENHANCED_MODE" = true ]; then
+        log_success "Enhanced mode active"
+        log_info "Commands available: dotpush, sshpush, sshpull"
+    else
+        log_success "Standalone mode active"
+        log_info "For enhanced mode, see: PRIVATE_SETUP.md"
+    fi
+    
     if [ -f "$HOME/.zshrc" ]; then
         log_info "Run 'source ~/.zshrc' or restart your shell to apply changes"
     else
@@ -246,29 +346,22 @@ if [[ "$QUIET_MODE" != "true" ]]; then
         log_warning "Default shell is not zsh - logout/login required for change to take effect"
     fi
 
-    log_complete "Dotfiles installation complete!"
-    log_section "Next Steps" "$ROCKET"
-    log_plain "${YELLOW}${INFO}${NC} To apply all changes, run:"
-    log_plain "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}"
-    log_plain "   ${DIM}OR${NC}"
-    log_plain "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}"
-    log_plain ""
+    if [ "$FROM_JOIN" = true ]; then
+        log_complete "Dotfiles setup complete!"
+        log_section "Next Steps" "$ROCKET"
+        log_plain "${YELLOW}${INFO}${NC} To apply all changes, run:"
+        log_plain "   ${CYAN}exec zsh${NC}  ${DIM}# Reload current shell${NC}"
+        log_plain "   ${DIM}OR${NC}"
+        log_plain "   ${CYAN}exit${NC}      ${DIM}# Start a new session${NC}"
+        log_plain ""
+    else
+        log_complete "Dotfiles sync complete!"
+    fi
 else
     # In quiet mode, show compact summary
-    summary=""
-    if [ $CREATED -gt 0 ]; then
-        summary="${CREATED} updated"
+    mode_str="standalone"
+    if [ "$ENHANCED_MODE" = true ]; then
+        mode_str="enhanced"
     fi
-    if [ $SKIPPED -gt 0 ]; then
-        if [ -n "$summary" ]; then
-            summary="$summary, ${SKIPPED} unchanged"
-        else
-            summary="${SKIPPED} unchanged"
-        fi
-    fi
-    if [ -n "$summary" ]; then
-        log_success "Dotfiles: ${summary}"
-    else
-        log_success "Dotfiles updated"
-    fi
+    log_success "Dotfiles synced ($mode_str mode)"
 fi

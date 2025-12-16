@@ -6,7 +6,9 @@
 > wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 > ```
 >
-> This installs Git, core utilities (bat, p7zip-full, tree), runs automated setup (zsh, eza, fastfetch, starship), clones the repo, and creates symlinks.
+> **Two Modes Available:**
+> - **Standalone**: Public dotfiles only (one-way sync from GitHub) - works immediately
+> - **Enhanced**: Private SSH sync + dotfiles (two-way sync, requires [setup](PRIVATE_SETUP.md))
 
 ## Overview
 
@@ -14,12 +16,46 @@ This repository provides a symlink-based dotfiles management system for maintain
 
 Files are stored in this Git repository and symlinked to their expected system locations (`~/.zshrc`, `~/.config/starship.toml`, etc.). The repository serves as the single source of truth, with version control enabling change tracking, rollbacks, and safe experimentation.
 
+## 🚀 Modes of Operation
+
+### Standalone Mode (Default)
+
+Perfect for: Anyone who wants a solid terminal setup without private sync.
+
+**What you get:**
+- ✅ Zsh shell with custom configuration and plugins
+- ✅ Starship prompt (modern, fast, customizable)
+- ✅ Public dotfiles and configurations
+- ✅ Sensible Git defaults
+- ✅ Core utilities (eza, fastfetch, bat, etc.)
+- ✅ One-way sync from GitHub (pull only)
+
+**Setup:** Just run the Quick Start command above. No preparation needed!
+
+### Enhanced Mode
+
+Perfect for: Managing multiple machines with private SSH keys and configurations.
+
+**Everything from Standalone Mode, plus:**
+- ✅ Encrypted SSH keys download and setup
+- ✅ SSH config from your private sshsync repository
+- ✅ Personal Git configuration
+- ✅ Two-way sync with both repos (push and pull)
+- ✅ Commands: `dotpush`, `sshpush`, `sshpull`
+
+**Setup:** See **[PRIVATE_SETUP.md](PRIVATE_SETUP.md)** for complete guide.
+
+**Quick Setup:**
+1. Create `~/.config/dotfiles/dotfiles.env` (template: [dotfiles.env.example](dotfiles.env.example))
+2. Run the same join.sh command - it auto-detects enhanced mode!
+
 ## Key Features
 
 - **One-click deployment** - Automated setup on new hosts
 - **Symlink-based** - Live editing without manual copying
 - **Version controlled** - Full history and rollback capability
 - **Host-aware configs** - Gracefully handles missing software
+- **Mode detection** - Automatically uses enhanced mode when configured
 
 ## Terminal Environment
 
@@ -99,20 +135,31 @@ For proper icon display in prompts and eza output, configure your terminal to us
 
 The `join.sh` script automates the complete setup process:
 
+**Standalone Mode** (default):
 1. Updates package lists
 2. Installs Git (if needed)
 3. Installs core utilities: `bat`, `p7zip-full`, `tree`
-4. Clones this repository
-5. Runs core setup scripts automatically:
+4. Clones this repository via HTTPS
+5. Runs sync script to set up:
    - **zsh** - Modern shell with Zinit, autosuggestions, syntax highlighting, FZF, zoxide
    - **eza** - Modern ls replacement with git integration
    - **fastfetch** - Fast system information display
    - **starship** - Cross-shell prompt with Nerd Font support
-6. Creates all symlinks via `install.sh`
+6. Creates all symlinks
+
+**Enhanced Mode** (when `~/.config/dotfiles/dotfiles.env` exists):
+- All standalone mode features
+- Downloads and decrypts SSH keys
+- Configures Git with your credentials
+- Clones sshsync repository via SSH
+- Symlinks SSH config from sshsync
+- Enables two-way sync commands
 
 ```bash
 wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 ```
+
+For enhanced mode setup, see **[PRIVATE_SETUP.md](PRIVATE_SETUP.md)**.
 
 **Note**: You'll need to log out and log back in for Zsh to become your default shell.
 
@@ -128,7 +175,7 @@ This script will:
 
 1. Move the file into the repository
 2. Create a symlink at the original location
-3. Update `install.sh` with the new symlink command
+3. Update `sync.sh` with the new symlink command
 4. Stage changes in Git, commit, and push.
 
 ### Sync Changes to Other Hosts
@@ -156,7 +203,7 @@ The symlinks ensure changes take effect immediately (or after sourcing shell con
 ```text
 dotfiles/
 ├── join.sh                 # One-line deployment script (auto-installs core tools)
-├── install.sh              # Symlink creator (reads config/symlinks.conf)
+├── sync.sh                 # Symlink creator and sync script (reads config/symlinks.conf)
 ├── test.sh                 # Validation script for testing changes
 ├── VERSION                 # Current version number
 ├── CHANGELOG.md            # Version history and changes

@@ -97,6 +97,17 @@ mkd() {
 
 # Dotfiles git push
 dotpush() {
+    # Check if enhanced mode is active (sshsync exists)
+    if [[ ! -d "$HOME/sshsync/.git" ]]; then
+        log_error "Enhanced mode not configured"
+        log_info "dotpush requires SSH access to push changes"
+        log_info ""
+        log_info "To enable enhanced mode:"
+        log_info "  1. Create ~/.config/dotfiles/dotfiles.env"
+        log_info "  2. See: https://github.com/puckawayjeff/dotfiles/blob/main/PRIVATE_SETUP.md"
+        return 1
+    fi
+    
     local ORIGINAL_DIR="$PWD"
     local COMMIT_MSG="$1"
     
@@ -614,4 +625,25 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
         cd "$ORIGINAL_DIR"
     }
     
+else
+    # Provide helpful error messages when sshsync isn't set up
+    sshpush() {
+        log_error "Enhanced mode not configured"
+        log_info "sshpush requires a private sshsync repository"
+        log_info ""
+        log_info "To enable enhanced mode:"
+        log_info "  1. Create ~/.config/dotfiles/dotfiles.env"
+        log_info "  2. See: https://github.com/puckawayjeff/dotfiles/blob/main/PRIVATE_SETUP.md"
+        return 1
+    }
+    
+    sshpull() {
+        log_error "Enhanced mode not configured"
+        log_info "sshpull requires a private sshsync repository"
+        log_info ""
+        log_info "To enable enhanced mode:"
+        log_info "  1. Create ~/.config/dotfiles/dotfiles.env"
+        log_info "  2. See: https://github.com/puckawayjeff/dotfiles/blob/main/PRIVATE_SETUP.md"
+        return 1
+    }
 fi

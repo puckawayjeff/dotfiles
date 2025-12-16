@@ -23,7 +23,7 @@ This command will:
    - **eza** - Modern ls replacement with git integration and icons
    - **fastfetch** - Fast system information tool
    - **starship** - Cross-shell prompt with Nerd Font support
-6. Run `install.sh` to create all symlinks
+6. Run `sync.sh` to create all symlinks
 7. Apply configuration changes
 
 ## Script Behavior
@@ -43,7 +43,7 @@ When running `join.sh` on a host without the dotfiles repository:
    git clone git@github.com:puckawayjeff/dotfiles.git ~/dotfiles
    ```
 
-3. **Installation** - Runs `install.sh` to create all symlinks and applies changes to the current session.
+3. **Installation** - Runs `sync.sh` to create all symlinks and applies changes to the current session.
 
 ### Updates on Existing Hosts
 
