@@ -126,6 +126,30 @@ zinit snippet OMZ::plugins/copypath/copypath.plugin.zsh
 # 12. copyfile - Copy file contents to clipboard
 zinit snippet OMZ::plugins/copyfile/copyfile.plugin.zsh
 
+# ===== Additional Plugins =====
+
+# 13. zsh-help - Colorize --help output with bat
+zinit ice wait lucid
+zinit light Freed-Wu/zsh-help
+
+# 14. printdocker-zsh-plugin - Pretty print Docker objects
+zinit ice wait lucid
+zinit light elvitin/printdocker-zsh-plugin
+
+# 15. zsh-sshinfo - Display SSH connection info before connecting
+zinit ice wait lucid
+zinit light SckyzO/zsh-sshinfo
+
+# 16. zsh-thefuck - TheFuck integration with caching
+# Disable default ESC ESC keybinding (conflicts with sudo plugin)
+zstyle ':prezto:module:thefuck' bindkey 'no'
+zinit ice wait lucid atload'bindkey "^X^F" fuck-command-line'
+zinit light laggardkernel/zsh-thefuck
+
+# 17. zsh-activate-py-environment - Auto-activate Python environments
+zinit ice wait lucid
+zinit light se-jaeger/zsh-activate-py-environment
+
 # Initialize completion system
 autoload -Uz compinit
 # Only regenerate .zcompdump once a day
@@ -165,6 +189,10 @@ else
     alias la='ls -A'
     alias l='ls -CF'
 fi
+
+# Python environment shortcuts
+alias link-pyenv='link_py_environment'
+alias unlink-pyenv='unlink_py_environment'
 
 # Load additional aliases if present
 [[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases

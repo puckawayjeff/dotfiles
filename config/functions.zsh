@@ -532,8 +532,8 @@ dotkeys() {
     printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n\n"
     
     printf "${BOLD}${GREEN}Plugin Shortcuts${NC}\n"
-    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} Prepend sudo to command           ${YELLOW}Ctrl+T${NC}           ${ARROW} FZF file search\n"
-    printf "  ${YELLOW}Alt+C${NC}          ${ARROW} FZF directory navigation\n"
+    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} Prepend sudo to command           ${YELLOW}Ctrl+X Ctrl+F${NC}    ${ARROW} TheFuck correction\n"
+    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} FZF file search                   ${YELLOW}Alt+C${NC}            ${ARROW} FZF directory navigation\n"
     
     printf "${BLUE}${HR}${NC}\n\n"
 }
@@ -564,6 +564,11 @@ dothelp() {
     printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction      ${YELLOW}copypath${NC}            ${ARROW} Copy current path\n"
     printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents                ${YELLOW}gst, gco, gp${NC}        ${ARROW} Git status/checkout/push\n"
     printf "  ${YELLOW}dps, dex, dlog${NC}     ${ARROW} Docker ps/exec/logs shortcuts\n\n"
+    
+    printf "${BOLD}${GREEN}Additional Plugin Commands${NC}\n"
+    printf "  ${YELLOW}fuck${NC}               ${ARROW} Correct last failed command       ${YELLOW}printdocker [full]${NC}  ${ARROW} Pretty print Docker objects\n"
+    printf "  ${YELLOW}s / sshinfo${NC}        ${ARROW} SSH with connection info          ${YELLOW}connect${NC}             ${ARROW} SSH alias (same as s)\n"
+    printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
     
     printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
     printf "  ${YELLOW}j <dir>${NC}            ${ARROW} Jump to directory (zoxide)        ${YELLOW}z <dir>${NC}             ${ARROW} Smart cd (zoxide alias)\n"
