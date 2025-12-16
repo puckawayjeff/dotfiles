@@ -25,8 +25,7 @@ If you're already familiar with SSH keys and want the fastest path:
 ```bash
 # 1. Create your private sshsync repo on GitHub
 # 2. Package your SSH keys
-cd ~/dotfiles
-./package-ssh-keys.sh "your-secure-password"
+sshpack "your-secure-password"
 
 # 3. Upload ~/ssh-keys.tar.gz.enc to your web server
 # 4. Create ~/.config/dotfiles/dotfiles.env with your settings
@@ -415,7 +414,7 @@ When you need to rotate keys:
 3. Re-run packaging script:
    ```bash
    cd ~/dotfiles
-   ./package-ssh-keys.sh "new-password-or-same-password"
+   sshpack "new-password-or-same-password"
    ```
 4. Upload new archive to your web server (can use same URL)
 5. Update `SSH_KEYS_ARCHIVE_PASSWORD` in dotfiles.env if password changed
@@ -442,7 +441,7 @@ Just run join.sh with dotfiles.env in place. That's it!
 **Cause:** Wrong password or corrupted archive
 
 **Solutions:**
-1. Verify password in dotfiles.env matches the one used in package-ssh-keys.sh
+1. Verify password in dotfiles.env matches the one used in sshpack
 2. Re-download the archive manually and test:
    ```bash
    wget https://yourserver.com/.../ssh-keys.tar.gz.enc -O /tmp/test.enc
@@ -630,7 +629,7 @@ fi
 For high-security scenarios, maintain separate archives:
 ```bash
 # Work keys only
-./package-ssh-keys.sh work-password
+sshpack work-password
 mv ~/ssh-keys.tar.gz.enc ~/ssh-keys-work.tar.gz.enc
 
 # Personal keys only

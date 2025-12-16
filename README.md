@@ -210,7 +210,7 @@ To create your own dotfiles:
 
 For enhanced mode:
 1. Create private `sshsync` repository
-2. Package SSH keys with `./package-ssh-keys.sh`
+2. Package SSH keys with `sshpack` function
 3. Host encrypted archive on your web server
 4. Create `dotfiles.env` with your credentials
 

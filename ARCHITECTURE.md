@@ -134,7 +134,7 @@ GIT_USER_EMAIL="your@email.com"
 
 **Setup Process**:
 1. Create private sshsync repository
-2. Package SSH keys with `./package-ssh-keys.sh`
+2. Package SSH keys with `sshpack` function
 3. Upload encrypted archive to web server
 4. Create `dotfiles.env` with credentials
 5. Run `join.sh` - it auto-detects enhanced mode
@@ -183,7 +183,7 @@ add-dotfile ~/.gitconfig
 - Terminal utilities (get_hr for horizontal rules)
 - QUIET_MODE support for silent operations
 
-**Used By**: All scripts (sync.sh, join.sh, package-ssh-keys.sh, setup scripts, functions.zsh)
+**Used By**: All scripts (sync.sh, join.sh, setup scripts, functions.zsh)
 
 ### lib/terminal.sh (Tool Installation)
 

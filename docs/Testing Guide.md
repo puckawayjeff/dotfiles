@@ -360,7 +360,7 @@ grep -r "PRIVATE_SETUP.md" *.md
 cd ~/dotfiles
 
 # 1. Run packaging script
-./package-ssh-keys.sh "test-password-123"
+sshpack "test-password-123"
 
 # 2. Verify archive created
 ls -lh ~/ssh-keys.tar.gz.enc

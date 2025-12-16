@@ -21,7 +21,7 @@
 - Better organization for both users and developers
 
 #### Library Consolidation
-- Unified `package-ssh-keys.sh` to use `lib/utils.sh`
+- Converted package-ssh-keys.sh to `sshpack` function in functions.zsh
 - Added INFO emoji constant (ℹ️) to utils library
 - Documented why `join.sh` must remain self-contained (bootstrap requirement)
 - Consistent logging across all scripts

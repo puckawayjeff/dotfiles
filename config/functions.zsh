@@ -547,22 +547,27 @@ dothelp() {
     printf "${BLUE}${HR}${NC}\n"
     
     printf "${BOLD}${GREEN}Dotfiles Management${NC}\n"
-    printf "  ${YELLOW}dotpush <msg>${NC}      ${ARROW} Commit & push changes              ${YELLOW}dotpull${NC}           ${ARROW} Pull latest & reload\n"
-    printf "  ${YELLOW}add-dotfile <path>${NC} ${ARROW} Add file to repo & symlink         ${YELLOW}dotsetup [tool]${NC}   ${ARROW} Run/list setup scripts\n"
-    printf "  ${YELLOW}dotversion${NC}         ${ARROW} Show version & git info            ${YELLOW}maintain${NC}          ${ARROW} Full update sequence\n\n"
+    if [[ -d "$HOME/sshsync/.git" ]]; then
+        printf "  ${YELLOW}dotpush <msg>${NC}      ${ARROW} Commit & push changes             ${YELLOW}dotpull${NC}             ${ARROW} Pull latest & reload\n"
+        printf "  ${YELLOW}sshpush <msg>${NC}      ${ARROW} Push SSH config changes           ${YELLOW}sshpull${NC}             ${ARROW} Pull SSH config changes\n"
+        printf "  ${YELLOW}sshpack [pass]${NC}     ${ARROW} Package SSH keys (encrypted)      ${YELLOW}add-dotfile <path>${NC}  ${ARROW} Add file to repo & symlink\n"
+    else
+        printf "  ${YELLOW}dotpull${NC}            ${ARROW} Pull latest & reload              ${YELLOW}dotsetup [tool]${NC}     ${ARROW} Run/list setup scripts\n"
+    fi
+    printf "  ${YELLOW}dotversion${NC}         ${ARROW} Show version & git info           ${YELLOW}maintain${NC}            ${ARROW} Full update sequence\n\n"
     
     printf "${BOLD}${GREEN}System Utilities${NC}\n"
-    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update in tmux              ${YELLOW}paths${NC}             ${ARROW} Check PATH validity\n"
-    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd              ${YELLOW}dotpack <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
+    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update in tmux             ${YELLOW}paths${NC}               ${ARROW} Check PATH validity\n"
+    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd             ${YELLOW}dotpack <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
     
     printf "${BOLD}${GREEN}Plugin Commands (oh-my-zsh)${NC}\n"
-    printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction       ${YELLOW}copypath${NC}          ${ARROW} Copy current path\n"
-    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents                 ${YELLOW}gst, gco, gp${NC}      ${ARROW} Git status/checkout/push\n"
+    printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction      ${YELLOW}copypath${NC}            ${ARROW} Copy current path\n"
+    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents                ${YELLOW}gst, gco, gp${NC}        ${ARROW} Git status/checkout/push\n"
     printf "  ${YELLOW}dps, dex, dlog${NC}     ${ARROW} Docker ps/exec/logs shortcuts\n\n"
     
     printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
-    printf "  ${YELLOW}j <dir>${NC}            ${ARROW} Jump to directory (zoxide)         ${YELLOW}z <dir>${NC}           ${ARROW} Smart cd (zoxide alias)\n"
-    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza               ${YELLOW}ff${NC}                ${ARROW} Run fastfetch\n"
+    printf "  ${YELLOW}j <dir>${NC}            ${ARROW} Jump to directory (zoxide)        ${YELLOW}z <dir>${NC}             ${ARROW} Smart cd (zoxide alias)\n"
+    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza              ${YELLOW}ff${NC}                  ${ARROW} Run fastfetch\n"
     
     printf "${BLUE}${HR}${NC}\n"
     printf "${MAGENTA}💡 Tip: Type 'dotkeys' for keyboard shortcuts${NC}\n\n"
@@ -647,3 +652,135 @@ else
         return 1
     }
 fi
+
+# Package SSH keys into encrypted archive
+sshpack() {
+    log_section "SSH Keys Packaging" "$PACKAGE"
+
+    # Check if ~/.ssh exists
+    if [ ! -d "$HOME/.ssh" ]; then
+        log_error "~/.ssh directory does not exist"
+        return 1
+    fi
+
+    # Check for SSH keys
+    local SSH_KEY_FILES=$(find "$HOME/.ssh" -type f \( -name "id_*" ! -name "*.pub" \) 2>/dev/null || true)
+    local SSH_PUB_FILES=$(find "$HOME/.ssh" -type f -name "id_*.pub" 2>/dev/null || true)
+
+    if [ -z "$SSH_KEY_FILES" ]; then
+        log_error "No SSH keys found in ~/.ssh"
+        log_info "Generate keys with: ssh-keygen -t ed25519 -C \"your@email.com\""
+        return 1
+    fi
+
+    # List found keys
+    log_info "Found SSH keys:"
+    echo "$SSH_KEY_FILES" | while read -r keyfile; do
+        echo "   • $(basename "$keyfile")"
+    done
+    echo "$SSH_PUB_FILES" | while read -r keyfile; do
+        echo "   • $(basename "$keyfile")"
+    done
+    echo ""
+
+    # Get password
+    local PASSWORD="$1"
+    if [ -z "$PASSWORD" ]; then
+        log_warning "No password provided as argument"
+        printf "Enter password for encryption: "
+        read -s PASSWORD
+        echo ""
+        if [ -z "$PASSWORD" ]; then
+            log_error "Password cannot be empty"
+            return 1
+        fi
+        printf "Confirm password: "
+        local PASSWORD_CONFIRM
+        read -s PASSWORD_CONFIRM
+        echo ""
+        if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
+            log_error "Passwords do not match"
+            return 1
+        fi
+    fi
+
+    if [ ${#PASSWORD} -lt 12 ]; then
+        log_warning "Password is shorter than 12 characters. Consider using a stronger password."
+        printf "Continue anyway? (y/N): "
+        local CONTINUE
+        read -r CONTINUE
+        if [[ ! "$CONTINUE" =~ ^[Yy]$ ]]; then
+            log_info "Aborted"
+            return 0
+        fi
+    fi
+
+    # Create temporary directory
+    local TEMP_DIR=$(mktemp -d)
+    local cleanup() {
+        rm -rf "$TEMP_DIR"
+    }
+    trap cleanup EXIT INT TERM
+
+    log_info "Creating archive..."
+
+    # Copy SSH keys to temp directory
+    mkdir -p "$TEMP_DIR/ssh"
+    find "$HOME/.ssh" -type f \( -name "id_*" \) -exec cp {} "$TEMP_DIR/ssh/" \;
+
+    # Count files
+    local FILE_COUNT=$(find "$TEMP_DIR/ssh" -type f | wc -l)
+
+    # Create tar.gz
+    (cd "$TEMP_DIR" && tar -czf ssh-keys.tar.gz ssh/)
+
+    # Encrypt using openssl with AES-256-CBC
+    openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 -in "$TEMP_DIR/ssh-keys.tar.gz" -out "$TEMP_DIR/ssh-keys.tar.gz.enc" -pass pass:"$PASSWORD"
+
+    # Move to home directory
+    local OUTPUT_FILE="$HOME/ssh-keys.tar.gz.enc"
+    mv "$TEMP_DIR/ssh-keys.tar.gz.enc" "$OUTPUT_FILE"
+
+    # Get file size
+    local FILE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
+
+    log_success "Archive created successfully!"
+    echo ""
+    log_info "Archive details:"
+    echo "   • Location: $OUTPUT_FILE"
+    echo "   • Files packaged: $FILE_COUNT"
+    echo "   • Size: $FILE_SIZE"
+    echo ""
+
+    # Verify archive can be decrypted
+    log_info "Verifying archive..."
+    local VERIFY_DIR=$(mktemp -d)
+    trap "rm -rf $TEMP_DIR $VERIFY_DIR" EXIT INT TERM
+
+    if openssl enc -aes-256-cbc -d -pbkdf2 -iter 100000 -in "$OUTPUT_FILE" -out "$VERIFY_DIR/test.tar.gz" -pass pass:"$PASSWORD" 2>/dev/null; then
+        if tar -tzf "$VERIFY_DIR/test.tar.gz" >/dev/null 2>&1; then
+            log_success "Archive verified successfully"
+            echo ""
+            log_info "Contents:"
+            tar -tzf "$VERIFY_DIR/test.tar.gz" | sed 's/^/   • /'
+        else
+            log_error "Archive verification failed - tar extraction failed"
+            return 1
+        fi
+    else
+        log_error "Archive verification failed - decryption failed"
+        return 1
+    fi
+
+    echo ""
+    log_info "Next steps:"
+    echo "   1. Upload $OUTPUT_FILE to your secure web server"
+    echo "   2. Note the URL where it's accessible"
+    echo "   3. Add URL and password to your dotfiles.env file:"
+    echo ""
+    echo "      SSH_KEYS_ARCHIVE_URL=\"https://example.com/path/to/ssh-keys.tar.gz.enc\""
+    echo "      SSH_KEYS_ARCHIVE_PASSWORD=\"<your-password>\""
+    echo ""
+    log_warning "Keep this file and password secure! Anyone with both can access your SSH keys."
+    echo ""
+}

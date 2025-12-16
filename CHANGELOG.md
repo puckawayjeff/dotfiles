@@ -30,7 +30,7 @@ This release focuses on clarifying the repository architecture, streamlining doc
   - Moved architectural details to ARCHITECTURE.md
   - Consolidated related information
   - Clearer separation between user guides and developer docs
-- **package-ssh-keys.sh**: Now uses lib/utils.sh for consistent logging
+- **sshpack function**: Added to functions.zsh for SSH key packaging (replaces package-ssh-keys.sh)
 - **RELEASE_NOTES.md**: Updated for 2.0.0 release with clear migration guide
 
 ### Fixed
