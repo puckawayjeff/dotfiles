@@ -28,6 +28,10 @@ setopt ALWAYS_TO_END             # Move cursor to end after completion
 setopt AUTO_MENU                 # Show completion menu on tab
 setopt AUTO_LIST                 # List choices on ambiguous completion
 
+# ===== Completion System =====
+setopt INTERACTIVE_COMMENTS      # Safely ignore pasted comment lines in the terminal
+
+
 # ===== Zinit Installation and Setup =====
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
