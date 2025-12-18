@@ -228,30 +228,6 @@ else
     log_info "   → Create ~/.config/dotfiles/dotfiles.env (see dotfiles.env.example)"
 fi
 
-# Enhanced mode: Set up SSH and private repository
-if [ "$ENHANCED_MODE" = true ]; then
-    # Download and extract SSH keys
-    if ! setup_ssh_from_archive; then
-        log_error "SSH setup failed - falling back to standalone mode"
-        ENHANCED_MODE=false
-    else
-        # Create GitHub SSH config
-        setup_github_ssh_config
-        
-        # Configure git with personal settings
-        log_section "Configuring Git" "$WRENCH"
-        git config --global pull.rebase false
-        git config --global user.name "$GIT_USER_NAME"
-        git config --global user.email "$GIT_USER_EMAIL"
-        log_success "Git configured: $GIT_USER_NAME <$GIT_USER_EMAIL>"
-        
-        # Clone/update sshsync repository
-        if ! setup_sshsync_repo; then
-            log_warning "sshsync setup failed - continuing with dotfiles only"
-        fi
-    fi
-fi
-
 log_section "Installing Base Utilities" "$PACKAGE"
 if ! command -v apt &> /dev/null; then
     log_error "Cannot update packages without apt package manager."
@@ -278,6 +254,30 @@ else
 fi
 
 log_substep "Git version: $(git --version | cut -d' ' -f3)"
+
+# Enhanced mode: Set up SSH and private repository (now that git is installed)
+if [ "$ENHANCED_MODE" = true ]; then
+    # Download and extract SSH keys
+    if ! setup_ssh_from_archive; then
+        log_error "SSH setup failed - falling back to standalone mode"
+        ENHANCED_MODE=false
+    else
+        # Create GitHub SSH config
+        setup_github_ssh_config
+        
+        # Configure git with personal settings
+        log_section "Configuring Git" "$WRENCH"
+        git config --global pull.rebase false
+        git config --global user.name "$GIT_USER_NAME"
+        git config --global user.email "$GIT_USER_EMAIL"
+        log_success "Git configured: $GIT_USER_NAME <$GIT_USER_EMAIL>"
+        
+        # Clone/update sshsync repository
+        if ! setup_sshsync_repo; then
+            log_warning "sshsync setup failed - continuing with dotfiles only"
+        fi
+    fi
+fi
 
 # Standalone mode: Configure git with defaults
 if [ "$ENHANCED_MODE" = false ]; then
