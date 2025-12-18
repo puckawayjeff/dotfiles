@@ -161,6 +161,8 @@ if command -v apt &> /dev/null; then
         "wget"
         "sudo"
         "unzip"
+        "rename"
+        "rsync"
     )
     
     UTILS_TO_INSTALL=()
