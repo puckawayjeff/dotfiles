@@ -532,8 +532,8 @@ dotkeys() {
     printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n\n"
     
     printf "${BOLD}${GREEN}Plugin Shortcuts${NC}\n"
-    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} Prepend sudo to command           ${YELLOW}Ctrl+X Ctrl+F${NC}    ${ARROW} TheFuck correction\n"
-    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} FZF file search                   ${YELLOW}Alt+C${NC}            ${ARROW} FZF directory navigation\n"
+    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} TheFuck command correction        ${YELLOW}Ctrl+T${NC}           ${ARROW} FZF file search\n"
+    printf "  ${YELLOW}Alt+C${NC}          ${ARROW} FZF directory navigation\n"
     
     printf "${BLUE}${HR}${NC}\n\n"
 }
@@ -567,7 +567,7 @@ dothelp() {
     
     printf "${BOLD}${GREEN}Additional Plugin Commands${NC}\n"
     printf "  ${YELLOW}fuck${NC}               ${ARROW} Correct last failed command       ${YELLOW}printdocker [full]${NC}  ${ARROW} Pretty print Docker objects\n"
-    printf "  ${YELLOW}s / sshinfo${NC}        ${ARROW} SSH with connection info          ${YELLOW}connect${NC}             ${ARROW} SSH alias (same as s)\n"
+    printf "  ${YELLOW}s / sshinfo${NC}        ${ARROW} SSH with connection info          ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
     printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
     
     printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
@@ -788,4 +788,50 @@ sshpack() {
     echo ""
     log_warning "Keep this file and password secure! Anyone with both can access your SSH keys."
     echo ""
+}
+
+# List all SSH hosts from config files
+sshlist() {
+    log_section "SSH Configured Hosts" "$COMPUTER"
+    
+    local -a hosts
+    local found_any=false
+    
+    # Check ~/.ssh/config
+    if [[ -f ~/.ssh/config ]]; then
+        local config_hosts=$(grep -i "^Host " ~/.ssh/config | grep -v "*" | awk '{print $2}' | sort -u)
+        if [[ -n "$config_hosts" ]]; then
+            log_info "${FOLDER} From ~/.ssh/config:"
+            echo "$config_hosts" | while read -r host; do
+                printf "   ${CYAN}•${NC} %s\n" "$host"
+            done
+            echo ""
+            found_any=true
+        fi
+    fi
+    
+    # Check sshsync ssh.conf if enhanced mode is active
+    if [[ -f ~/sshsync/ssh.conf ]]; then
+        local sshsync_hosts=$(grep -i "^Host " ~/sshsync/ssh.conf | grep -v "*" | awk '{print $2}' | sort -u)
+        if [[ -n "$sshsync_hosts" ]]; then
+            log_info "${FOLDER} From ~/sshsync/ssh.conf:"
+            echo "$sshsync_hosts" | while read -r host; do
+                printf "   ${CYAN}•${NC} %s\n" "$host"
+            done
+            echo ""
+            found_any=true
+        fi
+    fi
+    
+    if [[ "$found_any" = false ]]; then
+        log_warning "No SSH hosts found in config files"
+        log_info "Add hosts to ~/.ssh/config"
+        echo ""
+        log_plain "Example entry:"
+        log_substep "Host myserver"
+        log_substep "    HostName 192.168.1.100"
+        log_substep "    User username"
+        log_substep "    Port 22"
+        echo ""
+    fi
 }

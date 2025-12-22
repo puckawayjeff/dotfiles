@@ -83,7 +83,7 @@ See [docs/Functions Reference.md](docs/Functions%20Reference.md) for complete do
 - **Tmux** - Terminal multiplexer with sensible defaults
 
 ### Plugins
-- **Oh-My-Zsh**: git, docker, sudo (ESC ESC), extract, command-not-found, colored-man-pages
+- **Oh-My-Zsh**: git, docker, extract, command-not-found, colored-man-pages
 - **Core**: completions, history search, syntax highlighting
 
 ## Adding Your Own Dotfiles

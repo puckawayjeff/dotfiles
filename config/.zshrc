@@ -79,7 +79,12 @@ zinit ice wait lucid atload'
 '
 zinit light zsh-users/zsh-history-substring-search
 
-# 4. Fast-syntax-highlighting - MUST load after history-substring-search
+# 3b. zsh-thefuck - TheFuck integration (MUST load before syntax-highlighting)
+# Uses default ESC ESC keybinding
+zinit ice wait lucid
+zinit light laggardkernel/zsh-thefuck
+
+# 4. Fast-syntax-highlighting - MUST load LAST (after other ZLE widgets)
 zinit ice wait lucid
 zinit light zdharma-continuum/fast-syntax-highlighting
 
@@ -92,10 +97,7 @@ zinit snippet OMZ::plugins/git/git.plugin.zsh
 # 6. docker - Docker completion and aliases
 zinit snippet OMZ::plugins/docker/docker.plugin.zsh
 
-# 7. sudo - Press ESC twice to prepend sudo
-zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
-
-# 8. extract - Universal archive extraction (replaces unpackk)
+# 7. extract - Universal archive extraction (replaces unpackk)
 zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 
 # 9. command-not-found - Suggests packages for missing commands
@@ -141,16 +143,11 @@ zinit ice wait lucid
 zinit light elvitin/printdocker-zsh-plugin
 
 # 15. zsh-sshinfo - Display SSH connection info before connecting
-zinit ice wait lucid
-zinit light SckyzO/zsh-sshinfo
+# DISABLED: Box-drawing characters render incorrectly
+# zinit ice wait lucid
+# zinit light SckyzO/zsh-sshinfo
 
-# 16. zsh-thefuck - TheFuck integration with caching
-# Disable default ESC ESC keybinding (conflicts with sudo plugin)
-zstyle ':prezto:module:thefuck' bindkey 'no'
-zinit ice wait lucid atload'bindkey "^X^F" fuck-command-line'
-zinit light laggardkernel/zsh-thefuck
-
-# 17. zsh-activate-py-environment - Auto-activate Python environments
+# 16. zsh-activate-py-environment - Auto-activate Python environments
 zinit ice wait lucid
 zinit light se-jaeger/zsh-activate-py-environment
 
@@ -170,6 +167,34 @@ zstyle ':completion:*' menu select                       # Menu-driven completio
 zstyle ':completion:*' group-name ''                     # Group completions
 zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
 zstyle ':completion:*:warnings' format '%F{red}-- no matches found --%f'
+
+# ===== SSH Completion =====
+# Enable completion from ~/.ssh/config and ~/.ssh/known_hosts
+zstyle ':completion:*:ssh:*' hosts off  # Don't use system hosts
+zstyle ':completion:*:ssh:*' users off  # Don't complete usernames
+
+# Custom SSH host completion function
+function _ssh_hosts() {
+    local -a ssh_hosts
+    
+    # Read from ~/.ssh/config
+    if [[ -f ~/.ssh/config ]]; then
+        ssh_hosts+=(${${${${(@M)${(f)"$(<~/.ssh/config)"}:#Host *}#Host }:#*[*?]*}:#*/*})
+    fi
+    
+    # Read from sshsync ssh.conf if it exists (enhanced mode)
+    if [[ -f ~/sshsync/ssh.conf ]]; then
+        ssh_hosts+=(${${${${(@M)${(f)"$(<~/sshsync/ssh.conf)"}:#Host *}#Host }:#*[*?]*}:#*/*})
+    fi
+    
+    # Remove duplicates and provide to completion
+    _describe 'ssh hosts' ssh_hosts
+}
+
+# Register the completion function for ssh, scp, sftp
+compdef _ssh_hosts ssh
+compdef _ssh_hosts scp
+compdef _ssh_hosts sftp
 
 # ===== Color Support =====
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'

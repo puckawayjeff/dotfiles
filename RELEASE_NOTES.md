@@ -1,49 +1,69 @@
-# Release Notes - Version 2.0.0
+# Release Notes - Version 2.1.0
 
-**Release Date**: December 2025  
-**Major Version**: Architecture and documentation overhaul
+**Release Date**: December 21, 2025  
+**Minor Version**: SSH improvements and plugin optimization
 
-## 🎯 What's New in 2.0.0
+## 🎯 What's New in 2.1.0
 
-### Major Changes
+### SSH Host Management
 
-#### Repository Architecture Clarification
-- **NEW**: [ARCHITECTURE.md](ARCHITECTURE.md) - Comprehensive system design documentation
-- Clear separation between public dotfiles and private sshsync repositories
-- Detailed explanation of standalone vs enhanced modes
-- Complete workflow diagrams and extension points
+#### Smart SSH Autocomplete
+- **NEW**: SSH host completion from `~/.ssh/config` and `~/sshsync/ssh.conf`
+- Tab completion for `ssh`, `scp`, and `sftp` commands
+- Automatically reads all configured hosts from both config files
+- No more typing full hostnames manually
 
-#### Streamlined Documentation
-- **Reduced from 3,700+ lines to ~2,500 lines** (32% reduction)
-- Focused README.md on quick start and essential commands
-- Moved detailed explanations to ARCHITECTURE.md
-- Improved navigation with clear cross-references
-- Better organization for both users and developers
+#### sshlist Function
+- **NEW**: `sshlist` command displays all configured SSH hosts
+- Shows hosts from both `~/.ssh/config` and enhanced mode `~/sshsync/ssh.conf`
+- Color-coded output with clear section headers
+- Helpful examples when no hosts are configured
 
-#### Library Consolidation
-- Converted package-ssh-keys.sh to `sshpack` function in functions.zsh
-- Added INFO emoji constant (ℹ️) to utils library
-- Documented why `join.sh` must remain self-contained (bootstrap requirement)
-- Consistent logging across all scripts
+### Plugin Improvements
+
+#### Removed zsh-sshinfo
+- **REMOVED**: `SckyzO/zsh-sshinfo` plugin
+- Reason: Box-drawing characters rendered incorrectly causing visual issues
+- Replaced with native SSH completion (better functionality)
+
+#### Removed sudo Plugin
+- **REMOVED**: Oh-My-Zsh `sudo` plugin
+- Reason: Conflicted with thefuck plugin keybinding
+- TheFuck now uses default ESC ESC binding (more intuitive)
+
+#### Fixed zsh-thefuck Integration
+- Resolved ZLE widget loading order issue
+- Moved thefuck plugin to load before fast-syntax-highlighting
+- Eliminated "unhandled ZLE widget" error messages
+- ESC ESC keybinding now works reliably
+
+### Documentation Updates
+
+- Updated `dothelp` to include `sshlist` command
+- Updated `dotkeys` to reflect ESC ESC for TheFuck (not sudo)
+- Updated README.md plugin list
+- Corrected SSH config path references in functions
 
 ## 🚀 Migration Guide
 
-### For Existing Users (1.x → 2.0.0)
+### For Existing Users (2.0.0 → 2.1.0)
 
-**No breaking changes!** This is a documentation and architecture release.
+**No breaking changes!** All existing functionality preserved.
 
 1. Pull latest changes:
    ```bash
    dotpull
    ```
 
-2. Review new documentation:
-   ```bash
-   cat ~/dotfiles/ARCHITECTURE.md
-   cat ~/dotfiles/README.md
-   ```
+2. The changes take effect immediately:
+   - Type `ssh <Tab>` to see your configured hosts
+   - Run `sshlist` to view all SSH hosts
+   - Use ESC ESC for TheFuck command correction
 
-3. Continue using as normal - all commands work the same
+3. Optional: Remove cached zsh-sshinfo plugin data:
+   ```bash
+   rm -rf ~/.local/share/zinit/plugins/SckyzO---zsh-sshinfo
+   ```
 
 ### For New Users
 
@@ -52,35 +72,55 @@ Just run the standard deployment command:
 wget -qO - https://raw.githubusercontent.com/puckawayjeff/dotfiles/main/join.sh | bash
 ```
 
-Enhanced mode users: Follow [PRIVATE_SETUP.md](PRIVATE_SETUP.md)
+## 📖 Key Features
 
-## 📖 What to Read
+### SSH Tab Completion
 
-**New to dotfiles**: [README.md](README.md) → [QUICKSTART.md](QUICKSTART.md) → [docs/Examples.md](docs/Examples.md)
+Type partial hostname and press Tab:
+```bash
+$ ssh med<Tab>
+$ ssh mediabarn
+```
 
-**Setting up enhanced mode**: [PRIVATE_SETUP.md](PRIVATE_SETUP.md) → [ARCHITECTURE.md](ARCHITECTURE.md)
+View all hosts:
+```bash
+$ sshlist
+💻 SSH Configured Hosts...
+📁 From ~/.ssh/config:
+   • mediabarn
+   • puckaplex
+   • workshop-sensor
+   ...
+```
 
-**Forking this repository**: [README.md](README.md) → [ARCHITECTURE.md](ARCHITECTURE.md) → [docs/Script Development Best Practices.md](docs/Script%20Development%20Best%20Practices.md)
+### TheFuck Integration
 
-## 🎓 Key Concepts
+Mistyped a command? Press ESC ESC:
+```bash
+$ apt install package
+Permission denied
+$ <ESC ESC>
+$ sudo apt install package
+```
 
-### Two-Repository Pattern
+## 🔧 Technical Changes
 
-**Public Repository (dotfiles)**: Terminal configuration and universal settings that work standalone
-
-**Private Repository (sshsync)**: SSH keys and private configurations as optional companion
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for complete explanation.
+- Added `_ssh_hosts()` completion function to `.zshrc`
+- Added `sshlist()` function to `functions.zsh`
+- Reordered Zinit plugin loading sequence
+- Fixed sshsync config path (`ssh.conf` not `config`)
+- Removed conflicting keybinding configurations
 
 ## 📊 Statistics
 
-- **Documentation**: Reduced from 3,722 lines to ~2,500 lines (32% reduction)
-- **New file**: ARCHITECTURE.md (comprehensive system design guide)
-- **README.md**: Streamlined from 24KB to 8KB (66% smaller)
-- **Code quality**: Centralized logging, better comments, consistent patterns
+- **Plugins**: Removed 2 (zsh-sshinfo, sudo), improved 1 (thefuck)
+- **New functions**: 2 (sshlist, _ssh_hosts)
+- **Bug fixes**: 1 (ZLE widget error)
+- **Documentation updates**: 4 files (README.md, functions.zsh, .zshrc, RELEASE_NOTES.md)
 
 ---
 
-**Version**: 2.0.0  
-**Type**: Documentation and architecture overhaul  
-**Breaking Changes**: None
+**Version**: 2.1.0  
+**Type**: Minor release - SSH improvements and plugin optimization  
+**Breaking Changes**: None  
+**Upgrade Recommended**: Yes - Better SSH workflow and cleaner shell startup
