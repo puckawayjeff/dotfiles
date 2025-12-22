@@ -799,23 +799,10 @@ sshlist() {
     
     # Check ~/.ssh/config
     if [[ -f ~/.ssh/config ]]; then
-        local config_hosts=$(grep -i "^Host " ~/.ssh/config | grep -v "*" | awk '{print $2}' | sort -u)
+        local config_hosts=$(grep -i "^Host " ~/.ssh/config | grep -v "*" | grep -v "github.com" | awk '{print $2}' | sort -u)
         if [[ -n "$config_hosts" ]]; then
             log_info "${FOLDER} From ~/.ssh/config:"
             echo "$config_hosts" | while read -r host; do
-                printf "   ${CYAN}•${NC} %s\n" "$host"
-            done
-            echo ""
-            found_any=true
-        fi
-    fi
-    
-    # Check sshsync ssh.conf if enhanced mode is active
-    if [[ -f ~/sshsync/ssh.conf ]]; then
-        local sshsync_hosts=$(grep -i "^Host " ~/sshsync/ssh.conf | grep -v "*" | awk '{print $2}' | sort -u)
-        if [[ -n "$sshsync_hosts" ]]; then
-            log_info "${FOLDER} From ~/sshsync/ssh.conf:"
-            echo "$sshsync_hosts" | while read -r host; do
                 printf "   ${CYAN}•${NC} %s\n" "$host"
             done
             echo ""
