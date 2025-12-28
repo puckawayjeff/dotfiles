@@ -5,6 +5,76 @@ All notable changes to this dotfiles repository will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to semantic versioning principles for major structural changes.
 
+## [Unreleased]
+
+### Changed
+- **Symlink Management Architecture**: Refactored to use single source of truth
+  - All symlinks now defined in `config/symlinks.conf` (core + user-added)
+  - Removed `setup_config_symlinks()` function from `lib/terminal.sh`
+  - Terminal.sh now only installs binaries, symlinks handled by sync.sh
+  - Added micro.json and tmux.conf to symlinks.conf (previously hardcoded in terminal.sh)
+  - Updated ARCHITECTURE.md to reflect new architecture
+  - Improved transparency: all symlinks visible in one location
+  - Better maintainability: consistent processing for all symlinks
+- **Configuration File Naming**: Removed dot-prefix from config files for better visibility
+  - Renamed `config/.zshrc` → `config/zshrc.conf`
+  - Renamed `config/.zprofile` → `config/zprofile.conf`
+  - Makes configuration files visible by default in file listings
+  - Follows best practice of using descriptive names (like `fastfetch.jsonc` vs `config.jsonc`)
+  - Updated all references throughout codebase and documentation
+- **zsh-thefuck Plugin**: Disabled due to Python 3.13+ incompatibility
+  - TheFuck requires Python distutils and imp modules removed in 3.13
+  - Added comment explaining incompatibility with upstream issue link
+  - Awaiting upstream fix: https://github.com/nvbn/thefuck/issues/1495
+
+### Added
+- **Eza Theme Customization**: Custom eza theme with special directory icons
+  - Developer directory (󰲋) - yellow/bold text with console icon
+  - dotfiles directory (󰴋) - yellow/bold text with sync folder icon
+  - sshsync directory (󰒃) - yellow/bold text with shield icon
+  - Based on default eza theme from eza-community/eza-themes
+  - Automatically symlinked to `~/.config/eza/theme.yml`
+- **EZA_CONFIG_DIR environment variable** in .zshrc to enable theme support
+- **Smart `cd` function with zoxide fallback**: Enhanced directory navigation
+  - Uses `j` (zoxide) for smart directory jumping when available
+  - Graceful fallback to standard `cd` when zoxide not installed
+  - Maintains compatibility across all systems
+
+## [2.1.1] - 2025-12-21
+
+This patch release improves SSH host management by filtering out non-SSH hosts from the list.
+
+### Changed
+- **sshlist function**: Now excludes `github.com` from SSH host listings
+  - GitHub is a git remote, not an SSH target for interactive sessions
+  - Cleaner output showing only actual SSH servers
+  - Better user experience with focused host list
+
+## [2.1.0] - 2025-12-21
+
+This release enhances SSH workflow with smart autocomplete and improves plugin compatibility.
+
+### Added
+- **SSH Host Management**: Smart SSH autocomplete from configuration files
+  - Tab completion for `ssh`, `scp`, and `sftp` commands
+  - Reads hosts from `~/.ssh/config` and `~/sshsync/ssh.conf` (enhanced mode)
+  - Custom `_ssh_hosts()` completion function
+- **sshlist Function**: Display all configured SSH hosts
+  - Color-coded output with section headers
+  - Shows hosts from both standalone and enhanced mode configs
+  - Helpful examples when no hosts are configured
+
+### Changed
+- **Plugin Optimization**: Removed conflicting and problematic plugins
+  - Removed `zsh-sshinfo` plugin (box-drawing character issues)
+  - Removed Oh-My-Zsh `sudo` plugin (keybinding conflict with thefuck)
+  - Fixed zsh-thefuck integration (ZLE widget loading order)
+  - TheFuck now uses default ESC ESC binding reliably
+
+### Fixed
+- ZLE widget "unhandled" error messages eliminated
+- SSH config path references corrected throughout codebase
+
 ## [2.0.0] - 2025-12-16
 
 This release focuses on clarifying the repository architecture, streamlining documentation, and improving maintainability while maintaining 100% backward compatibility.
@@ -49,13 +119,6 @@ This release focuses on clarifying the repository architecture, streamlining doc
 - Clear separation between bootstrap (join.sh) and post-clone scripts
 - Common patterns documented in ARCHITECTURE.md
 - Extension points clearly identified
-
-## [Unreleased]
-
-### Coming Soon
-- Host-specific configuration overrides
-- Backup/restore functions for safety net
-- Extended validation in test.sh
 
 ## [1.3.0] - 2025-12-15
 

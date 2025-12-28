@@ -8,7 +8,7 @@ Symlink-based dotfiles management for Linux hosts. Files live in Git and are sym
 - `sync.sh` - Orchestrates installation and manages user-defined symlinks
 - `config/symlinks.conf` - User-added dotfiles symlink registry (managed by add-dotfile)
 - `config/functions.zsh` - Common Zsh functions and aliases
-- `config/.zshrc` - Main Zsh configuration file
+- `config/zshrc.conf` - Main Zsh configuration file
 - `lib/utils.sh` - Shared library for colors, icons, and helper functions
 - `lib/terminal.sh` - Core terminal utilities installer + configuration management (zsh, starship, fastfetch, tmux)
 - `join.sh` - One-click deployment (installs git/zsh, clones repo, runs `sync.sh`)
@@ -51,24 +51,41 @@ If repo exists, stashes uncommitted changes before pulling (shows stash command 
 
 ### Symlink Management Architecture
 
-**Core Tool Configs** (managed by `lib/terminal.sh`):
-- `.zshrc`, `.zprofile`, `functions.zsh` - Zsh configuration
+**Single Source of Truth**: ALL symlinks are defined in `config/symlinks.conf` and processed by `sync.sh` (step 5).
+
+**Managed Symlinks**:
+- `zshrc.conf`, `zprofile.conf`, `functions.zsh` - Zsh configuration
 - `starship.toml` - Starship prompt
 - `fastfetch.jsonc` - Fastfetch system info
 - `tmux.conf` - Tmux multiplexer
+- `micro.json` - Micro text editor
+- `eza-theme.yml` - Eza file listing theme
+- Any user-added configs via `add-dotfile` function
 
-These are automatically symlinked during `terminal.sh` execution via `setup_config_symlinks()`.
+**Format in symlinks.conf**:
+```properties
+$DOTFILES_DIR/config/zshrc.conf:$HOME/.zshrc
+$DOTFILES_DIR/config/starship.toml:$HOME/.config/starship.toml
+```
 
-**User-Added Configs** (managed by `config/symlinks.conf`):
-- Format: `$DOTFILES_DIR/path/to/file:$HOME/target/path`
-- Read by `sync.sh` during step 5
-- Added via `add-dotfile` function (never edit manually)
-- Supports comments (lines starting with `#`)
+**Configuration File Naming Best Practices**:
+- **Never use dot-prefixed names** in the config/ directory (e.g., avoid `.zshrc`)
+- Dot-prefixed files are hidden by default, reducing visibility and discoverability
+- Use descriptive names with extensions: `zshrc.conf`, `fastfetch.jsonc`, `tmux.conf`
+- The symlink target (in $HOME) can still be dot-prefixed (e.g., `~/.zshrc`)
+- **Example**: Store as `config/zshrc.conf`, symlink to `~/.zshrc`
+- This makes `ls config/` show all files without needing `-a` flag
 
-**Variables**:
-- `$DOTFILES_DIR` - Resolved via `$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )`
-- Source paths use `$DOTFILES_DIR`, target paths use `$HOME`
-- Variables are expanded at runtime via `eval echo`
+**Processing**:
+- `lib/terminal.sh` - Installs binary tools only (no symlink management)
+- `sync.sh` - Reads symlinks.conf and creates all symlinks
+- Variables (`$DOTFILES_DIR`, `$HOME`) expanded at runtime via `eval echo`
+- Comments supported (lines starting with `#`)
+
+**Adding Symlinks**:
+- ALWAYS use `add-dotfile <path>` function (never edit symlinks.conf manually)
+- Function handles: move, symlink, conf update, git staging
+- Never manually create symlinks in `lib/terminal.sh` or other scripts
 
 ## Git Workflow (Single-User)
 
@@ -257,7 +274,7 @@ Example SSH setup:
 4. Add to `dotpush "Add <tool> setup script"`
 
 **Modify existing function in .zshrc**:
-1. Edit `config/.zshrc` directly (already symlinked)
+1. Edit `config/zshrc.conf` directly (already symlinked)
 2. Changes take effect immediately (or `source ~/.zshrc`)
 3. Run `dotpush "Update <function> description"`
 

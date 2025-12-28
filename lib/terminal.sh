@@ -444,45 +444,8 @@ install_tmux() {
         fi
     fi
     
-    # Verify configuration is properly symlinked
-    if [ "$tmux_installed" = true ]; then
-        local TMUX_CONF="$HOME/.tmux.conf"
-        local TMUX_CONF_SOURCE="$DOTFILES_DIR/config/tmux.conf"
-        
-        if [[ -L "$TMUX_CONF" ]]; then
-            local LINK_TARGET=$(readlink -f "$TMUX_CONF" 2>/dev/null)
-            local EXPECTED_TARGET=$(readlink -f "$TMUX_CONF_SOURCE" 2>/dev/null)
-            
-            if [[ "$LINK_TARGET" == "$EXPECTED_TARGET" ]]; then
-                log_substep "Configuration already linked"
-                config_verified=true
-            else
-                log_substep "Fixing configuration symlink..."
-                rm "$TMUX_CONF"
-                ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-                log_substep "Configuration symlink corrected"
-                config_verified=true
-            fi
-        elif [[ -f "$TMUX_CONF" ]]; then
-            log_substep "Backing up existing config and creating symlink..."
-            local BACKUP_FILE="${TMUX_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
-            mv "$TMUX_CONF" "$BACKUP_FILE"
-            ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-            log_substep "Configuration symlinked (backup: $(basename $BACKUP_FILE))"
-            config_verified=true
-        elif [[ -f "$TMUX_CONF_SOURCE" ]]; then
-            log_substep "Creating configuration symlink..."
-            ln -sf "$TMUX_CONF_SOURCE" "$TMUX_CONF"
-            log_substep "Configuration symlinked"
-            config_verified=true
-        else
-            log_warning "Configuration source not found at $TMUX_CONF_SOURCE"
-        fi
-        
-        # Test configuration syntax if successfully linked
-        if [ "$config_verified" = true ] && [[ -f "$TMUX_CONF" ]]; then
-            if tmux -f "$TMUX_CONF" new-session -d -s tmux-config-test 'exit' 2>/dev/null; then
-                tmux kill-session -t tmux-config-test 2>/dev/null || true
+    # Configuration symlink now managed by config/symlinks.conf
+    # See sync.sh step 5 for symlink processing
                 log_substep "Configuration syntax validated"
             fi
         fi
@@ -520,53 +483,10 @@ install_micro() {
         fi
     fi
     
-    # Verify configuration is properly symlinked
-    if [ "$micro_installed" = true ]; then
-        local MICRO_CONF_DIR="$HOME/.config/micro"
-        local MICRO_CONF="$MICRO_CONF_DIR/settings.json"
-        local MICRO_CONF_SOURCE="$DOTFILES_DIR/config/micro.json"
-        
-        # Create config directory if needed
-        if [[ ! -d "$MICRO_CONF_DIR" ]]; then
-            mkdir -p "$MICRO_CONF_DIR"
-            log_substep "Created config directory"
-        fi
-        
-        if [[ -L "$MICRO_CONF" ]]; then
-            local LINK_TARGET=$(readlink -f "$MICRO_CONF" 2>/dev/null)
-            local EXPECTED_TARGET=$(readlink -f "$MICRO_CONF_SOURCE" 2>/dev/null)
-            
-            if [[ "$LINK_TARGET" == "$EXPECTED_TARGET" ]]; then
-                log_substep "Configuration already linked"
-                config_verified=true
-            else
-                log_substep "Fixing configuration symlink..."
-                rm "$MICRO_CONF"
-                ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
-                log_substep "Configuration symlink corrected"
-                config_verified=true
-            fi
-        elif [[ -f "$MICRO_CONF" ]]; then
-            log_substep "Backing up existing config and creating symlink..."
-            local BACKUP_FILE="${MICRO_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
-            mv "$MICRO_CONF" "$BACKUP_FILE"
-            ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
-            log_substep "Configuration symlinked (backup: $(basename $BACKUP_FILE))"
-            config_verified=true
-        elif [[ -f "$MICRO_CONF_SOURCE" ]]; then
-            log_substep "Creating configuration symlink..."
-            ln -sf "$MICRO_CONF_SOURCE" "$MICRO_CONF"
-            log_substep "Configuration symlinked"
-            config_verified=true
-        else
-            log_warning "Configuration source not found at $MICRO_CONF_SOURCE"
-        fi
-    fi
+    # Configuration symlink now managed by config/symlinks.conf
+    # See sync.sh step 5 for symlink processing
 }
 
-# ============================================================================
-# CONFIGURATION SYMLINKS
-# ============================================================================
 # ============================================================================
 # LAST LOGIN CONFIGURATION
 # ============================================================================
@@ -654,59 +574,8 @@ configure_last_login() {
     fi
 }
 
-setup_config_symlinks() {
-    if [[ "$QUIET_MODE" != "true" ]]; then
-        log_section "Terminal Configuration" "$WRENCH"
-    fi
-    
-    # Define configuration files managed by this script
-    # These are for tools installed by terminal.sh
-    declare -A TERMINAL_CONFIGS=(
-        ["$DOTFILES_DIR/config/.zshrc"]="$HOME/.zshrc"
-        ["$DOTFILES_DIR/config/.zprofile"]="$HOME/.zprofile"
-        ["$DOTFILES_DIR/config/functions.zsh"]="$HOME/.zsh_functions"
-        ["$DOTFILES_DIR/config/starship.toml"]="$HOME/.config/starship.toml"
-        ["$DOTFILES_DIR/config/fastfetch.jsonc"]="$HOME/.config/fastfetch/config.jsonc"
-    )
-    
-    local created=0
-    local skipped=0
-    
-    for source in "${!TERMINAL_CONFIGS[@]}"; do
-        target="${TERMINAL_CONFIGS[$source]}"
-        
-        # Create parent directory if needed
-        target_dir=$(dirname "$target")
-        if [[ ! -d "$target_dir" ]]; then
-            mkdir -p "$target_dir"
-        fi
-        
-        # Check if target already exists and points to correct location
-        if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
-            log_substep "$(basename "$target") - already linked"
-            skipped=$((skipped + 1))
-        else
-            # Backup existing file if present
-            if [[ -f "$target" ]] && [[ ! -L "$target" ]]; then
-                local backup="${target}.backup.$(date +%Y%m%d_%H%M%S)"
-                mv "$target" "$backup"
-                log_substep "$(basename "$target") - backed up existing file"
-            fi
-            
-            # Create/update symlink
-            ln -sf "$source" "$target"
-            log_substep "$(basename "$target") - linked"
-            created=$((created + 1))
-        fi
-    done
-    
-    if [ $created -gt 0 ]; then
-        log_success "Linked $created configuration file(s)"
-    fi
-    if [ $skipped -gt 0 ] && [[ "$QUIET_MODE" != "true" ]]; then
-        log_info "Skipped $skipped existing symlink(s)"
-    fi
-}
+# Configuration symlinks are now managed by config/symlinks.conf
+# See sync.sh step 5 for symlink processing
 
 # ============================================================================
 # MAIN EXECUTION
@@ -736,8 +605,8 @@ main() {
     install_tmux
     install_micro
     
-    # Setup configuration symlinks for all installed tools
-    setup_config_symlinks
+    # Note: Configuration symlinks are now managed by config/symlinks.conf
+    # They will be created by sync.sh step 5
     
     # Configure custom last login display
     configure_last_login

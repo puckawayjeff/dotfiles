@@ -133,14 +133,14 @@ $ add-dotfile ~/.nonexistent
 **Trying to add a file already in the repo:**
 ```bash
 $ add-dotfile ~/.zshrc
-❌ Error: Destination '/home/jeff/dotfiles/config/.zshrc' already exists.
+❌ Error: Destination '/home/jeff/dotfiles/config/zshrc.conf' already exists.
 ```
 
 **Trying to add a file that's already a symlink:**
 ```bash
 $ add-dotfile ~/.zshrc
 ❌ Error: Source '/home/jeff/.zshrc' is already a symlink.
-   Target: /home/jeff/dotfiles/config/.zshrc
+   Target: /home/jeff/dotfiles/config/zshrc.conf
 ```
 
 ## Syncing Changes Across Hosts

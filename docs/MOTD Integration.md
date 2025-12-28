@@ -104,7 +104,7 @@ sudo rm /etc/update-motd.d/99-dotfiles
 sudo chmod -x /etc/update-motd.d/99-dotfiles
 
 # Re-enable in .zshrc if desired
-# Edit config/.zshrc and restore the fastfetch auto-launch
+# Edit config/zshrc.conf and restore the fastfetch auto-launch
 ```
 To stop showing MOTD on login:
 
@@ -113,7 +113,7 @@ To stop showing MOTD on login:
 sudo rm /etc/update-motd.d/99-dotfiles
 
 # Re-enable in .zshrc if desired
-# Edit config/.zshrc and restore the fastfetch auto-launch
+# Edit config/zshrc.conf and restore the fastfetch auto-launch
 ```
 
 ## System Compatibility

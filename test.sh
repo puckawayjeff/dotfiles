@@ -49,8 +49,8 @@ REQUIRED_FILES=(
     "README.md"
     "lib/utils.sh"
     "lib/terminal.sh"
-    "config/.zshrc"
-    "config/.zprofile"
+    "config/zshrc.conf"
+    "config/zprofile.conf"
     "config/functions.zsh"
 )
 
@@ -66,34 +66,86 @@ else
     test_fail "Missing files: ${MISSING_FILES[*]}"
 fi
 
-# Test 2: Check symlink targets in sync.sh are valid
-test_start "Symlink sources in sync.sh exist"
+# Test 2: Check symlink sources exist and verify active symlinks
+test_start "Symlinks correctly configured and active"
 BROKEN_SOURCES=()
+BROKEN_SYMLINKS=()
+SYMLINKS_CONF="$SCRIPT_DIR/config/symlinks.conf"
 
-# Extract symlink sources from sync.sh
-while IFS= read -r line; do
-    # Match lines like: ["$DOTFILES_DIR/config/file"]="$HOME/target"
-    if [[ $line =~ \[\"([^\"]+)\"\]=\"([^\"]+)\" ]]; then
-        source_path="${BASH_REMATCH[1]}"
-        # Replace $DOTFILES_DIR with actual path
-        source_path="${source_path/\$DOTFILES_DIR/$SCRIPT_DIR}"
-        
-        # Check if source exists
-        if [ ! -e "$source_path" ]; then
-            BROKEN_SOURCES+=("$source_path")
-        fi
-    fi
-done < <(sed -n '/^declare -A SYMLINKS=/,/^)/p' "$SCRIPT_DIR/sync.sh")
-
-if [ ${#BROKEN_SOURCES[@]} -eq 0 ]; then
-    test_pass
+# Check if symlinks.conf exists
+if [ ! -f "$SYMLINKS_CONF" ]; then
+    test_fail "config/symlinks.conf not found"
 else
-    test_fail "Missing source files: ${BROKEN_SOURCES[*]}"
+    # Read each symlink definition
+    while IFS= read -r line; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+        
+        # Skip lines without colon
+        [[ ! "$line" =~ : ]] && continue
+        
+        # Split on first colon
+        source="${line%%:*}"
+        target="${line#*:}"
+        
+        # Expand variables (replace $DOTFILES_DIR with $SCRIPT_DIR for test context)
+        source="${source//\$DOTFILES_DIR/$SCRIPT_DIR}"
+        source="${source//\$HOME/$HOME}"
+        target="${target//\$DOTFILES_DIR/$SCRIPT_DIR}"
+        target="${target//\$HOME/$HOME}"
+        
+        # Check if source file exists in repo
+        if [ ! -f "$source" ]; then
+            BROKEN_SOURCES+=("$source")
+            continue
+        fi
+        
+        # Check if target symlink exists
+        if [ ! -e "$target" ]; then
+            BROKEN_SYMLINKS+=("$target (missing)")
+        elif [ ! -L "$target" ]; then
+            BROKEN_SYMLINKS+=("$target (not a symlink)")
+        else
+            # Get what the symlink points to
+            link_target=$(readlink "$target")
+            # Resolve to absolute path if needed
+            if [[ ! "$link_target" = /* ]]; then
+                link_dir=$(dirname "$target")
+                link_target="$link_dir/$link_target"
+            fi
+            
+            # Compare resolved paths
+            if [ "$(realpath "$link_target")" != "$(realpath "$source")" ]; then
+                BROKEN_SYMLINKS+=("$target -> $link_target (expected: $source)")
+            fi
+        fi
+    done < "$SYMLINKS_CONF"
+    
+    if [ ${#BROKEN_SOURCES[@]} -eq 0 ] && [ ${#BROKEN_SYMLINKS[@]} -eq 0 ]; then
+        test_pass
+    else
+        if [ ${#BROKEN_SOURCES[@]} -gt 0 ]; then
+            echo ""
+            echo "   ${RED}Missing source files:${NC}"
+            for src in "${BROKEN_SOURCES[@]}"; do
+                echo "   - $src"
+            done
+        fi
+        if [ ${#BROKEN_SYMLINKS[@]} -gt 0 ]; then
+            echo ""
+            echo "   ${RED}Broken/incorrect symlinks:${NC}"
+            for lnk in "${BROKEN_SYMLINKS[@]}"; do
+                echo "   - $lnk"
+            done
+            echo "   ${YELLOW}💡 Run './sync.sh' to fix symlinks${NC}"
+        fi
+        test_fail
+    fi
 fi
 
 # Test 3: Check functions.zsh can be sourced
 test_start "functions.zsh sources without errors"
-if ( source "$SCRIPT_DIR/config/functions.zsh" 2>/dev/null ); then
+if command -v zsh &> /dev/null && ( zsh -c "source '$SCRIPT_DIR/config/functions.zsh' 2>/dev/null" ); then
     test_pass
 else
     test_fail "Syntax or runtime errors in functions.zsh"
@@ -102,12 +154,12 @@ fi
 # Test 4: Check .zshrc can be sourced (in non-interactive mode)
 test_start ".zshrc sources without errors"
 # Set non-interactive flag to skip interactive-only sections
-if ( NONINTERACTIVE=1 source "$SCRIPT_DIR/config/.zshrc" 2>/dev/null ); then
+if ( NONINTERACTIVE=1 source "$SCRIPT_DIR/config/zshrc.conf" 2>/dev/null ); then
     test_pass
 else
     # .zshrc has interactive checks, so this might fail - that's okay
     # Just check for syntax errors
-    if zsh -n "$SCRIPT_DIR/config/.zshrc" 2>/dev/null; then
+    if zsh -n "$SCRIPT_DIR/config/zshrc.conf" 2>/dev/null; then
         test_pass
     else
         test_fail "Syntax errors in .zshrc"

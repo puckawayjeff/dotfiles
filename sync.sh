@@ -266,14 +266,18 @@ else
     log_substep "Skipping MOTD setup - fastfetch will run from .zshrc instead"
 fi
 
-# --- 5. Create user-defined symlinks ---
-# NOTE: Core tool configurations (zsh, starship, fastfetch, tmux) are managed by lib/terminal.sh
-# This section handles additional symlinks added via the add-dotfile function
+# --- 5. Create symlinks from config/symlinks.conf ---
+# Single source of truth for ALL dotfiles symlinks (core tools + user-added)
+# Symlinks are defined in config/symlinks.conf and processed here
+
+if [[ "$QUIET_MODE" != "true" ]]; then
+    log_section "Configuration Symlinks" "$WRENCH"
+fi
 
 SYMLINKS_CONF="$DOTFILES_DIR/config/symlinks.conf"
 
 if [ -f "$SYMLINKS_CONF" ] && [ -s "$SYMLINKS_CONF" ]; then
-    log_info "Creating user-defined symlinks..."
+    log_info "Processing symlinks from config/symlinks.conf..."
     
     CREATED=0
     SKIPPED=0
@@ -313,14 +317,14 @@ if [ -f "$SYMLINKS_CONF" ] && [ -s "$SYMLINKS_CONF" ]; then
     done < "$SYMLINKS_CONF"
     
     if [ $CREATED -gt 0 ]; then
-        log_success "Created/updated $CREATED user-defined symlink(s)"
+        log_success "Created/updated $CREATED symlink(s)"
     fi
     if [ $SKIPPED -gt 0 ]; then
         log_info "Skipped $SKIPPED existing symlink(s)"
     fi
 else
     if [[ "$QUIET_MODE" != "true" ]]; then
-        log_info "No user-defined symlinks configured"
+        log_warning "No symlinks configured in symlinks.conf"
         log_substep "Use 'add-dotfile <path>' to add configuration files"
     fi
 fi

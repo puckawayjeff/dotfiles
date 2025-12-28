@@ -121,13 +121,15 @@ dotfiles/
 ├── PRIVATE_SETUP.md           # Enhanced mode setup guide
 ├── QUICKSTART.md              # Command reference card
 ├── config/                    # Configuration files
-│   ├── .zshrc                 # Shell configuration
+│   ├── zshrc.conf             # Shell configuration
+│   ├── zprofile.conf          # Zsh profile
 │   ├── functions.zsh          # Custom functions
 │   ├── symlinks.conf          # User-added dotfiles
 │   ├── starship.toml          # Prompt configuration
 │   ├── fastfetch.jsonc        # System info display
 │   ├── tmux.conf              # Terminal multiplexer
-│   └── micro.json             # Text editor settings
+│   ├── micro.json             # Text editor settings
+│   └── eza-theme.yml          # File listing theme
 ├── lib/                       # Shared libraries
 │   ├── utils.sh               # Colors, logging, helpers
 │   ├── terminal.sh            # Core tool installation

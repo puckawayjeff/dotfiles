@@ -141,34 +141,62 @@ GIT_USER_EMAIL="your@email.com"
 
 See [PRIVATE_SETUP.md](PRIVATE_SETUP.md) for detailed setup guide.
 
-## Symlink Management
+## Symlink Management (Single Source of Truth)
 
-### Core Tool Configurations
+All symlinks are defined in `config/symlinks.conf` and processed by `sync.sh`.
 
-Managed by `lib/terminal.sh` during installation:
-- `.zshrc`, `.zprofile`, `functions.zsh`
-- `starship.toml`
-- `fastfetch.jsonc`
-- `tmux.conf`
-- `micro.json` (settings.json)
+### config/symlinks.conf Structure
 
-These are automatically symlinked when their tools are installed.
-
-### User-Added Configurations
-
-Managed by `config/symlinks.conf`:
-- Files added via `add-dotfile` command
+**Single source of truth** for ALL dotfiles symlinks:
+- Core tool configurations (zsh, starship, fastfetch, tmux, micro, etc.)
+- User-added configurations (via `add-dotfile` command)
 - Format: `$DOTFILES_DIR/source/path:$HOME/target/path`
-- Read by `sync.sh` during symlink creation
+- Variables expanded at runtime via `eval echo`
 - Supports comments (lines starting with `#`)
 
-**Example**:
+**Configuration File Naming Best Practices**:
+- **Never use dot-prefixed names** in the config/ directory (e.g., avoid `.zshrc`)
+- Dot-prefixed files are hidden by default, reducing visibility and discoverability
+- Use descriptive names with extensions: `zshrc.conf`, `fastfetch.jsonc`, `tmux.conf`
+- The symlink target (in $HOME) can still be dot-prefixed (e.g., `~/.zshrc`)
+- **Example**: Store as `config/zshrc.conf`, symlink to `~/.zshrc`
+- This makes `ls config/` show all files without needing `-a` flag
+
+**Example entries**:
+```properties
+# Core Terminal Configurations
+$DOTFILES_DIR/config/zshrc.conf:$HOME/.zshrc
+$DOTFILES_DIR/config/starship.toml:$HOME/.config/starship.toml
+$DOTFILES_DIR/config/tmux.conf:$HOME/.tmux.conf
+$DOTFILES_DIR/config/micro.json:$HOME/.config/micro/settings.json
+
+# User-Added Configurations
+$DOTFILES_DIR/config/eza-theme.yml:$HOME/.config/eza/theme.yml
+```
+
+### Adding New Dotfiles
+
+**Always use** `add-dotfile <path>` function (never manually):
+
 ```bash
 add-dotfile ~/.gitconfig
-# Moves ~/.gitconfig to ~/dotfiles/config/.gitconfig
-# Creates symlink: ~/.gitconfig → ~/dotfiles/config/.gitconfig
-# Adds entry to config/symlinks.conf
+# 1. Moves ~/.gitconfig → ~/dotfiles/config/gitconfig (or custom destination)
+# 2. Creates symlink: ~/.gitconfig → ~/dotfiles/config/gitconfig
+# 3. Adds entry to config/symlinks.conf
+# 4. Stages files in git for review
 ```
+
+**Benefits**:
+- Transparency: All symlinks visible in one file
+- Portability: Variables ensure cross-host compatibility
+- Consistency: Same processing logic for all symlinks
+- Maintainability: Easy to audit and update
+
+### Processing Flow
+
+1. **Installation** (`lib/terminal.sh`): Installs binary tools only
+2. **Configuration** (`sync.sh`): Reads `symlinks.conf` and creates all symlinks
+3. **Validation**: Checks existing symlinks, backs up conflicts, creates parent directories
 
 ## Library Architecture
 
@@ -187,7 +215,7 @@ add-dotfile ~/.gitconfig
 
 ### lib/terminal.sh (Tool Installation)
 
-**Purpose**: Install and configure core terminal tools
+**Purpose**: Install core terminal tool binaries
 
 **Responsibilities**:
 - Zsh shell installation and configuration
@@ -196,7 +224,10 @@ add-dotfile ~/.gitconfig
 - Eza (modern ls replacement)
 - Tmux terminal multiplexer
 - Micro text editor
-- Symlink creation for tool configs
+- FZF, zoxide, fd, direnv utilities
+- Nerd fonts and emoji support
+
+**Note**: Only installs binaries. Configuration files are symlinked by `sync.sh` reading from `config/symlinks.conf`.
 
 **Called By**: sync.sh during initial setup and updates
 
@@ -247,9 +278,9 @@ add-dotfile ~/.gitconfig
 2. **Git Configuration**: Set defaults if standalone first-run
 3. **SSH Config**: Symlink from sshsync if enhanced mode
 4. **Core Utilities**: Install missing packages (bat, 7z, tree, etc.)
-5. **Terminal Tools**: Run `lib/terminal.sh`
+5. **Terminal Tools**: Run `lib/terminal.sh` (installs binaries only)
 6. **MOTD Setup**: Configure system login message
-7. **User Symlinks**: Process `config/symlinks.conf`
+7. **Symlink Creation**: Process ALL symlinks from `config/symlinks.conf`
 8. **Display Status**: Show mode and next steps
 
 ### Adding Dotfiles (add-dotfile)
