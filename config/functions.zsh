@@ -548,8 +548,7 @@ dotkeys() {
     printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n\n"
     
     printf "${BOLD}${GREEN}Plugin Shortcuts${NC}\n"
-    printf "  ${YELLOW}ESC ESC${NC}        ${ARROW} TheFuck command correction        ${YELLOW}Ctrl+T${NC}           ${ARROW} FZF file search\n"
-    printf "  ${YELLOW}Alt+C${NC}          ${ARROW} FZF directory navigation\n"
+    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} FZF file search                   ${YELLOW}Alt+C${NC}            ${ARROW} FZF directory navigation\n"
     
     printf "${BLUE}${HR}${NC}\n\n"
 }
@@ -582,16 +581,17 @@ dothelp() {
     printf "  ${YELLOW}dps, dex, dlog${NC}     ${ARROW} Docker ps/exec/logs shortcuts\n\n"
     
     printf "${BOLD}${GREEN}Additional Plugin Commands${NC}\n"
-    printf "  ${YELLOW}fuck${NC}               ${ARROW} Correct last failed command       ${YELLOW}printdocker [full]${NC}  ${ARROW} Pretty print Docker objects\n"
-    printf "  ${YELLOW}s / sshinfo${NC}        ${ARROW} SSH with connection info          ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
+    printf "  ${YELLOW}printdocker [full]${NC} ${ARROW} Pretty print Docker objects       ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
     printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
     
     printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
-    printf "  ${YELLOW}j <dir>${NC}            ${ARROW} Jump to directory (zoxide)        ${YELLOW}z <dir>${NC}             ${ARROW} Smart cd (zoxide alias)\n"
-    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza              ${YELLOW}ff${NC}                  ${ARROW} Run fastfetch\n"
+    printf "  ${YELLOW}cd <dir>${NC}           ${ARROW} Smart fuzzy navigation (zoxide)   ${YELLOW}cd${NC}                  ${ARROW} Without args goes home (~)\n"
+    printf "  ${YELLOW}<dir>${NC}              ${ARROW} Direct navigation (if dir exists) ${YELLOW}ll, la, lt${NC}          ${ARROW} Enhanced ls with eza\n"
+    printf "  ${YELLOW}ff${NC}                 ${ARROW} Run fastfetch\n"
     
     printf "${BLUE}${HR}${NC}\n"
-    printf "${MAGENTA}💡 Tip: Type 'dotkeys' for keyboard shortcuts${NC}\n\n"
+    printf "${BOLD}${CYAN}💡 Tips:${NC}${MAGENTA} Type ${BOLD}${YELLOW}dotkeys${NC}${MAGENTA} for keyboard shortcuts${NC}\n"
+    printf "         ${MAGENTA}Use ${BOLD}${YELLOW}--help${NC}${MAGENTA} with any command for colorized output${NC}\n\n"
 }
 
 # ===== SSH Sync Functions (Optional - only loaded if sshsync repo exists) =====
