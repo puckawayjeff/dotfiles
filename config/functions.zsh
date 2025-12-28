@@ -95,6 +95,22 @@ mkd() {
     mkdir -p -- "$1" && cd -P -- "$1"
 }
 
+# Smart cd with zoxide fallback
+cd() {
+    # Go to home without arguments
+    [ -z "$*" ] && builtin cd && return
+    # If directory exists, change to it
+    [ -d "$*" ] && builtin cd "$*" && return
+    [ "$*" = "-" ] && builtin cd "$*" && return
+    # Catch cd . and cd ..
+    case "$*" in
+        ..) builtin cd ..; return;;
+        .) builtin cd .; return;;
+    esac
+    # Finally, call zoxide (using 'j' command as configured)
+    j "$*" || builtin cd "$*"
+}
+
 # Dotfiles git push
 dotpush() {
     # Check if enhanced mode is active (sshsync exists)

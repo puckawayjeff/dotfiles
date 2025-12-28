@@ -79,10 +79,11 @@ zinit ice wait lucid atload'
 '
 zinit light zsh-users/zsh-history-substring-search
 
-# 3b. zsh-thefuck - TheFuck integration (MUST load before syntax-highlighting)
-# Uses default ESC ESC keybinding
-zinit ice wait lucid
-zinit light laggardkernel/zsh-thefuck
+# 3b. zsh-thefuck - DISABLED (incompatible with Python 3.13+)
+# TheFuck requires Python distutils and imp modules removed in 3.13
+# Awaiting upstream fix: https://github.com/nvbn/thefuck/issues/1495
+# zinit ice wait lucid
+# zinit light laggardkernel/zsh-thefuck
 
 # 4. Fast-syntax-highlighting - MUST load LAST (after other ZLE widgets)
 zinit ice wait lucid
