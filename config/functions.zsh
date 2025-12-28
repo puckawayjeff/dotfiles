@@ -67,6 +67,13 @@ script -q -c '
         echo ""
     fi
     
+    # Update snap if available
+    if command -v snap &> /dev/null; then
+        echo "Running: sudo snap refresh"
+        sudo snap refresh
+        echo ""
+    fi
+    
     echo "--- Update Process Finished ---"
     echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
 ' "$LOG_FILE"
@@ -92,7 +99,12 @@ SCRIPT_EOF
 
 # Create directory and cd into it
 mkd() {
-    mkdir -p -- "$1" && cd -P -- "$1"
+    if [[ -d "$1" ]]; then
+        echo "Directory '$1' already exists, navigating there..."
+        builtin cd "$1"
+    else
+        mkdir -p "$1" && builtin cd "$1"
+    fi
 }
 
 # Smart cd with zoxide fallback
@@ -380,6 +392,78 @@ paths() {
     done
 }
 
+# Fuzzy directory change with preview
+fcd() {
+    local dir
+    
+    # Determine which fd command to use (Debian uses fdfind)
+    local fd_cmd
+    if command -v fd >/dev/null 2>&1; then
+        fd_cmd="fd"
+    elif command -v fdfind >/dev/null 2>&1; then
+        fd_cmd="fdfind"
+    fi
+    
+    # Use fd/fdfind if available, otherwise fall back to find
+    if [[ -n "$fd_cmd" ]]; then
+        dir=$("$fd_cmd" --type d --hidden --follow --exclude .git . "${1:-.}" 2>/dev/null | \
+            fzf --preview 'eza --tree --level=1 --color=always {} 2>/dev/null || ls -la {}' \
+                --preview-window=right:50% \
+                --height=80% \
+                --border \
+                --prompt="📁 Select directory: ")
+    else
+        dir=$(find "${1:-.}" -type d 2>/dev/null | \
+            fzf --preview 'ls -la {}' \
+                --preview-window=right:50% \
+                --height=80% \
+                --border \
+                --prompt="📁 Select directory: ")
+    fi
+    
+    # Change to selected directory if one was chosen
+    [[ -n "$dir" ]] && cd "$dir"
+}
+
+# Find and edit - Search file contents and open in editor
+fne() {
+    local file line query="${*:-}"
+    
+    # Check for required tools
+    if ! command -v rg >/dev/null 2>&1; then
+        log_error "ripgrep (rg) is required but not installed"
+        log_info "Install with: sudo apt install ripgrep"
+        return 1
+    fi
+    
+    if ! command -v fzf >/dev/null 2>&1; then
+        log_error "fzf is required but not installed"
+        return 1
+    fi
+    
+    # Perform search with ripgrep and fzf
+    local result
+    result=$(rg --line-number --no-heading --color=always --smart-case "${query}" 2>/dev/null | \
+        fzf --ansi \
+            --delimiter ':' \
+            --preview 'bat --style=numbers --color=always --highlight-line {2} {1} 2>/dev/null || cat {1}' \
+            --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+            --height=80% \
+            --border \
+            --prompt="🔍 Search results: ")
+    
+    # Extract file and line number
+    if [[ -n "$result" ]]; then
+        file=$(echo "$result" | cut -d: -f1)
+        line=$(echo "$result" | cut -d: -f2)
+        
+        # Open in editor at specific line
+        if [[ -n "$file" && -n "$line" ]]; then
+            ${EDITOR:-micro} "$file" +"$line"
+        fi
+    fi
+}
+
 # Pack directory into archive
 dotpack() {
     if [[ -z "$1" ]]; then
@@ -540,15 +624,23 @@ dotkeys() {
     # Multi-column layout
     printf "${BOLD}${GREEN}Shell Completion & History${NC}\n"
     printf "  ${YELLOW}Ctrl+Space${NC}     ${ARROW} Accept autosuggestion             ${YELLOW}Ctrl+P / Ctrl+N${NC}  ${ARROW} History prev/next\n"
-    printf "  ${YELLOW}Up / Down${NC}      ${ARROW} History substring search          ${YELLOW}Ctrl+R${NC}           ${ARROW} FZF fuzzy search\n\n"
+    printf "  ${YELLOW}Up / Down${NC}      ${ARROW} History substring search          ${YELLOW}Ctrl+R${NC}           ${ARROW} FZF fuzzy search (1M)\n"
+    printf "  ${YELLOW}Tab Tab${NC}        ${ARROW} Fuzzy completion with preview\n\n"
+    
+    printf "${BOLD}${GREEN}FZF Shortcuts${NC}\n"
+    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} Fuzzy file search with preview    ${YELLOW}Alt+C${NC}            ${ARROW} Fuzzy directory change\n"
+    printf "  ${YELLOW}fcd [start]${NC}    ${ARROW} Search subdirectories with tree   ${YELLOW}fne [query]${NC}      ${ARROW} Find text & edit file\n\n"
+    
+    printf "${BOLD}${GREEN}Micro Editor (Default)${NC}\n"
+    printf "  ${YELLOW}Ctrl+S${NC}         ${ARROW} Save file                         ${YELLOW}Ctrl+Q${NC}           ${ARROW} Quit editor\n"
+    printf "  ${YELLOW}Ctrl+C/X/V${NC}     ${ARROW} Copy/cut/paste                    ${YELLOW}Ctrl+Z/Y${NC}         ${ARROW} Undo/redo\n"
+    printf "  ${YELLOW}Ctrl+F${NC}         ${ARROW} Find text                         ${YELLOW}Ctrl+G${NC}           ${ARROW} Go to line number\n"
+    printf "  ${YELLOW}Ctrl+A${NC}         ${ARROW} Select all                        ${YELLOW}Alt+Shift+Up/Dn${NC}  ${ARROW} Move line up/down\n\n"
     
     printf "${BOLD}${GREEN}Tmux Multiplexer${NC}\n"
     printf "  ${YELLOW}Ctrl+B, D${NC}      ${ARROW} Detach from session               ${YELLOW}Ctrl+B, C${NC}        ${ARROW} Create new window\n"
     printf "  ${YELLOW}Ctrl+B, [0-9]${NC}  ${ARROW} Switch to window number           ${YELLOW}Ctrl+B, \"${NC}        ${ARROW} Split horizontal\n"
-    printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n\n"
-    
-    printf "${BOLD}${GREEN}Plugin Shortcuts${NC}\n"
-    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} FZF file search                   ${YELLOW}Alt+C${NC}            ${ARROW} FZF directory navigation\n"
+    printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n"
     
     printf "${BLUE}${HR}${NC}\n\n"
 }
@@ -572,22 +664,21 @@ dothelp() {
     printf "  ${YELLOW}dotversion${NC}         ${ARROW} Show version & git info           ${YELLOW}maintain${NC}            ${ARROW} Full update sequence\n\n"
     
     printf "${BOLD}${GREEN}System Utilities${NC}\n"
-    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update in tmux             ${YELLOW}paths${NC}               ${ARROW} Check PATH validity\n"
+    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update (apt/flatpak/snap)  ${YELLOW}paths${NC}               ${ARROW} Check PATH validity\n"
     printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd             ${YELLOW}dotpack <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
-    
-    printf "${BOLD}${GREEN}Plugin Commands (oh-my-zsh)${NC}\n"
-    printf "  ${YELLOW}extract <archive>${NC}  ${ARROW} Universal archive extraction      ${YELLOW}copypath${NC}            ${ARROW} Copy current path\n"
-    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents                ${YELLOW}gst, gco, gp${NC}        ${ARROW} Git status/checkout/push\n"
-    printf "  ${YELLOW}dps, dex, dlog${NC}     ${ARROW} Docker ps/exec/logs shortcuts\n\n"
-    
-    printf "${BOLD}${GREEN}Additional Plugin Commands${NC}\n"
-    printf "  ${YELLOW}printdocker [full]${NC} ${ARROW} Pretty print Docker objects       ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
-    printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
     
     printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
     printf "  ${YELLOW}cd <dir>${NC}           ${ARROW} Smart fuzzy navigation (zoxide)   ${YELLOW}cd${NC}                  ${ARROW} Without args goes home (~)\n"
-    printf "  ${YELLOW}<dir>${NC}              ${ARROW} Direct navigation (if dir exists) ${YELLOW}ll, la, lt${NC}          ${ARROW} Enhanced ls with eza\n"
-    printf "  ${YELLOW}ff${NC}                 ${ARROW} Run fastfetch\n"
+    printf "  ${YELLOW}j <partial>${NC}        ${ARROW} Jump to directory (zoxide)        ${YELLOW}<dir>${NC}               ${ARROW} Direct navigation\n"
+    printf "  ${YELLOW}fcd [start]${NC}        ${ARROW} Fuzzy directory change w/ preview ${YELLOW}fne [query]${NC}         ${ARROW} Find text in files & edit\n"
+    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza              ${YELLOW}ff${NC}                  ${ARROW} Run fastfetch\n\n"
+    
+    printf "${BOLD}${GREEN}Plugin Commands${NC}\n"
+    printf "  ${YELLOW}extract <file>${NC}     ${ARROW} Universal archive extraction      ${YELLOW}copypath${NC}            ${ARROW} Copy current path\n"
+    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents to clipboard   ${YELLOW}git open${NC}            ${ARROW} Open repo in browser\n"
+    printf "  ${YELLOW}gst, gco, gp${NC}       ${ARROW} Git shortcuts (status/checkout)   ${YELLOW}dps, dex, dlog${NC}      ${ARROW} Docker shortcuts\n"
+    printf "  ${YELLOW}printdocker${NC}        ${ARROW} Pretty print Docker objects       ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
+    printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
     
     printf "${BLUE}${HR}${NC}\n"
     printf "${BOLD}${CYAN}💡 Tips:${NC}${MAGENTA} Type ${BOLD}${YELLOW}dotkeys${NC}${MAGENTA} for keyboard shortcuts${NC}\n"

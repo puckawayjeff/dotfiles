@@ -167,6 +167,32 @@ install_direnv() {
 }
 
 # ============================================================================
+# RIPGREP (Fast grep alternative)
+# ============================================================================
+install_ripgrep() {
+    if [[ "$QUIET_MODE" != "true" ]]; then
+        log_section "ripgrep (Fast search tool)" "$COMPUTER"
+    fi
+    
+    if command -v rg &> /dev/null; then
+        RG_VERSION=$(rg --version | head -n1)
+        log_success "ripgrep already installed: $RG_VERSION"
+        track_skip
+    else
+        log_info "Installing ripgrep..."
+        if sudo apt install -y ripgrep 2>/dev/null; then
+            RG_VERSION=$(rg --version | head -n1)
+            log_success "ripgrep installed: $RG_VERSION"
+            track_success
+        else
+            log_warning "ripgrep installation failed, continuing..."
+            log_info "Note: fne() function requires ripgrep to work"
+            track_failure
+        fi
+    fi
+}
+
+# ============================================================================
 # EZA (Modern ls replacement)
 # ============================================================================
 install_eza() {
@@ -590,6 +616,7 @@ main() {
     install_zoxide
     install_fd
     install_direnv
+    install_ripgrep
     install_eza
     install_fastfetch
     install_starship

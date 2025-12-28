@@ -73,8 +73,10 @@ See [docs/Functions Reference.md](docs/Functions%20Reference.md) for complete do
 - **Zsh** with Zinit plugin manager
 - **Autosuggestions** - Press → to accept grey completions
 - **Syntax highlighting** - Instant validation (green=valid, red=invalid)
-- **FZF** - Ctrl+R (history), Ctrl+T (files), Alt+C (directories)
-- **Zoxide** - Smart directory jumping with `z` command
+- **FZF** - Ctrl+R (history), Ctrl+T (files), Alt+C (directories), Tab (fuzzy completion)
+- **Zoxide** - Smart directory jumping with `j` command
+- **Micro** - Modern terminal editor (default EDITOR)
+- **Ripgrep** - Ultra-fast search tool for code
 
 ### Visual Tools
 - **Starship** - Fast, informative prompt with Git status
@@ -82,9 +84,18 @@ See [docs/Functions Reference.md](docs/Functions%20Reference.md) for complete do
 - **Fastfetch** - System info on terminal login
 - **Tmux** - Terminal multiplexer with sensible defaults
 
+### Power Features
+- **fcd** - Fuzzy directory change with tree preview
+- **fne** - Find text in files and edit at exact line (ripgrep + fzf + micro)
+- **git open** - Open current repository in browser
+- **1M command history** - Find that command from 6 months ago
+
 ### Plugins
-- **Oh-My-Zsh**: git, docker, extract, command-not-found, colored-man-pages
-- **Core**: completions, history search, syntax highlighting
+- **Oh-My-Zsh**: git, docker, extract, command-not-found, colored-man-pages, copypath, copyfile
+- **Core**: completions, multi-word history search, syntax highlighting, autosuggestions
+- **FZF-Tab**: Fuzzy tab completion with file/directory previews
+- **Git-Open**: Open repositories in browser
+- **Additional**: zsh-help, printdocker, zsh-activate-py-environment, zsh-you-should-use
 
 ## Adding Your Own Dotfiles
 

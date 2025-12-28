@@ -7,7 +7,44 @@ and this project adheres to semantic versioning principles for major structural 
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-12-28
+
+### Fixed
+- **mkd() Function**: Now properly navigates to created directories
+  - Fixed conflict with custom cd() wrapper function
+  - Uses builtin cd to avoid zoxide interference
+  - Gives friendly message if directory already exists
+  - Still navigates even when directory exists
+
 ### Changed
+- **History Configuration**: Massively increased capacity and improved management
+  - Increased HISTSIZE and SAVEHIST from 10,000 to 1,000,000 lines
+  - Added HIST_IGNORE_ALL_DUPS to remove all duplicate entries (not just consecutive)
+  - Added HIST_REDUCE_BLANKS to clean up commands before saving
+  - Can now find obscure commands from months ago
+- **History Search Plugin**: Upgraded to more powerful multi-word search
+  - Replaced zsh-history-substring-search with history-search-multi-word
+  - Better multi-word searching capabilities
+  - Enhanced syntax highlighting in search results
+- **FZF Configuration**: Enhanced with preview windows and directory navigation
+  - Added --preview-window=right:60% to default FZF options
+  - Configured FZF_ALT_C_OPTS with eza tree preview for directory navigation
+  - Alt+C now shows directory structure before changing directories
+- **Completion System**: Complete overhaul with colors and caching
+  - Added colorful descriptions (green), corrections (yellow), messages (purple)
+  - Added error formatting with error count display
+  - Enabled completion caching in ~/.zsh/cache for faster startup
+  - Added verbose mode with progress indicators
+  - Case-insensitive matching with fuzzy support
+- **Default Editor**: Set micro as default editor
+  - Set EDITOR=micro for command-line editing
+  - Set VISUAL=micro for GUI-style editing
+  - Added PAGER=less for viewing long outputs
+- **Command Not Found Handler**: Enhanced error messages and package suggestions
+  - Prettier error formatting with colors
+  - Shows package suggestions from system database
+  - Maintains helpful dothelp tip at the end
+  - Better visual hierarchy in error output
 - **Symlink Management Architecture**: Refactored to use single source of truth
   - All symlinks now defined in `config/symlinks.conf` (core + user-added)
   - Removed `setup_config_symlinks()` function from `lib/terminal.sh`
@@ -28,6 +65,44 @@ and this project adheres to semantic versioning principles for major structural 
   - Awaiting upstream fix: https://github.com/nvbn/thefuck/issues/1495
 
 ### Added
+- **FZF-Tab Plugin**: Revolutionary fuzzy tab completion
+  - Replaces default tab completion with interactive FZF finder
+  - File previews with bat (first 50 lines) for all completions
+  - Directory previews with eza tree view for cd command
+  - Smart fallbacks if bat/eza aren't installed
+  - Tab completion now uses fuzzy matching for everything
+- **Enhanced FZF Integration**: Preview windows everywhere
+  - All FZF operations now show previews by default
+  - File completions show bat-powered syntax highlighting
+  - Directory completions show eza tree structure
+  - Ctrl+T, Alt+C all have contextual previews
+- **Snap Package Support**: Added to updatep() function
+  - updatep() now handles snap packages with 'sudo snap refresh'
+  - Joins existing apt and flatpak update support
+  - Covers all major package managers on Debian-based systems
+- **Git-Open Plugin**: Type `git open` to open repo in browser
+  - Opens current git repository in your default web browser
+  - Works with GitHub, GitLab, Bitbucket, and other platforms
+  - Automatically detects remote URL and opens appropriate page
+- **Ripgrep Installation**: Added to terminal.sh setup
+  - Automatically installs ripgrep (rg) fast search tool
+  - Required dependency for fne() function
+  - Provides helpful error messages if missing
+- **Power User Functions**: Advanced navigation and search capabilities
+  - **fcd()** - Fuzzy directory change with tree preview
+    - Interactive directory browser with eza tree visualization
+    - Smart detection for fd vs fdfind (Debian compatibility)
+    - Graceful fallback to find if fd not available
+  - **fne()** - Find 'n Edit (search and edit files)
+    - Search file contents with ripgrep and fzf
+    - Preview matches with bat syntax highlighting
+    - Opens files in micro at exact line number
+    - Requires ripgrep (now auto-installed)
+- **Micro Keybindings Documentation**: Added to dotkeys reference
+  - Common editing shortcuts (Ctrl+S save, Ctrl+Q quit)
+  - Copy/cut/paste operations
+  - Find and go-to-line commands
+  - Line movement shortcuts
 - **Eza Theme Customization**: Custom eza theme with special directory icons
   - Developer directory (󰲋) - yellow/bold text with console icon
   - dotfiles directory (󰴋) - yellow/bold text with sync folder icon
@@ -314,7 +389,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - Terminal Font Setup guide for Nerd Fonts configuration
 - GitHub Copilot instructions for AI-assisted development
 
-## [2025-12-03] - Initial Documentation Release
+## Initial Documentation Release - 2025-12-03
 
 ### Added
 - Comprehensive documentation structure in `docs/` directory

@@ -21,6 +21,15 @@ New to the setup? Start here:
 
 These two commands are your built-in documentation - use them anytime!
 
+### 🎯 Power Features
+
+- **Tab Completion**: Press Tab twice for fuzzy search with file previews (powered by FZF)
+- **History Search**: Ctrl+R searches 1 million commands with multi-word matching
+- **Directory Preview**: Alt+C shows directory tree before changing folders
+- **File Preview**: Ctrl+T shows file contents with syntax highlighting
+- **Fuzzy Navigation**: `fcd` to interactively browse and navigate directories
+- **Find & Edit**: `fne "search"` to search code and jump to exact line in editor
+
 ## �📦 Core Commands
 
 ### Dotfiles Management
@@ -38,13 +47,22 @@ These two commands are your built-in documentation - use them anytime!
 
 | Command | Description |
 |---------|-------------|
-| `updatep` | System update in tmux (full-upgrade + cleanup) |
+| `updatep` | System update (apt/flatpak/snap) |
 | `paths` | Check if all PATH directories exist |
 | `mkd <dir>` | Create directory and cd into it |
 | `dotpack <dir> [format]` | Create archive (tar.gz/zip/7z) |
 | `extract <archive>` | Extract any archive format (oh-my-zsh plugin) |
 | `dothelp` | Show all available commands and functions |
 | `dotkeys` | Show keyboard shortcuts reference |
+
+### Navigation & Search (Power Tools)
+
+| Command | Description |
+|---------|-------------|
+| `fcd [start]` | Fuzzy directory change with tree preview |
+| `fne [query]` | Find text in files and edit at exact line |
+| `cd` | Smart cd (zoxide fallback), no args → home |
+| `j <partial>` | Jump to directory (zoxide) |
 
 ### File Operations (with eza)
 
@@ -56,6 +74,22 @@ These two commands are your built-in documentation - use them anytime!
 | `l` | Simple one-column list |
 
 ## 🔧 Common Workflows
+
+### Power User: Finding and Fixing Code
+
+```bash
+# Find all TODO comments across project
+fne "TODO"
+# Select from preview → opens in micro at that line
+
+# Navigate to any subdirectory interactively
+fcd ~/projects
+# Type partial name → see tree → Enter to jump
+
+# Search for function definition and edit
+fne "handleSubmit"
+# Preview shows all matches → select → edit immediately
+```
 
 ### Adding a New Config File
 

@@ -109,7 +109,7 @@ dotsetup <script-name>
 
 ### `updatep()` - Background System Update
 
-**Purpose**: Run system updates (`apt update`, `apt full-upgrade`, `apt autoremove`) in a background tmux session with all output logged to a file.
+**Purpose**: Run system updates (apt, flatpak, snap) in a background tmux session with all output logged to a file.
 
 **Usage**:
 
@@ -132,6 +132,8 @@ updatep
 1. `sudo apt update` - Refresh package lists
 2. `sudo apt full-upgrade -y` - Upgrade all packages (including kernel)
 3. `sudo apt autoremove -y` - Remove unnecessary packages
+4. `flatpak update -y` - Update Flatpak apps (if flatpak installed)
+5. `sudo snap refresh` - Update Snap packages (if snap installed)
 
 **Features**:
 
@@ -203,6 +205,117 @@ Warning: PATH entry does not exist: /home/jeff/.cargo/bin
 3. Prints green ✔ for existing directories
 4. Prints red ✘ for missing directories
 5. Outputs warnings to stderr for missing entries
+
+---
+
+### `fcd()` - Fuzzy Directory Change with Preview
+
+**Purpose**: Interactively search and navigate to any subdirectory using fuzzy finding with a visual tree preview.
+
+**Usage**:
+
+```bash
+# Search subdirectories from current location
+fcd
+
+# Search from specific starting point
+fcd ~/projects
+fcd /etc
+```
+
+**How It Works**:
+
+1. Uses fd (or fdfind on Debian) if available, falls back to find
+2. Lists all subdirectories recursively
+3. Opens FZF with eza tree preview (or ls if eza not available)
+4. Changes to selected directory when you press Enter
+5. Does nothing if you cancel (Escape or Ctrl+C)
+
+**Features**:
+
+- **Smart tool detection**: Handles both `fd` and `fdfind` (Debian naming)
+- **Visual preview**: See directory structure before navigating
+- **Hidden files**: Includes hidden directories (except .git)
+- **Graceful fallbacks**: Works even if optional tools are missing
+- **Fast search**: Fuzzy matching finds directories by partial names
+
+**Example Workflow**:
+
+```bash
+fcd ~/projects          # Opens fuzzy finder
+# Type "dot" → filters to dotfiles-related dirs
+# See tree preview of each directory
+# Press Enter → instantly cd into selection
+```
+
+---
+
+### `fne()` - Find 'n Edit
+
+**Purpose**: Search file contents across your project and instantly open matches in your editor at the exact line number. A powerhouse command for finding and fixing code.
+
+**Usage**:
+
+```bash
+# Search with a query
+fne "TODO"
+fne "function handleClick"
+fne "bug"
+
+# Search without initial query (will prompt in fzf)
+fne
+```
+
+**How It Works**:
+
+1. Uses ripgrep to search all files for your query
+2. Opens FZF with bat-powered preview showing matched lines
+3. Highlights the matching line in preview window
+4. Extracts file path and line number from selection
+5. Opens file in $EDITOR (micro) at that exact line
+
+**Features**:
+
+- **Fast search**: Powered by ripgrep (faster than grep)
+- **Syntax highlighting**: Preview shows colorized code with bat
+- **Smart case**: Case-insensitive unless you use capitals
+- **Exact positioning**: Opens editor at the matched line
+- **Multi-line context**: See 3 lines above/below match in preview
+- **Git-aware**: Automatically respects .gitignore
+
+**Requirements**:
+
+- ripgrep (rg) - **required** (auto-installed by terminal.sh)
+- fzf - **required** (should already be installed)
+- bat - optional (falls back to cat for preview)
+- micro - optional (uses $EDITOR variable)
+
+**Error Handling**:
+
+```bash
+# If ripgrep is missing, you'll see:
+fne "test"
+# ❌ ripgrep (rg) is required but not installed
+# 🔵 Install with: sudo apt install ripgrep
+```
+
+**Example Workflow**:
+
+```bash
+cd ~/projects/myapp
+fne "handleSubmit"
+# Shows all files containing "handleSubmit"
+# Preview displays each match with syntax colors
+# Select the one you want
+# Micro opens instantly at that function definition
+```
+
+**Pro Tips**:
+
+- Search for function names to jump to definitions
+- Search for TODO/FIXME to find action items
+- Search for error messages to debug issues
+- Use without arguments to explore first in FZF
 
 ---
 
