@@ -443,13 +443,6 @@ install_tmux() {
             return 1
         fi
     fi
-    
-    # Configuration symlink now managed by config/symlinks.conf
-    # See sync.sh step 5 for symlink processing
-                log_substep "Configuration syntax validated"
-            fi
-        fi
-    fi
 }
 
 # ============================================================================
