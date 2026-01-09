@@ -13,21 +13,26 @@ autoload -U colors && colors
 updatep() {
     log_section "Starting system update process" "$ROCKET"
     
+    local UPDATE_SCRIPT="${DOTFILES_DIR}/bin/update-system"
+    
+    if [[ ! -x "$UPDATE_SCRIPT" ]]; then
+        log_error "Update script not found or not executable: $UPDATE_SCRIPT"
+        return 1
+    fi
+
     # Check for tmux
     if ! command -v tmux &> /dev/null; then
-        log_warning "${WRENCH} tmux not found. Attempting to install..."
-        log_info "Running 'sudo apt update' first..."
-        if ! sudo apt update; then
-            log_error "'sudo apt update' failed."
+        log_warning "${WRENCH} tmux not found. Installing..."
+        if command -v apt &> /dev/null; then
+            sudo apt update && sudo apt install -y tmux
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install -y tmux
+        elif command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm tmux
+        else
+            log_error "Could not install tmux automatically."
             return 1
         fi
-        if ! sudo apt install tmux -y; then
-            log_error "tmux installation failed."
-            return 1
-        fi
-        log_success "tmux installed successfully."
-    else
-        log_success "tmux is already installed."
     fi
     
     local LOG_FILE="${HOME}/.cache/updatep.log"
@@ -39,58 +44,14 @@ updatep() {
     
     local SESSION_NAME="system-update-$$"
     
-    # Create a temporary script file
-    local SCRIPT_FILE="/tmp/updatep-${SESSION_NAME}.sh"
-    cat > "$SCRIPT_FILE" << 'SCRIPT_EOF'
-#!/bin/bash
-LOG_FILE="$1"
-
-# Use script command to log everything while displaying to terminal
-script -q -c '
-    echo "--- Starting System Updates ---"
-    echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
-    echo ""
-    echo "Running: sudo apt update"
-    sudo apt update
-    echo ""
-    echo "Running: sudo apt full-upgrade -y"
-    sudo apt full-upgrade -y
-    echo ""
-    echo "Running: sudo apt autoremove -y"
-    sudo apt autoremove -y
-    echo ""
-    
-    # Update flatpak if available
-    if command -v flatpak &> /dev/null; then
-        echo "Running: flatpak update -y"
-        flatpak update -y
-        echo ""
-    fi
-    
-    # Update snap if available
-    if command -v snap &> /dev/null; then
-        echo "Running: sudo snap refresh"
-        sudo snap refresh
-        echo ""
-    fi
-    
-    echo "--- Update Process Finished ---"
-    echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
-' "$LOG_FILE"
-SCRIPT_EOF
-    chmod +x "$SCRIPT_FILE"
-    
-    if ! tmux new-session -s "$SESSION_NAME" "$SCRIPT_FILE '$LOG_FILE'"; then
+    # Run the update script inside tmux, logging to file
+    if ! tmux new-session -s "$SESSION_NAME" "$UPDATE_SCRIPT | tee $LOG_FILE; echo 'Press Enter to exit...'; read"; then
          log_error "Failed to create tmux session."
-         rm -f "$SCRIPT_FILE"
          return 1
     fi
     
-    # Cleanup script file after session ends
-    rm -f "$SCRIPT_FILE"
-    
     log_section "Process Summary" "$CHECK"
-    log_success "System update completed successfully."
+    log_success "System update process finished."
     log_info "${CYAN}${PARTY} Log saved to: ${LOG_FILE}${NC}"
     log_warning "View log: cat ${LOG_FILE}\n"
     
@@ -218,10 +179,6 @@ dotpull() {
 
 # Add a new dotfile to the repo
 # Usage: add-dotfile <source_path> [destination_path]
-# Examples:
-#   add-dotfile ~/.gitconfig
-#   add-dotfile ~/.config/tmux/tmux.conf
-#   add-dotfile ~/.bashrc config/.bashrc.backup
 add-dotfile() {
     local file="$1"
     local custom_dest="$2"
@@ -229,11 +186,6 @@ add-dotfile() {
     if [[ -z "$file" ]]; then
         log_error "No file path provided."
         log_plain "Usage: add-dotfile <path_to_dotfile> [destination_path]"
-        log_plain ""
-        log_plain "Examples:"
-        log_substep "add-dotfile ~/.gitconfig"
-        log_substep "add-dotfile ~/.config/tmux/tmux.conf"
-        log_substep "add-dotfile ~/.bashrc config/.bashrc.backup"
         return 1
     fi
     
@@ -395,16 +347,14 @@ paths() {
 # Fuzzy directory change with preview
 fcd() {
     local dir
-    
-    # Determine which fd command to use (Debian uses fdfind)
     local fd_cmd
-    if command -v fd >/dev/null 2>&1; then
+    
+    if command -v fd &>/dev/null; then
         fd_cmd="fd"
-    elif command -v fdfind >/dev/null 2>&1; then
+    elif command -v fdfind &>/dev/null; then
         fd_cmd="fdfind"
     fi
     
-    # Use fd/fdfind if available, otherwise fall back to find
     if [[ -n "$fd_cmd" ]]; then
         dir=$("$fd_cmd" --type d --hidden --follow --exclude .git . "${1:-.}" 2>/dev/null | \
             fzf --preview 'eza --tree --level=1 --color=always {} 2>/dev/null || ls -la {}' \
@@ -421,7 +371,6 @@ fcd() {
                 --prompt="📁 Select directory: ")
     fi
     
-    # Change to selected directory if one was chosen
     [[ -n "$dir" ]] && cd "$dir"
 }
 
@@ -429,10 +378,8 @@ fcd() {
 fne() {
     local file line query="${*:-}"
     
-    # Check for required tools
     if ! command -v rg >/dev/null 2>&1; then
         log_error "ripgrep (rg) is required but not installed"
-        log_info "Install with: sudo apt install ripgrep"
         return 1
     fi
     
@@ -441,7 +388,6 @@ fne() {
         return 1
     fi
     
-    # Perform search with ripgrep and fzf
     local result
     result=$(rg --line-number --no-heading --color=always --smart-case "${query}" 2>/dev/null | \
         fzf --ansi \
@@ -452,12 +398,10 @@ fne() {
             --border \
             --prompt="🔍 Search results: ")
     
-    # Extract file and line number
     if [[ -n "$result" ]]; then
         file=$(echo "$result" | cut -d: -f1)
         line=$(echo "$result" | cut -d: -f2)
         
-        # Open in editor at specific line
         if [[ -n "$file" && -n "$line" ]]; then
             ${EDITOR:-micro} "$file" +"$line"
         fi
@@ -566,25 +510,19 @@ maintain() {
     
     log_section "Starting Maintenance Sequence" "$ROCKET"
     
-    # Run dotpull without reloading shell immediately
-    # (dotpull already uses --quiet for sync.sh)
     dotpull --no-exec
     if [[ $? -ne 0 ]]; then
         log_error "dotpull failed. Stopping."
         return 1
     fi
     
-    # Note: sync.sh is already run by dotpull (in quiet mode)
-    
     log_success "Configuration updated."
     log_info "Launching system updates...\n"
     
     updatep
     
-    # Return to original directory before reloading shell
     cd "$ORIGINAL_DIR" || true
     
-    # Reload shell at the very end
     log_info "\n🔄 Reloading zsh configuration..."
     exec zsh
 }
@@ -600,9 +538,8 @@ dotversion() {
     fi
     
     local VERSION=$(cat "$VERSION_FILE")
-    printf "${CYAN}${PACKAGE} Dotfiles Version:${NC} ${GREEN}v${VERSION}${NC}\n"
+    printf "${CYAN}${PACKAGE} Puckadots Version:${NC} ${GREEN}v${VERSION}${NC}\n"
     
-    # Optional: Show git info if available
     if [[ -d "$DOTFILES_DIR/.git" ]]; then
         local COMMIT=$(git -C "$DOTFILES_DIR" rev-parse --short HEAD 2>/dev/null)
         local BRANCH=$(git -C "$DOTFILES_DIR" branch --show-current 2>/dev/null)
@@ -613,82 +550,68 @@ dotversion() {
     fi
 }
 
-# Display keyboard shortcuts quick reference
 dotkeys() {
-    # Get dynamic horizontal rule from utils
+    local DATA_FILE="$DOTFILES_DIR/config/keys.dat"
     local HR=$(get_hr)
     
     printf "\n${BOLD}${CYAN}${KEYBOARD}  KEYBOARD SHORTCUTS${NC}\n"
     printf "${BLUE}${HR}${NC}\n"
     
-    # Multi-column layout
-    printf "${BOLD}${GREEN}Shell Completion & History${NC}\n"
-    printf "  ${YELLOW}Ctrl+Space${NC}     ${ARROW} Accept autosuggestion             ${YELLOW}Ctrl+P / Ctrl+N${NC}  ${ARROW} History prev/next\n"
-    printf "  ${YELLOW}Up / Down${NC}      ${ARROW} History substring search          ${YELLOW}Ctrl+R${NC}           ${ARROW} FZF fuzzy search (1M)\n"
-    printf "  ${YELLOW}Tab Tab${NC}        ${ARROW} Fuzzy completion with preview\n\n"
+    if [[ ! -f "$DATA_FILE" ]]; then
+        log_error "Keys data file not found: $DATA_FILE"
+        return 1
+    fi
     
-    printf "${BOLD}${GREEN}FZF Shortcuts${NC}\n"
-    printf "  ${YELLOW}Ctrl+T${NC}         ${ARROW} Fuzzy file search with preview    ${YELLOW}Alt+C${NC}            ${ARROW} Fuzzy directory change\n"
-    printf "  ${YELLOW}fcd [start]${NC}    ${ARROW} Search subdirectories with tree   ${YELLOW}fne [query]${NC}      ${ARROW} Find text & edit file\n\n"
+    awk -F'|' -v green="${GREEN}" -v yellow="${YELLOW}" -v nc="${NC}" -v arrow="${ARROW}" -v bold="${BOLD}" '
+    /^#/ || /^$/ { next }
+    $1 != last_cat {
+        if (last_cat != "") print ""
+        print bold green $1 nc
+        last_cat = $1
+    }
+    { printf "  %s%-20s%s %s %s\n", yellow, $2, nc, arrow, $3 }
+    ' "$DATA_FILE"
     
-    printf "${BOLD}${GREEN}Micro Editor (Default)${NC}\n"
-    printf "  ${YELLOW}Ctrl+S${NC}         ${ARROW} Save file                         ${YELLOW}Ctrl+Q${NC}           ${ARROW} Quit editor\n"
-    printf "  ${YELLOW}Ctrl+C/X/V${NC}     ${ARROW} Copy/cut/paste                    ${YELLOW}Ctrl+Z/Y${NC}         ${ARROW} Undo/redo\n"
-    printf "  ${YELLOW}Ctrl+F${NC}         ${ARROW} Find text                         ${YELLOW}Ctrl+G${NC}           ${ARROW} Go to line number\n"
-    printf "  ${YELLOW}Ctrl+A${NC}         ${ARROW} Select all                        ${YELLOW}Alt+Shift+Up/Dn${NC}  ${ARROW} Move line up/down\n\n"
-    
-    printf "${BOLD}${GREEN}Tmux Multiplexer${NC}\n"
-    printf "  ${YELLOW}Ctrl+B, D${NC}      ${ARROW} Detach from session               ${YELLOW}Ctrl+B, C${NC}        ${ARROW} Create new window\n"
-    printf "  ${YELLOW}Ctrl+B, [0-9]${NC}  ${ARROW} Switch to window number           ${YELLOW}Ctrl+B, \"${NC}        ${ARROW} Split horizontal\n"
-    printf "  ${YELLOW}Ctrl+B, %%${NC}      ${ARROW} Split vertical                    ${YELLOW}Ctrl+B, Arrow${NC}    ${ARROW} Navigate panes\n"
-    
-    printf "${BLUE}${HR}${NC}\n\n"
+    printf "\n${BLUE}${HR}${NC}\n"
+    printf "${BOLD}${CYAN}💡 Tips:${NC}${MAGENTA} Type ${BOLD}${YELLOW}dothelp${NC}${MAGENTA} for commands${NC}\n\n"
 }
 
-# Display custom functions quick reference
 dothelp() {
-    # Get dynamic horizontal rule from utils
+    local DATA_FILE="$DOTFILES_DIR/config/help.dat"
     local HR=$(get_hr)
     
     printf "\n${BOLD}${CYAN}${BOOK} DOTFILES COMMANDS & FUNCTIONS${NC}\n"
     printf "${BLUE}${HR}${NC}\n"
     
-    printf "${BOLD}${GREEN}Dotfiles Management${NC}\n"
-    if [[ -d "$HOME/sshsync/.git" ]]; then
-        printf "  ${YELLOW}dotpush <msg>${NC}      ${ARROW} Commit & push changes             ${YELLOW}dotpull${NC}             ${ARROW} Pull latest & reload\n"
-        printf "  ${YELLOW}sshpush <msg>${NC}      ${ARROW} Push SSH config changes           ${YELLOW}sshpull${NC}             ${ARROW} Pull SSH config changes\n"
-        printf "  ${YELLOW}sshpack [pass]${NC}     ${ARROW} Package SSH keys (encrypted)      ${YELLOW}add-dotfile <path>${NC}  ${ARROW} Add file to repo & symlink\n"
-    else
-        printf "  ${YELLOW}dotpull${NC}            ${ARROW} Pull latest & reload              ${YELLOW}dotsetup [tool]${NC}     ${ARROW} Run/list setup scripts\n"
+    if [[ ! -f "$DATA_FILE" ]]; then
+        log_error "Help data file not found: $DATA_FILE"
+        return 1
     fi
-    printf "  ${YELLOW}dotversion${NC}         ${ARROW} Show version & git info           ${YELLOW}maintain${NC}            ${ARROW} Full update sequence\n\n"
     
-    printf "${BOLD}${GREEN}System Utilities${NC}\n"
-    printf "  ${YELLOW}updatep${NC}            ${ARROW} System update (apt/flatpak/snap)  ${YELLOW}paths${NC}               ${ARROW} Check PATH validity\n"
-    printf "  ${YELLOW}mkd <dir>${NC}          ${ARROW} Create directory & cd             ${YELLOW}dotpack <dir> [fmt]${NC} ${ARROW} Create archive\n\n"
+    # Filter out SSH commands if sshsync is not active
+    local awk_filter=""
+    if [[ ! -d "$HOME/sshsync/.git" ]]; then
+        awk_filter='($2 ~ /^sshpush|^sshpull|^sshpack|^add-dotfile/) { next }'
+    fi
     
-    printf "${BOLD}${GREEN}Navigation & Search${NC}\n"
-    printf "  ${YELLOW}cd <dir>${NC}           ${ARROW} Smart fuzzy navigation (zoxide)   ${YELLOW}cd${NC}                  ${ARROW} Without args goes home (~)\n"
-    printf "  ${YELLOW}j <partial>${NC}        ${ARROW} Jump to directory (zoxide)        ${YELLOW}<dir>${NC}               ${ARROW} Direct navigation\n"
-    printf "  ${YELLOW}fcd [start]${NC}        ${ARROW} Fuzzy directory change w/ preview ${YELLOW}fne [query]${NC}         ${ARROW} Find text in files & edit\n"
-    printf "  ${YELLOW}ll, la, lt${NC}         ${ARROW} Enhanced ls with eza              ${YELLOW}ff${NC}                  ${ARROW} Run fastfetch\n\n"
+    awk -F'|' -v green="${GREEN}" -v yellow="${YELLOW}" -v nc="${NC}" -v arrow="${ARROW}" -v bold="${BOLD}" '
+    /^#/ || /^$/ { next }
+    '"$awk_filter"'
+    $1 != last_cat {
+        if (last_cat != "") print ""
+        print bold green $1 nc
+        last_cat = $1
+    }
+    { printf "  %s%-25s%s %s %s\n", yellow, $2, nc, arrow, $3 }
+    ' "$DATA_FILE"
     
-    printf "${BOLD}${GREEN}Plugin Commands${NC}\n"
-    printf "  ${YELLOW}extract <file>${NC}     ${ARROW} Universal archive extraction      ${YELLOW}copypath${NC}            ${ARROW} Copy current path\n"
-    printf "  ${YELLOW}copyfile <file>${NC}    ${ARROW} Copy file contents to clipboard   ${YELLOW}git open${NC}            ${ARROW} Open repo in browser\n"
-    printf "  ${YELLOW}gst, gco, gp${NC}       ${ARROW} Git shortcuts (status/checkout)   ${YELLOW}dps, dex, dlog${NC}      ${ARROW} Docker shortcuts\n"
-    printf "  ${YELLOW}printdocker${NC}        ${ARROW} Pretty print Docker objects       ${YELLOW}sshlist${NC}             ${ARROW} List all SSH hosts\n"
-    printf "  ${YELLOW}link-pyenv${NC}         ${ARROW} Link Python env to directory      ${YELLOW}unlink-pyenv${NC}        ${ARROW} Remove Python env link\n\n"
-    
-    printf "${BLUE}${HR}${NC}\n"
+    printf "\n${BLUE}${HR}${NC}\n"
     printf "${BOLD}${CYAN}💡 Tips:${NC}${MAGENTA} Type ${BOLD}${YELLOW}dotkeys${NC}${MAGENTA} for keyboard shortcuts${NC}\n"
     printf "         ${MAGENTA}Use ${BOLD}${YELLOW}--help${NC}${MAGENTA} with any command for colorized output${NC}\n\n"
 }
 
-# ===== SSH Sync Functions (Optional - only loaded if sshsync repo exists) =====
 if [[ -d "$HOME/sshsync/.git" ]]; then
     
-    # SSH config git push
     sshpush() {
         local ORIGINAL_DIR="$PWD"
         local COMMIT_MSG="$1"
@@ -720,7 +643,6 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
         return $EXIT_CODE
     }
     
-    # SSH config git pull
     sshpull() {
         local ORIGINAL_DIR="$PWD"
         local SSHSYNC_DIR="$HOME/sshsync"
@@ -743,7 +665,6 @@ if [[ -d "$HOME/sshsync/.git" ]]; then
     }
     
 else
-    # Provide helpful error messages when sshsync isn't set up
     sshpush() {
         log_error "Enhanced mode not configured"
         log_info "sshpush requires a private sshsync repository"
@@ -765,17 +686,14 @@ else
     }
 fi
 
-# Package SSH keys into encrypted archive
 sshpack() {
     log_section "SSH Keys Packaging" "$PACKAGE"
 
-    # Check if ~/.ssh exists
     if [ ! -d "$HOME/.ssh" ]; then
         log_error "~/.ssh directory does not exist"
         return 1
     fi
 
-    # Check for SSH keys
     local SSH_KEY_FILES=$(find "$HOME/.ssh" -type f \( -name "id_*" ! -name "*.pub" \) 2>/dev/null || true)
     local SSH_PUB_FILES=$(find "$HOME/.ssh" -type f -name "id_*.pub" 2>/dev/null || true)
 
@@ -785,7 +703,6 @@ sshpack() {
         return 1
     fi
 
-    # List found keys
     log_info "Found SSH keys:"
     echo "$SSH_KEY_FILES" | while read -r keyfile; do
         echo "   • $(basename "$keyfile")"
@@ -795,7 +712,6 @@ sshpack() {
     done
     echo ""
 
-    # Get password
     local PASSWORD="$1"
     if [ -z "$PASSWORD" ]; then
         log_warning "No password provided as argument"
@@ -827,7 +743,6 @@ sshpack() {
         fi
     fi
 
-    # Create temporary directory
     local TEMP_DIR=$(mktemp -d)
     local cleanup() {
         rm -rf "$TEMP_DIR"
@@ -836,24 +751,18 @@ sshpack() {
 
     log_info "Creating archive..."
 
-    # Copy SSH keys to temp directory
     mkdir -p "$TEMP_DIR/ssh"
     find "$HOME/.ssh" -type f \( -name "id_*" \) -exec cp {} "$TEMP_DIR/ssh/" \;
 
-    # Count files
     local FILE_COUNT=$(find "$TEMP_DIR/ssh" -type f | wc -l)
 
-    # Create tar.gz
     (cd "$TEMP_DIR" && tar -czf ssh-keys.tar.gz ssh/)
 
-    # Encrypt using openssl with AES-256-CBC
     openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 -in "$TEMP_DIR/ssh-keys.tar.gz" -out "$TEMP_DIR/ssh-keys.tar.gz.enc" -pass pass:"$PASSWORD"
 
-    # Move to home directory
     local OUTPUT_FILE="$HOME/ssh-keys.tar.gz.enc"
     mv "$TEMP_DIR/ssh-keys.tar.gz.enc" "$OUTPUT_FILE"
 
-    # Get file size
     local FILE_SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
 
     log_success "Archive created successfully!"
@@ -864,7 +773,6 @@ sshpack() {
     echo "   • Size: $FILE_SIZE"
     echo ""
 
-    # Verify archive can be decrypted
     log_info "Verifying archive..."
     local VERIFY_DIR=$(mktemp -d)
     trap "rm -rf $TEMP_DIR $VERIFY_DIR" EXIT INT TERM
@@ -897,14 +805,12 @@ sshpack() {
     echo ""
 }
 
-# List all SSH hosts from config files
 sshlist() {
     log_section "SSH Configured Hosts" "$COMPUTER"
     
     local -a hosts
     local found_any=false
     
-    # Check ~/.ssh/config
     if [[ -f ~/.ssh/config ]]; then
         local config_hosts=$(grep -i "^Host " ~/.ssh/config | grep -v "*" | grep -v "github.com" | awk '{print $2}' | sort -u)
         if [[ -n "$config_hosts" ]]; then

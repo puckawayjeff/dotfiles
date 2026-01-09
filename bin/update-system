@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# bin/update-system
+# System update script using lib/os.sh abstraction
+
+# Resolve script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Source libraries
+if [ -f "$DOTFILES_DIR/lib/utils.sh" ]; then
+    source "$DOTFILES_DIR/lib/utils.sh"
+fi
+
+if [ -f "$DOTFILES_DIR/lib/os.sh" ]; then
+    source "$DOTFILES_DIR/lib/os.sh"
+else
+    echo "Error: lib/os.sh not found"
+    exit 1
+fi
+
+log_section "System Update" "$ROCKET"
+log_info "Detected OS: $OS_NAME $OS_VERSION"
+log_info "Package Manager: $PKG_MANAGER"
+
+# Update package lists
+if pkg_update; then
+    log_success "Package lists updated"
+else
+    log_error "Failed to update package lists"
+    exit 1
+fi
+
+# Upgrade packages
+# We need to handle the specific upgrade commands since pkg_install doesn't cover "upgrade all"
+log_info "Upgrading packages..."
+
+case "$PKG_MANAGER" in
+    apt)
+        run_sudo apt full-upgrade -y
+        run_sudo apt autoremove -y
+        ;;
+    dnf)
+        run_sudo dnf upgrade -y
+        run_sudo dnf autoremove -y
+        ;;
+    pacman)
+        run_sudo pacman -Syu --noconfirm
+        ;;
+    apk)
+        run_sudo apk upgrade
+        ;;
+    synogear)
+        log_info "Skipping upgrade for synogear (manual only)"
+        ;;
+    *)
+        log_warning "Upgrade not implemented for $PKG_MANAGER"
+        ;;
+esac
+
+# Flatpak update
+if command -v flatpak &> /dev/null; then
+    log_section "Flatpak Update" "$PACKAGE"
+    flatpak update -y
+fi
+
+# Snap update
+if command -v snap &> /dev/null; then
+    log_section "Snap Update" "$PACKAGE"
+    run_sudo snap refresh
+fi
+
+log_success "System update complete!"

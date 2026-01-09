@@ -1,0 +1,29 @@
+# Puckadots Keyboard Shortcuts
+# Format: category|shortcut|description
+
+Shell Completion & History|Ctrl+Space|Accept autosuggestion
+Shell Completion & History|Ctrl+P / Ctrl+N|History prev/next
+Shell Completion & History|Up / Down|History substring search
+Shell Completion & History|Ctrl+R|FZF fuzzy search (1M)
+Shell Completion & History|Tab Tab|Fuzzy completion with preview
+
+FZF Shortcuts|Ctrl+T|Fuzzy file search with preview
+FZF Shortcuts|Alt+C|Fuzzy directory change
+FZF Shortcuts|fcd [start]|Search subdirectories with tree
+FZF Shortcuts|fne [query]|Find text & edit file
+
+Micro Editor (Default)|Ctrl+S|Save file
+Micro Editor (Default)|Ctrl+Q|Quit editor
+Micro Editor (Default)|Ctrl+C/X/V|Copy/cut/paste
+Micro Editor (Default)|Ctrl+Z/Y|Undo/redo
+Micro Editor (Default)|Ctrl+F|Find text
+Micro Editor (Default)|Ctrl+G|Go to line number
+Micro Editor (Default)|Ctrl+A|Select all
+Micro Editor (Default)|Alt+Shift+Up/Dn|Move line up/down
+
+Tmux Multiplexer|Ctrl+B, D|Detach from session
+Tmux Multiplexer|Ctrl+B, C|Create new window
+Tmux Multiplexer|Ctrl+B, [0-9]|Switch to window number
+Tmux Multiplexer|Ctrl+B, "|Split horizontal
+Tmux Multiplexer|Ctrl+B, %|Split vertical
+Tmux Multiplexer|Ctrl+B, Arrow|Navigate panes

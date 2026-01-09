@@ -1,0 +1,115 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+  "display": {
+    "color": {
+      "keys": "blue"
+    },
+    "separator": " ",
+    "size": {
+      "maxPrefix": "MB",
+      "ndigits": 0
+    }
+  },
+  "logo": {
+    "type": "auto",
+    "padding": {
+      "top": 0,
+      "left": 0,
+      "right": 4
+    }
+  },
+  "modules": [
+    {
+      "type": "title",
+      "key": " ",
+      "keyIcon": "",
+      "color": {
+        "user": "green",
+        "at": "white",
+        "host": "blue"
+      }
+    },
+    "break",
+    {
+      "type": "os",
+      "key": "OS   ",
+      "keyIcon": ""
+    },
+    {
+      "type": "host",
+      "key": "Host ",
+      "keyIcon": "󰌢"
+    },
+    {
+      "type": "kernel",
+      "key": "Kern ",
+      "keyIcon": ""
+    },
+    {
+      "type": "uptime",
+      "key": "Up   ",
+      "keyIcon": ""
+    },
+    {
+      "type": "packages",
+      "key": "Pkgs ",
+      "keyIcon": "󰏖"
+    },
+    {
+      "type": "shell",
+      "key": "Shell",
+      "keyIcon": ""
+    },
+    "break",
+    {
+      "type": "cpu",
+      "key": "CPU  ",
+      "keyIcon": ""
+    },
+    {
+      "type": "gpu",
+      "key": "GPU  ",
+      "keyIcon": "󰾲"
+    },
+    {
+      "type": "memory",
+      "key": "Mem  ",
+      "keyIcon": ""
+    },
+    {
+      "type": "disk",
+      "key": "Disk ",
+      "keyIcon": "",
+      "folders": "/"
+    },
+    "break",
+    {
+      "type": "localip",
+      "key": "LAN  ",
+      "keyIcon": "󰩟",
+      "showIpv6": false,
+      "showMac": false
+    },
+    {
+      "type": "command",
+      "key": "Tail ",
+      "keyIcon": "󰛳",
+      "text": "tailscale ip -4 2>/dev/null || echo 'Not connected'"
+    },
+    "break",
+    {
+      "type": "command",
+      "key": "Ver  ",
+      "keyIcon": "",
+      "text": "echo -n 'v' && cat ~/dotfiles/VERSION 2>/dev/null || echo 'unknown'"
+    },
+    {
+      "type": "command",
+      "key": "Last ",
+      "keyIcon": "󰟀",
+      "text": "last -n 2 -R $USER | awk 'NR==2 {print $3 \" at \" $4, $5, $6}'"
+    },
+    "break",
+    "colors"
+  ]
+}

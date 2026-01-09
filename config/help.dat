@@ -1,0 +1,34 @@
+# Puckadots Help Menu Data
+# Format: category|command|description
+
+Dotfiles Management|dotpull|Pull latest changes & reload
+Dotfiles Management|dotpush <msg>|Commit & push changes
+Dotfiles Management|sshpush <msg>|Push SSH config changes
+Dotfiles Management|sshpull|Pull SSH config changes
+Dotfiles Management|sshpack [pass]|Package SSH keys (encrypted)
+Dotfiles Management|add-dotfile <path>|Add file to repo & symlink
+Dotfiles Management|dotversion|Show version & git info
+Dotfiles Management|maintain|Full update sequence
+Dotfiles Management|dotsetup [tool]|Run/list setup scripts
+
+System Utilities|updatep|System update (apt/dnf/pacman)
+System Utilities|paths|Check PATH validity
+System Utilities|mkd <dir>|Create directory & cd
+System Utilities|dotpack <dir> [fmt]|Create archive (tar.gz/zip/7z)
+
+Navigation & Search|cd <dir>|Smart fuzzy navigation (zoxide)
+Navigation & Search|j <partial>|Jump to directory (zoxide)
+Navigation & Search|fcd [start]|Fuzzy directory change w/ preview
+Navigation & Search|fne [query]|Find text in files & edit
+Navigation & Search|ll, la, lt|Enhanced ls with eza
+Navigation & Search|ff|Run fastfetch
+
+Plugin Commands|extract <file>|Universal archive extraction
+Plugin Commands|copypath|Copy current path
+Plugin Commands|copyfile <file>|Copy file contents to clipboard
+Plugin Commands|git open|Open repo in browser
+Plugin Commands|gst, gco, gp|Git shortcuts (status/checkout)
+Plugin Commands|dps, dex, dlog|Docker shortcuts
+Plugin Commands|printdocker|Pretty print Docker objects
+Plugin Commands|sshlist|List all SSH hosts
+Plugin Commands|link-pyenv|Link Python env to directory
