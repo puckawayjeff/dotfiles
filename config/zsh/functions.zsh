@@ -13,26 +13,11 @@ autoload -U colors && colors
 updatep() {
     log_section "Starting system update process" "$ROCKET"
     
-    local UPDATE_SCRIPT="${DOTFILES_DIR}/bin/update-system"
+    local UPDATE_SCRIPT="${DOTFILES_DIR}/lib/update-system.sh"
     
     if [[ ! -x "$UPDATE_SCRIPT" ]]; then
         log_error "Update script not found or not executable: $UPDATE_SCRIPT"
         return 1
-    fi
-
-    # Check for tmux
-    if ! command -v tmux &> /dev/null; then
-        log_warning "${WRENCH} tmux not found. Installing..."
-        if command -v apt &> /dev/null; then
-            sudo apt update && sudo apt install -y tmux
-        elif command -v dnf &> /dev/null; then
-            sudo dnf install -y tmux
-        elif command -v pacman &> /dev/null; then
-            sudo pacman -S --noconfirm tmux
-        else
-            log_error "Could not install tmux automatically."
-            return 1
-        fi
     fi
     
     local LOG_FILE="${HOME}/.cache/updatep.log"
@@ -46,7 +31,7 @@ updatep() {
     
     # Run the update script inside tmux, logging to file
     if ! tmux new-session -s "$SESSION_NAME" "$UPDATE_SCRIPT | tee $LOG_FILE; echo 'Press Enter to exit...'; read"; then
-         log_error "Failed to create tmux session."
+         log_error "Failed to create tmux session. Is tmux installed?"
          return 1
     fi
     
@@ -183,6 +168,15 @@ add-dotfile() {
     local file="$1"
     local custom_dest="$2"
     
+    local sshsync_dir="$HOME/sshsync"
+    local symlinks_conf="$sshsync_dir/symlinks.conf"
+    
+    if [[ ! -d "$sshsync_dir/.git" ]]; then
+        log_error "Private sshsync repo not found at $sshsync_dir"
+        log_info "add-dotfile requires a private repository for storage."
+        return 1
+    fi
+    
     if [[ -z "$file" ]]; then
         log_error "No file path provided."
         log_plain "Usage: add-dotfile <path_to_dotfile> [destination_path]"
@@ -199,23 +193,15 @@ add-dotfile() {
     
     local source_path=$(realpath "$file")
     local basename=$(basename "$source_path")
-    local dotfiles_dir="$HOME/dotfiles"
-    local sync_script="$dotfiles_dir/sync.sh"
     
-    # Determine destination path
+    # Determine destination path inside sshsync
     local dest_path
     if [[ -n "$custom_dest" ]]; then
         # Custom destination provided
-        if [[ "$custom_dest" = /* ]]; then
-            # Absolute path
-            dest_path="$custom_dest"
-        else
-            # Relative path (relative to dotfiles dir)
-            dest_path="$dotfiles_dir/$custom_dest"
-        fi
+        dest_path="$sshsync_dir/$custom_dest"
     else
         # Default: config/<basename>
-        dest_path="$dotfiles_dir/config/$basename"
+        dest_path="$sshsync_dir/config/$basename"
     fi
     
     # Get the directory part and filename part
@@ -237,12 +223,7 @@ add-dotfile() {
     fi
     
     if [[ -e "$dest_path" ]]; then
-        log_error "Destination '$dest_path' already exists."
-        return 1
-    fi
-    
-    if [[ ! -f "$sync_script" ]]; then
-        log_error "sync.sh not found."
+        log_error "Destination '$dest_path' already exists in sshsync."
         return 1
     fi
     
@@ -253,7 +234,7 @@ add-dotfile() {
     fi
     
     # Move file
-    log_step "Moving file to repo..." "$WRENCH"
+    log_step "Moving file to sshsync repo..." "$WRENCH"
     mv "$source_path" "$dest_path"
     log_success "Moved to $dest_path"
     
@@ -263,14 +244,12 @@ add-dotfile() {
     log_success "Symlink created"
     
     # Update symlinks.conf
-    log_step "Updating symlinks configuration..." "$PENCIL"
-    
-    local symlinks_conf="$dotfiles_dir/config/symlinks.conf"
+    log_step "Updating sshsync symlinks configuration..." "$PENCIL"
     
     # Replace literal home path with $HOME variable
     local install_target_path="${source_path/#$HOME/\$HOME}"
-    # Convert dest_path to use $DOTFILES_DIR
-    local install_source_path="${dest_path/#$dotfiles_dir/\$DOTFILES_DIR}"
+    # Convert dest_path to use $SSHSYNC_DIR variable
+    local install_source_path="${dest_path/#$sshsync_dir/\$SSHSYNC_DIR}"
     local new_entry="$install_source_path:$install_target_path"
     
     # Check if entry already exists
@@ -283,13 +262,11 @@ add-dotfile() {
     fi
     
     # Stage changes
-    log_step "Staging changes..." "$PACKAGE"
-    # Get relative path from dotfiles_dir for git add
-    local git_add_path="${dest_path/#$dotfiles_dir\/}"
-    git -C "$dotfiles_dir" add "$git_add_path" "config/symlinks.conf"
+    log_step "Staging changes in sshsync..." "$PACKAGE"
+    git -C "$sshsync_dir" add .
     
-    log_complete "Successfully added '$dest_filename'!"
-    log_plain "Next: dotpush 'Add $dest_filename'"
+    log_complete "Successfully added '$dest_filename' to private repo!"
+    log_plain "Next: sshpush 'Add $dest_filename'"
 }
 
 # Run dotfiles setup scripts

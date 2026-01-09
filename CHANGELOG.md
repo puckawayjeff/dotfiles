@@ -2,14 +2,30 @@
 
 All notable changes to this dotfiles repository will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to semantic versioning principles for major structural changes.
+## [3.0.0] - 2026-01-09
 
-## [Unreleased]
+### Breaking Changes
+
+- **Private Repository Required**: `join.sh` now strictly enforces the presence of `dotfiles.env` and a private `sshsync` repository. Standalone "public only" mode is removed.
+- **Directory Structure**: Configuration files moved to `config/zsh/`, `config/fastfetch/`, etc.
+- **OS Abstraction**: Replaced hardcoded `apt` calls with `lib/os.sh` abstraction layer supporting Debian, Fedora, Arch, and Alpine.
+
+### Added
+
+- **Multi-Distro Support**: `updatep` and installation scripts now detect the OS and use the appropriate package manager.
+- **Modular Zsh Config**: Split `zshrc.conf` into `init.zsh`, `aliases.zsh`, `exports.zsh`, and `options.zsh`.
+- **Data-Driven Help**: `dothelp` and `dotkeys` generate output from `config/help.dat` and `config/keys.dat` (no hardcoded print statements).
+- **Private Symlinks**: `sync.sh` now processes `sshsync/symlinks.conf` for private configurations.
+
+### Removed
+
+- **Legacy Scripts**: Removed `lib/last-login.sh` and `lib/motd.sh` (replaced by native `fastfetch` config).
+- **Redundant Docs**: Removed `ARCHITECTURE.md`, `QUICKSTART.md`, `PRIVATE_SETUP.md` (consolidated into `README.md`).
 
 ## [2.2.0] - 2025-12-28
 
 ### Fixed
+
 - **mkd() Function**: Now properly navigates to created directories
   - Fixed conflict with custom cd() wrapper function
   - Uses builtin cd to avoid zoxide interference
@@ -17,6 +33,7 @@ and this project adheres to semantic versioning principles for major structural 
   - Still navigates even when directory exists
 
 ### Changed
+
 - **History Configuration**: Massively increased capacity and improved management
   - Increased HISTSIZE and SAVEHIST from 10,000 to 1,000,000 lines
   - Added HIST_IGNORE_ALL_DUPS to remove all duplicate entries (not just consecutive)
@@ -62,9 +79,10 @@ and this project adheres to semantic versioning principles for major structural 
 - **zsh-thefuck Plugin**: Disabled due to Python 3.13+ incompatibility
   - TheFuck requires Python distutils and imp modules removed in 3.13
   - Added comment explaining incompatibility with upstream issue link
-  - Awaiting upstream fix: https://github.com/nvbn/thefuck/issues/1495
+  - Awaiting upstream fix: <https://github.com/nvbn/thefuck/issues/1495>
 
 ### Added
+
 - **FZF-Tab Plugin**: Revolutionary fuzzy tab completion
   - Replaces default tab completion with interactive FZF finder
   - File previews with bat (first 50 lines) for all completions
@@ -120,6 +138,7 @@ and this project adheres to semantic versioning principles for major structural 
 This patch release improves SSH host management by filtering out non-SSH hosts from the list.
 
 ### Changed
+
 - **sshlist function**: Now excludes `github.com` from SSH host listings
   - GitHub is a git remote, not an SSH target for interactive sessions
   - Cleaner output showing only actual SSH servers
@@ -130,6 +149,7 @@ This patch release improves SSH host management by filtering out non-SSH hosts f
 This release enhances SSH workflow with smart autocomplete and improves plugin compatibility.
 
 ### Added
+
 - **SSH Host Management**: Smart SSH autocomplete from configuration files
   - Tab completion for `ssh`, `scp`, and `sftp` commands
   - Reads hosts from `~/.ssh/config` and `~/sshsync/ssh.conf` (enhanced mode)
@@ -140,6 +160,7 @@ This release enhances SSH workflow with smart autocomplete and improves plugin c
   - Helpful examples when no hosts are configured
 
 ### Changed
+
 - **Plugin Optimization**: Removed conflicting and problematic plugins
   - Removed `zsh-sshinfo` plugin (box-drawing character issues)
   - Removed Oh-My-Zsh `sudo` plugin (keybinding conflict with thefuck)
@@ -147,6 +168,7 @@ This release enhances SSH workflow with smart autocomplete and improves plugin c
   - TheFuck now uses default ESC ESC binding reliably
 
 ### Fixed
+
 - ZLE widget "unhandled" error messages eliminated
 - SSH config path references corrected throughout codebase
 
@@ -155,6 +177,7 @@ This release enhances SSH workflow with smart autocomplete and improves plugin c
 This release focuses on clarifying the repository architecture, streamlining documentation, and improving maintainability while maintaining 100% backward compatibility.
 
 ### Added
+
 - **ARCHITECTURE.md**: Comprehensive system design documentation (12KB)
   - Repository structure and two-repo pattern explanation
   - Standalone vs Enhanced mode architecture
@@ -166,6 +189,7 @@ This release focuses on clarifying the repository architecture, streamlining doc
 - **Self-contained comment** in join.sh explaining why it cannot use lib/utils.sh
 
 ### Changed
+
 - **README.md**: Streamlined from 24KB to 8KB (66% reduction)
   - Focused on quick start and essential commands
   - Removed redundant detailed explanations
@@ -179,17 +203,20 @@ This release focuses on clarifying the repository architecture, streamlining doc
 - **RELEASE_NOTES.md**: Updated for 2.0.0 release with clear migration guide
 
 ### Fixed
+
 - Documentation cross-references now point to correct locations
 - Consistent terminology throughout all documentation
 - Better explanation of public/private repository pattern
 
 ### Documentation
+
 - New comprehensive ARCHITECTURE.md for system understanding
 - Streamlined README.md for faster onboarding
 - Updated all cross-references for better navigation
 - Clearer explanation of dotfiles.env and enhanced mode
 
 ### For Developers
+
 - Architectural decisions now documented in code comments
 - Clear separation between bootstrap (join.sh) and post-clone scripts
 - Common patterns documented in ARCHITECTURE.md
@@ -200,6 +227,7 @@ This release focuses on clarifying the repository architecture, streamlining doc
 This release refines documentation, improves command naming consistency, and enhances user experience with better help resources and examples.
 
 ### Changed
+
 - **Function Rename**: `packk()` renamed to `dotpack()` for naming consistency
   - Aligns with other dotfiles commands (`dotpush`, `dotpull`, `dothelp`, etc.)
   - Updated all references across documentation and code
@@ -211,6 +239,7 @@ This release refines documentation, improves command naming consistency, and enh
   - Enhanced Example 3 in Examples.md to demonstrate custom destination paths with micro.json use case
 
 ### Added
+
 - **Enhanced Quick Help**: Added prominent references to help functions
   - `dothelp` and `dotkeys` now featured in QUICKSTART.md Quick Help section
   - `join.sh` completion output now mentions these commands
@@ -221,6 +250,7 @@ This release refines documentation, improves command naming consistency, and enh
   - Improved AI assistant consistency in code generation
 
 ### Fixed
+
 - Documentation accuracy improvements across multiple files
 - Consistent function references throughout all documentation
 
@@ -229,6 +259,7 @@ This release refines documentation, improves command naming consistency, and enh
 This release transforms the terminal login experience with polished system information display, custom login messages, and improved configuration organization. It also adds powerful oh-my-zsh plugin integration and helpful quick reference functions.
 
 ### Added
+
 - **Oh-My-Zsh Plugin Integration**: Eight curated plugins loaded via Zinit snippets
   - `git` - Comprehensive git aliases (`gst`, `gco`, `gp`, `gl`, `gcmsg`, etc.)
   - `docker` - Docker shortcuts and completions (`dps`, `dex`, `dlog`, `dstop`)
@@ -281,6 +312,7 @@ This release transforms the terminal login experience with polished system infor
   - Documented in "Functions Reference.md" with availability notes
 
 ### Enhanced
+
 - **Functions Documentation**: Added missing function documentation
   - `maintain()` - Complete maintenance workflow fully documented
   - `dotversion()` - Version display command documented
@@ -288,6 +320,7 @@ This release transforms the terminal login experience with polished system infor
   - All functions now have comprehensive documentation in "Functions Reference.md"
 
 ### Changed
+
 - **Archive Extraction**: Replaced custom `unpackk` function with oh-my-zsh `extract` plugin
   - More format support (30+ archive types vs 4)
   - Better maintained and tested
@@ -314,6 +347,7 @@ This release transforms the terminal login experience with polished system infor
   - Simpler, more maintainable architecture
 
 ### Fixed
+
 - **MOTD fastfetch execution context**: Fixed fastfetch to run as the actual login user during SSH MOTD
   - Detects actual login user via `$PAM_USER`, `$USER`, or `logname`
   - Uses `su - username` to execute fastfetch with proper login environment
@@ -334,6 +368,7 @@ This release transforms the terminal login experience with polished system infor
 This release enhances system maintenance workflows with complete tmux integration and improved update automation.
 
 ### Added
+
 - **Tmux Integration**: Complete tmux setup with sensible defaults
   - Automatic installation via `lib/terminal.sh`
   - Mouse support enabled for modern workflow
@@ -345,6 +380,7 @@ This release enhances system maintenance workflows with complete tmux integratio
   - Comprehensive documentation in Setup Scripts Reference
 
 ### Enhanced
+
 - **`updatep` function**: Improved system update automation
   - Runs updates in background tmux session
   - Logs all output to `~/.cache/updatep.log` (non-cumulative)
@@ -353,6 +389,7 @@ This release enhances system maintenance workflows with complete tmux integratio
   - Better integration with `maintain` workflow
 
 ### Fixed
+
 - Removed 5-second delay before system updates in `maintain` function
 - Fixed log file creation and output capture in `updatep`
 
@@ -361,6 +398,7 @@ This release enhances system maintenance workflows with complete tmux integratio
 This release marks the first stable version of the dotfiles repository with comprehensive documentation, validation tools, and a robust workflow system.
 
 ### Added
+
 - **Version Tracking**: Added `VERSION` file and `dotversion` command to track dotfiles version
 - **Validation Suite**: `test.sh` script to check repository health and configuration (9 comprehensive tests)
 - **Examples Documentation**: Practical workflows and usage patterns for common operations
@@ -373,6 +411,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - **License**: MIT license for open source distribution
 
 ### Enhanced
+
 - `add-dotfile` function with custom destination path support
 - `add-dotfile` validates that source is not already a symlink
 - `add-dotfile` improved error messages with better context
@@ -381,6 +420,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - `install.sh` with quiet mode for reduced output on subsequent runs
 
 ### Documentation
+
 - Comprehensive documentation structure in `docs/` directory
 - Functions Reference with detailed function documentation
 - New Host Deployment guide explaining `join.sh` workflow
@@ -392,6 +432,7 @@ This release marks the first stable version of the dotfiles repository with comp
 ## Initial Documentation Release - 2025-12-03
 
 ### Added
+
 - Comprehensive documentation structure in `docs/` directory
 - Functions Reference with detailed function documentation
 - New Host Deployment guide explaining `join.sh` workflow
@@ -401,6 +442,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - GitHub Copilot instructions for AI-assisted development
 
 ### Structure
+
 - `sync.sh` - Symlink creation and system setup
 - `join.sh` - One-command new host deployment
 - `config/` - Configuration files (.zshrc, .zprofile, functions.zsh)
@@ -409,6 +451,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - `docs/` - Comprehensive documentation
 
 ### Key Features
+
 - Symlink-based dotfiles management
 - Git workflow functions (`dotpush`, `dotpull`)
 - System update automation (`updatep` with tmux)
@@ -418,6 +461,7 @@ This release marks the first stable version of the dotfiles repository with comp
 - Setup script runner (`dotsetup`)
 
 ### Environment
+
 - Zsh with Zinit plugin manager
 - Autosuggestions and syntax highlighting
 - FZF for fuzzy finding
@@ -443,8 +487,4 @@ None yet - this is the initial documented release.
 
 ## Future Roadmap
 
-See the [Project Roadmap](#project-roadmap-december-2025) section in `.github/copilot-instructions.md` for planned enhancements.
-
----
-
-**Note**: Dates in this changelog represent when features were documented/formalized, not necessarily when they were first implemented.
+See the **Project Roadmap** section in `.github/copilot-instructions.md` for planned enhancements.

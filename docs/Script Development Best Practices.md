@@ -62,6 +62,7 @@ Only define colors inline for **standalone scripts** that must work outside the 
 **CRITICAL**: Always use `log_*` helper functions from `lib/utils.sh` for output. Never use raw `printf` or `echo` with color codes.
 
 **Available log_* functions**:
+
 - `log_section "Title" "Optional Icon"` - Section headers (cyan, always shown)
 - `log_success "Message"` - Success messages (green with ✅)
 - `log_error "Message"` - Error messages (red with ❌, always shown)

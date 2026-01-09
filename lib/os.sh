@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# lib/os.sh - OS detection and package management
 
 detect_os() {
     if [ -f /etc/os-release ]; then

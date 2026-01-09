@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# bin/update-system
-# System update script using lib/os.sh abstraction
+# lib/update-system.sh - System update script using lib/os.sh abstraction
 
 # Resolve script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

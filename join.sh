@@ -158,56 +158,54 @@ setup_sshsync_repo() {
     return 0
 }
 
-ENHANCED_MODE=false
-if check_env_file; then
-    ENHANCED_MODE=true
-    log_section "Starting Puckadots setup (Private Mode)" "$ROCKET"
-    log_success "Environment file detected"
-else
-    log_section "Starting Puckadots setup (Public Mode)" "$ROCKET"
-    log_info "Note: For private repo integration, create ~/.config/dotfiles/dotfiles.env first."
+log_section "Puckadots v3.0 Setup" "$ROCKET"
+
+if ! check_env_file; then
+    log_error "Missing configuration file!"
+    log_info "Puckadots requires a valid 'dotfiles.env' file at:"
+    log_info "~/.config/dotfiles/dotfiles.env"
+    echo ""
+    log_info "Please set up your private repository and environment file first."
+    log_info "See instructions here: https://github.com/puckawayjeff/dotfiles#private-setup-guide-required"
+    exit 1
 fi
+
+log_success "Environment file detected"
 
 install_git
 
-if [ "$ENHANCED_MODE" = true ]; then
-    if ! setup_ssh_from_archive; then
-        log_error "SSH setup failed - falling back to public mode"
-        ENHANCED_MODE=false
-    else
-        setup_github_ssh_config
-        
-        log_section "Configuring Git" "$WRENCH"
-        git config --global pull.rebase false
-        if [ -n "$GIT_USER_NAME" ]; then
-            git config --global user.name "$GIT_USER_NAME"
-            git config --global user.email "$GIT_USER_EMAIL"
-            log_success "Git configured: $GIT_USER_NAME"
-        fi
-        
-        setup_sshsync_repo
-    fi
+if ! setup_ssh_from_archive; then
+    log_error "SSH setup failed. Cannot continue with private repo clone."
+    exit 1
 fi
+
+setup_github_ssh_config
+
+log_section "Configuring Git" "$WRENCH"
+git config --global pull.rebase false
+if [ -n "$GIT_USER_NAME" ]; then
+    git config --global user.name "$GIT_USER_NAME"
+    git config --global user.email "$GIT_USER_EMAIL"
+    log_success "Git configured: $GIT_USER_NAME"
+fi
+
+setup_sshsync_repo
 
 log_section "Cloning Puckadots repository" "$ROCKET"
 if [ -d "$HOME/dotfiles/.git" ]; then
     log_warning "Dotfiles repository already exists"
     cd "$HOME/dotfiles"
-    if [ "$ENHANCED_MODE" = true ]; then
-        GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull
-    else
-        git pull
-    fi
+    GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git pull
     log_success "Dotfiles repository updated"
 else
-    if [ "$ENHANCED_MODE" = true ] && [ -f "$HOME/.ssh/id_ed25519_github" ]; then
+    if [ -f "$HOME/.ssh/id_ed25519_github" ]; then
         log_substep "Cloning via SSH..."
         GIT_SSH_COMMAND="ssh -o LogLevel=ERROR" git clone git@github.com:puckawayjeff/dotfiles.git "$HOME/dotfiles"
+        log_success "Dotfiles repository cloned"
     else
-        log_substep "Cloning via HTTPS..."
-        git clone https://github.com/puckawayjeff/dotfiles.git "$HOME/dotfiles"
+        log_error "GitHub SSH key missing after setup. Cloning failed."
+        exit 1
     fi
-    log_success "Dotfiles repository cloned"
 fi
 
 log_section "Handing off to sync.sh" "$WRENCH"
