@@ -30,7 +30,7 @@ updatep() {
     local SESSION_NAME="system-update-$$"
     
     # Run the update script inside tmux, logging to file
-    if ! tmux new-session -s "$SESSION_NAME" "$UPDATE_SCRIPT | tee $LOG_FILE; echo 'Press Enter to exit...'; read"; then
+    if ! tmux new-session -s "$SESSION_NAME" "$UPDATE_SCRIPT | tee $LOG_FILE; then
          log_error "Failed to create tmux session. Is tmux installed?"
          return 1
     fi
