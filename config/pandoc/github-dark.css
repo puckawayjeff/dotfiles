@@ -1,0 +1,545 @@
+/* GitHub Dark Mode CSS for Pandoc */
+
+:root {
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #8b949e;
+  --color-fg-subtle: #6e7681;
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-success-fg: #3fb950;
+  --color-attention-fg: #d29922;
+  --color-danger-fg: #f85149;
+  --color-done-fg: #a371f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-fg-default);
+  background-color: var(--color-canvas-default);
+  margin: 0;
+  padding: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-fg-default);
+}
+
+h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+h4 {
+  font-size: 1em;
+}
+
+h5 {
+  font-size: 0.875em;
+}
+
+h6 {
+  font-size: 0.85em;
+  color: var(--color-fg-muted);
+}
+
+/* Paragraphs */
+p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+/* Links */
+a {
+  color: var(--color-accent-fg);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists */
+ul,
+ol {
+  padding-left: 2em;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+ul ul,
+ul ol,
+ol ul,
+ol ol {
+  margin-bottom: 0;
+}
+
+li {
+  margin-top: 0.25em;
+}
+
+li+li {
+  margin-top: 0.25em;
+}
+
+/* Code - inline */
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85em;
+  padding: 0.2em 0.4em;
+  margin: 0;
+  background-color: rgba(110, 118, 129, 0.4);
+  border-radius: 6px;
+  color: var(--color-fg-default);
+}
+
+/* Code blocks */
+pre {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85em;
+  padding: 1em;
+  margin: 0 0 1em 0;
+  overflow-x: auto;
+  background-color: var(--color-canvas-subtle);
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+pre code {
+  font-size: inherit;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border-radius: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Syntax highlighting (Pandoc classes) */
+.sourceCode {
+  background-color: var(--color-canvas-subtle);
+}
+
+code span.kw {
+  color: #ff7b72;
+}
+
+/* Keyword */
+code span.dt {
+  color: #79c0ff;
+}
+
+/* DataType */
+code span.dv {
+  color: #79c0ff;
+}
+
+/* DecVal */
+code span.bn {
+  color: #79c0ff;
+}
+
+/* BaseN */
+code span.fl {
+  color: #79c0ff;
+}
+
+/* Float */
+code span.ch {
+  color: #a5d6ff;
+}
+
+/* Char */
+code span.st {
+  color: #a5d6ff;
+}
+
+/* String */
+code span.co {
+  color: #8b949e;
+}
+
+/* Comment */
+code span.ot {
+  color: #79c0ff;
+}
+
+/* Other */
+code span.al {
+  color: #f85149;
+}
+
+/* Alert */
+code span.fu {
+  color: #d2a8ff;
+}
+
+/* Function */
+code span.er {
+  color: #f85149;
+}
+
+/* Error */
+code span.wa {
+  color: #d29922;
+}
+
+/* Warning */
+code span.cn {
+  color: #79c0ff;
+}
+
+/* Constant */
+code span.sc {
+  color: #a5d6ff;
+}
+
+/* SpecialChar */
+code span.vs {
+  color: #a5d6ff;
+}
+
+/* VerbatimString */
+code span.ss {
+  color: #a5d6ff;
+}
+
+/* SpecialString */
+code span.im {
+  color: #ff7b72;
+}
+
+/* Import */
+code span.va {
+  color: #ffa657;
+}
+
+/* Variable */
+code span.cf {
+  color: #ff7b72;
+}
+
+/* ControlFlow */
+code span.op {
+  color: #79c0ff;
+}
+
+/* Operator */
+code span.bu {
+  color: #ffa657;
+}
+
+/* BuiltIn */
+code span.ex {
+  color: #d2a8ff;
+}
+
+/* Extension */
+code span.pp {
+  color: #ff7b72;
+}
+
+/* Preprocessor */
+code span.at {
+  color: #79c0ff;
+}
+
+/* Attribute */
+code span.do {
+  color: #8b949e;
+  font-style: italic;
+}
+
+/* Documentation */
+code span.an {
+  color: #8b949e;
+  font-style: italic;
+}
+
+/* Annotation */
+code span.cv {
+  color: #8b949e;
+  font-style: italic;
+}
+
+/* CommentVar */
+code span.in {
+  color: #8b949e;
+  font-style: italic;
+}
+
+/* Information */
+
+/* Blockquotes */
+blockquote {
+  margin: 0 0 1em 0;
+  padding: 0 1em;
+  color: var(--color-fg-muted);
+  border-left: 0.25em solid var(--color-border-default);
+}
+
+blockquote> :first-child {
+  margin-top: 0;
+}
+
+blockquote> :last-child {
+  margin-bottom: 0;
+}
+
+/* Horizontal rules */
+hr {
+  height: 0.25em;
+  padding: 0;
+  margin: 1.5em 0;
+  background-color: var(--color-border-muted);
+  border: 0;
+  border-radius: 2px;
+}
+
+/* Tables */
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-top: 0;
+  margin-bottom: 1em;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+th,
+td {
+  padding: 6px 13px;
+  border: 1px solid var(--color-border-default);
+}
+
+th {
+  font-weight: 600;
+  background-color: var(--color-canvas-subtle);
+}
+
+tr {
+  background-color: var(--color-canvas-default);
+  border-top: 1px solid var(--color-border-muted);
+}
+
+tr:nth-child(2n) {
+  background-color: var(--color-canvas-subtle);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* Definition lists */
+dl {
+  padding: 0;
+  margin-bottom: 1em;
+}
+
+dt {
+  padding: 0;
+  margin-top: 1em;
+  font-weight: 600;
+}
+
+dd {
+  padding: 0 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+}
+
+/* Task lists */
+.task-list-item {
+  list-style-type: none;
+}
+
+.task-list-item input {
+  margin: 0 0.2em 0.25em -1.6em;
+  vertical-align: middle;
+}
+
+/* Emphasis */
+strong,
+b {
+  font-weight: 600;
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+/* Subscript/Superscript */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Footnotes */
+.footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--color-border-muted);
+  font-size: 0.875em;
+  color: var(--color-fg-muted);
+}
+
+.footnote-ref {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* Figure captions */
+figcaption {
+  font-size: 0.875em;
+  color: var(--color-fg-muted);
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+/* Keyboard */
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.75em;
+  line-height: 1;
+  color: var(--color-fg-default);
+  vertical-align: middle;
+  background-color: var(--color-canvas-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 var(--color-border-default);
+}
+
+/* Mark/Highlight */
+mark {
+  background-color: rgba(210, 153, 34, 0.4);
+  color: var(--color-fg-default);
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(56, 139, 253, 0.4);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-canvas-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-subtle);
+}
+
+/* Forced wrapping for Pandoc code blocks with hanging indent and line markers */
+/* Forced wrapping from previous steps - Refined */
+div.sourceCode pre {
+  white-space: pre-wrap !important;
+}
+
+div.sourceCode pre>code.sourceCode {
+  white-space: normal !important;
+  /* Collapse structural newlines between blocks */
+  display: block;
+}
+
+/* Turn each logical line (span) into a block with hanging indent */
+div.sourceCode pre>code.sourceCode>span[id^="cb"] {
+  white-space: pre-wrap;
+  /* Restore code formatting */
+  display: block;
+  position: relative;
+  padding-left: 3em;
+  /* Indent for wrapped lines */
+  text-indent: -1.5em;
+  /* Pull start of line back */
+  width: auto;
+  /* Ensure full width */
+  height: auto;
+  /* Restore height */
+}
+
+/* Place markers absolutely to ensure consistent position */
+div.sourceCode pre>code.sourceCode>span[id^="cb"]::before {
+  content: "›";
+  position: absolute;
+  left: 0.5em;
+  /* Position inside the gutter */
+  text-align: right;
+  width: 1em;
+  color: var(--color-fg-muted);
+  font-weight: bold;
+  pointer-events: none;
+}
