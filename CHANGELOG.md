@@ -2,6 +2,22 @@
 
 All notable changes to this dotfiles repository will be documented in this file.
 
+## [3.1.0] - 2026-01-27
+
+### Added
+
+- **Passwordless Sudo Script**: New setup script to toggle sudo password requirement
+  - `setup/passwordless-sudo.sh` enables/disables passwordless sudo for current user
+  - Uses proper sudoers.d drop-in file pattern (`/etc/sudoers.d/99-<user>-nopasswd`)
+  - Validates syntax with `visudo -c` before activation to prevent lockout
+  - Fully reversible with `--enable` and `--disable` flags
+  - Idempotent and safe to run multiple times
+  - Run via `sudo dotsetup passwordless-sudo` or directly with `sudo ./setup/passwordless-sudo.sh`
+
+### Documentation
+
+- Added passwordless-sudo to Setup Scripts Reference with usage examples and security considerations
+
 ## [3.0.0] - 2026-01-09
 
 ### Breaking Changes

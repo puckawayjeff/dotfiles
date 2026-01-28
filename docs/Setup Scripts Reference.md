@@ -16,6 +16,7 @@ These tools may be manually installed via `dotsetup`:
 - **foot** - Wayland terminal emulator
 - **glow** - Markdown renderer
 - **nvm** - Node.js version manager
+- **passwordless-sudo** - Toggle sudo password requirement
 - **syncthing** - File synchronization
 
 ## General Usage
@@ -237,3 +238,51 @@ systemctl --user status syncthing.service
 **Project Homepage**: [syncthing.net](https://syncthing.net/)
 
 **Project Repository**: [syncthing/syncthing](https://github.com/syncthing/syncthing)
+
+---
+
+### Passwordless Sudo - Toggle Sudo Password Requirement
+
+**Script**: `setup/passwordless-sudo.sh` 🔐
+
+**Purpose**: Enables or disables passwordless sudo for the current user. Useful for development environments, trusted machines, or automation scenarios where frequently entering a password is inconvenient.
+
+**Installation**: Run `dotsetup passwordless-sudo` to configure.
+
+**What It Does**:
+
+- Creates or removes a sudoers.d entry for the current user
+- Uses proper sudoers.d drop-in file pattern for safety
+- Validates syntax with `visudo` before activation
+- Fully reversible - easily toggle back to requiring passwords
+
+**Usage**:
+
+```bash
+# Enable passwordless sudo (default action)
+sudo dotsetup passwordless-sudo
+sudo dotsetup passwordless-sudo --enable
+sudo dotsetup passwordless-sudo -e
+
+# Disable passwordless sudo (restore password requirement)
+sudo dotsetup passwordless-sudo --disable
+sudo dotsetup passwordless-sudo -d
+
+# Show help
+dotsetup passwordless-sudo --help
+```
+
+**Technical Details**:
+
+- Creates file at `/etc/sudoers.d/99-<username>-nopasswd`
+- Sets proper permissions (0440) as required by sudoers
+- The `99-` prefix ensures it's loaded after other sudoers.d files
+- Validates syntax with `visudo -c` to prevent lockout
+
+**Security Considerations**:
+
+- ⚠️ Only use on trusted machines you control
+- ⚠️ Not recommended for production servers
+- ⚠️ Any process running as your user can execute any command as root
+- 👍 Suitable for personal development machines, VMs, containers
+- 👍 Easy to disable when needed
